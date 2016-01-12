@@ -7,10 +7,10 @@ var fakeAjax = function(func){
   try{
     func(requests);
   }
-  catch (e){
+  catch (e) {
     throw e;
   }
-  finally{
+  finally {
     xhr.restore();
   }
 }
@@ -224,7 +224,7 @@ describe('User', function(){
       });
 
       expect(requests.length).toBe(1);
-      var req= requests[0];
+      var req = requests[0];
       expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
       req.respond(401, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
     });
@@ -249,14 +249,222 @@ describe('User', function(){
 });
 
 describe("devices", function(){
-  it('device should throw an error when missing the method incomingData', function() {
-    var relayr = relayrInit();
+  var relayr;
+  beforeEach(function() {
+    relayr = relayrInit();
+    relayr.account = {
+      id: 'test-dummy-account-id',
+      token: 'test-dummy-token'
+    };
+  });
 
+  it('device should throw an error when missing the method incomingData', function() {
     var f = function() {
       relayr.devices().getDeviceData({});
     };
 
     expect(f).toThrow(new Error("Provide the method incomingData within your parameters"));
+  });
+
+  describe('#getAllDevices', function() {
+    var xhr, requests;
+    beforeEach(function() {
+      xhr = sinon.useFakeXMLHttpRequest();
+      requests = [];
+      xhr.onCreate = function(xhr){
+        requests.push(xhr);
+      }
+    });
+
+    afterEach(function() {
+      xhr.restore();
+    });
+
+    it('should throw an error is no success cb is provided', function() {
+      var f = function() {
+        relayr.devices().getAllDevices();
+      };
+
+      expect(f).toThrow();
+    });
+
+    it('should throw an error is no error cb is provided', function() {
+      var f = function() {
+        relayr.devices().getAllDevices(function() {});
+      };
+
+      expect(f).toThrow();
+    });
+
+    it('should do a GET to users devices', function() {
+      relayr.devices().getAllDevices(function() {}, function() {});
+
+      expect(requests.length).toBe(1);
+      var req = requests[0];
+      expect(req.url).toBe('https://api.relayr.io/users/test-dummy-account-id/devices');
+    });
+
+    it('should call success callback when it gets data', function(done) {
+      relayr.devices().getAllDevices(function() {
+        expect(true).toBeTruthy();
+        done();
+      }, function() {});
+
+      var req = requests[0];
+      req.respond(200, {}, JSON.stringify([]));
+    });
+
+
+    it('should call error callback if the request fails', function(done) {
+      relayr.devices().getAllDevices(function() {}, function() {
+        expect(true).toBeTruthy();
+        done();
+      });
+
+      var req = requests[0];
+      req.respond(401, { "Content-Type": "application/json" }, JSON.stringify({error: "error"}));
+    });
+  });
+});
+
+describe('groups', function() {
+  var relayr;
+  beforeEach(function() {
+    relayr = relayrInit();
+    relayr.account = {
+      id: 'test-dummy-account-id',
+      token: 'test-dummy-token'
+    };
+  });
+
+  describe('#getAllGroups', function() {
+    var xhr, requests;
+    beforeEach(function() {
+      xhr = sinon.useFakeXMLHttpRequest();
+      requests = [];
+      xhr.onCreate = function(xhr){
+        requests.push(xhr);
+      }
+    });
+
+    afterEach(function() {
+      xhr.restore();
+    });
+
+    it('should throw an error is no success cb is provided', function() {
+      var f = function() {
+        relayr.groups().getAllGroups();
+      };
+
+      expect(f).toThrow();
+    });
+
+    it('should throw an error is no error cb is provided', function() {
+      var f = function() {
+        relayr.groups().getAllGroups(function() {});
+      };
+
+      expect(f).toThrow();
+    });
+
+    it('should do a GET to users devices', function() {
+      relayr.groups().getAllGroups(function() {}, function() {});
+
+      expect(requests.length).toBe(1);
+      var req = requests[0];
+      expect(req.url).toBe('https://api.relayr.io/users/test-dummy-account-id/groups');
+    });
+
+    it('should call success callback when it gets data with response', function(done) {
+      relayr.groups().getAllGroups(function(data) {
+        expect(data).toEqual([]);
+        done();
+      }, function() {});
+
+      var req = requests[0];
+      req.respond(200, {}, JSON.stringify([]));
+    });
+
+    it('should call error callback if the request fails', function(done) {
+      relayr.groups().getAllGroups(function() {}, function() {
+        expect(true).toBeTruthy();
+        done();
+      });
+
+      var req = requests[0];
+      req.respond(401, { "Content-Type": "application/json" }, JSON.stringify({error: "error"}));
+    });
+  });
+
+});
+
+describe('models', function() {
+  var relayr;
+  beforeEach(function() {
+    relayr = relayrInit();
+    relayr.account = {
+      id: 'test-dummy-account-id',
+      token: 'test-dummy-token'
+    };
+  });
+
+  describe('#getAllModels', function() {
+    var xhr, requests;
+    beforeEach(function() {
+      xhr = sinon.useFakeXMLHttpRequest();
+      requests = [];
+      xhr.onCreate = function(xhr){
+        requests.push(xhr);
+      }
+    });
+
+    afterEach(function() {
+      xhr.restore();
+    });
+
+    it('should throw an error is no success cb is provided', function() {
+      var f = function() {
+        relayr.models().getAllModels();
+      };
+
+      expect(f).toThrow();
+    });
+
+    it('should throw an error is no error cb is provided', function() {
+      var f = function() {
+        relayr.models().getAllModels(function() {});
+      };
+
+      expect(f).toThrow();
+    });
+
+    it('should do a GET to users devices', function() {
+      relayr.models().getAllModels(function() {}, function() {});
+
+      expect(requests.length).toBe(1);
+      var req = requests[0];
+      expect(req.url).toBe('https://api.relayr.io/device-models?limit=100000');
+    });
+
+    it('should call success callback when it gets data with response', function(done) {
+      relayr.models().getAllModels(function(data) {
+        expect(data).toEqual([]);
+        done();
+      }, function() {});
+
+      var req = requests[0];
+      req.respond(200, {}, JSON.stringify([]));
+    });
+
+    it('should call error callback if the request fails', function(done) {
+      relayr.models().getAllModels(function() {}, function() {
+        expect(true).toBeTruthy();
+        done();
+      });
+
+      var req = requests[0];
+      req.respond(401, { "Content-Type": "application/json" }, JSON.stringify({error: "error"}));
+    });
   });
 });
 
