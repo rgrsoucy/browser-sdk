@@ -14,6 +14,7 @@ var fakeAjax = function(func){
     xhr.restore();
   }
 }
+
 var relayrInit = function(){
   return RELAYR.init({appId:"testerAppid", redirectUri:"testerRedirectUri"});
 };
@@ -184,22 +185,16 @@ describe('#login', function() {
 
 describe('User', function(){
   it('should check if user info returns properties', function(){
-    //spyOn(window.document, 'location');
     var relayr = relayrInit();
     var callbackCalled = false;
-
-
-
 
     localStorage.setItem("relayrToken",token);
     fakeAjax(function(requests){
       relayr.login({
-        success: function(){
+        success: function() {
           callbackCalled = true;
         },
-        error: function(){
-
-        }
+        error: function() {}
       });
       expect(requests.length).toBe(1);
       var req= requests[0];
@@ -216,31 +211,25 @@ describe('User', function(){
 
 
   it('should give unauthorized 401 if token is invalid', function(){
-    //spyOn(window.document, 'location');
     var relayr = relayrInit();
     var callbackCalled = false;
-
-
-
 
     localStorage.setItem("relayrToken",token);
     fakeAjax(function(requests){
       relayr.login({
-        success: function(){
-        },
-        error: function(){
-
+        success: function() {},
+        error: function() {
           callbackCalled = true;
         }
       });
+
       expect(requests.length).toBe(1);
       var req= requests[0];
       expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
       req.respond(401, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
-
     });
-    expect(callbackCalled).toBe(true);
 
+    expect(callbackCalled).toBe(true);
   });
 
   it('logout should remove key from storage', function(){
@@ -263,14 +252,11 @@ describe("devices", function(){
   it('device should throw an error when missing the method incomingData', function() {
     var relayr = relayrInit();
 
-    var f = function(){
-      relayr.devices().getDeviceData({
-
-      });
+    var f = function() {
+      relayr.devices().getDeviceData({});
     };
 
     expect(f).toThrow(new Error("Provide the method incomingData within your parameters"));
-
   });
 });
 
@@ -279,14 +265,11 @@ describe('Transmitters', function(){
   it('it should throw an error when accessing transmitters without being logged in', function() {
     var relayr = relayrInit();
 
-    var f = function(){
-      relayr.transmitters().getTransmitters({
-
-      });
+    var f = function() {
+      relayr.transmitters().getTransmitters({});
     };
 
     expect(f).toThrow(new Error("You must be logged in to access this method."));
-
   });
 
   it('transmitters should give an array of transmitters', function() {
@@ -295,22 +278,18 @@ describe('Transmitters', function(){
     localStorage.setItem("relayrToken",token);
     fakeAjax(function(requests){
       relayr.login({
-        success: function(){
-
-        },
+        success: function() {},
         error: function(){
-
           callbackCalled = true;
         }
       });
 
-      var req= requests[0];
+      var req = requests[0];
       var transmitterCallback = false;
 
       expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
       req.respond(200, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
-      relayr.transmitters().getTransmitters(function(transmitters){
-
+      relayr.transmitters().getTransmitters(function(transmitters) {
         expect(transmitters.length).toBe(0);
         transmitterCallbackResult = transmitters;
       });
@@ -321,23 +300,3 @@ describe('Transmitters', function(){
     });
   });
 });
-
-/*var relayr = RELAYR.init({
-appId: "50163677-306e-4030-b0fd-0d5035702d9f",
-redirectUri:"http://localhost:8001/jsSDK.html" //this setting must match your app
-});
-
-relayr.login({
-//This will check if you have a token stored, if not it will redirect to the Login page and use your redirectUri back to come back with the token.
-//It will recognize the token and automatically call the method below "success"
-success : function(token){
-relayr.devices().getDeviceData({
-deviceId: "ee7e9562-2b95-4c93-a1d3-fdbaaea5c160",
-token: token,
-incomingData: function(data){
-console.log("lighProx",data);
-}
-});
-}
-});
-*/
