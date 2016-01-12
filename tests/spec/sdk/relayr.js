@@ -241,7 +241,7 @@ describe('relayr SDK', function() {
     });
   });
 
-  describe("devices", function(){
+  describe('devices', function(){
     var relayr;
     beforeEach(function() {
       relayr = relayrInit();
@@ -425,7 +425,6 @@ describe('relayr SDK', function() {
     });
   });
 
-
   describe('Transmitters', function(){
     it('it should throw an error when accessing transmitters without being logged in', function() {
       var relayr = relayrInit();
@@ -466,4 +465,76 @@ describe('relayr SDK', function() {
     });
   });
 
+  describe('util', function() {
+    var relayr;
+    beforeEach(function() {
+      relayr = relayrInit();
+    });
+
+    describe('#ajax', function() {
+      describe('sucess', function() {
+        it('call succes cb on response 200', function(done) {
+          relayr.util.ajax({}, function(data) {
+            expect(data).toEqual('{}');
+            done();
+          }, function() {});
+
+          var req = requests[0];
+          req.respond(200, {}, JSON.stringify({}));
+        });
+
+        it('call succes cb on response 201', function(done) {
+          relayr.util.ajax({}, function(data) {
+            expect(data).toEqual('{}');
+            done();
+          }, function() {});
+
+          var req = requests[0];
+          req.respond(201, {}, JSON.stringify({}));
+        });
+      });
+
+      describe('error', function() {
+        it('call error cb on response 400', function(done) {
+          relayr.util.ajax({}, function() {}, function(data) {
+            expect(data).toEqual(jasmine.any(Object));
+            done();
+          });
+
+          var req = requests[0];
+          req.respond(400, {}, JSON.stringify({}));
+        });
+
+        it('call error cb on response 401', function(done) {
+          relayr.util.ajax({}, function() {}, function(data) {
+            expect(data).toEqual(jasmine.any(Object));
+            done();
+          });
+
+          var req = requests[0];
+          req.respond(401, {}, JSON.stringify({}));
+        });
+
+        it('call error cb on response 404', function(done) {
+          relayr.util.ajax({}, function() {}, function(data) {
+            expect(data).toEqual(jasmine.any(Object));
+            done();
+          });
+
+          var req = requests[0];
+          req.respond(404, {}, JSON.stringify({}));
+        });
+
+        it('call error cb on response 500', function(done) {
+          relayr.util.ajax({}, function() {}, function(data) {
+            expect(data).toEqual(jasmine.any(Object));
+            done();
+          });
+
+          var req = requests[0];
+          req.respond(500, {}, JSON.stringify({}));
+        });
+      });
+    });
+  });
 });
