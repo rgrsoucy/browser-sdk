@@ -1,7 +1,7 @@
 var fakeAjax = function(func){
   var xhr = sinon.useFakeXMLHttpRequest();
   var requests = [];
-  xhr.onCreate = function(xhr){ 
+  xhr.onCreate = function(xhr){
     requests.push(xhr);
   }
   try{
@@ -19,59 +19,132 @@ var relayrInit = function(){
 };
 var token ="testerToken";
 
-describe('initialization', function(){
-
-  var invalidInput = [undefined,{}, null, "", [],{appId:true}, {appId:""}];
-  invalidInput.forEach(function(input){
-
-    it('should throw an error with constructor arg['+ JSON.stringify(input)+']', function() {
-      var f = function(){
-        RELAYR.init(input);
-      };
-      
-      expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
-
-    });          
-    
-  });  
-
+describe('#init', function() {
   var validInputs = [{appId:"37648273648628", redirectUri:"34324234"}];
-  validInputs.forEach(function(input){
 
-    it('should initialize with constructor arg['+ JSON.stringify(input)+']', function() {
-      var relayr= RELAYR.init(input);
-    
-      
-      expect(typeof relayr.login).toBe("function");
+  it('should initialize with constructor with valid arguments', function() {
+    var relayr= RELAYR.init({
+      appId: '37648273648628',
+      redirectUri:'34324234'
+    });
+    expect(typeof relayr.login).toBe('function');
 
-    });          
-    
   });
-    
 });
 
+describe('#login', function() {
 
-describe('login', function(){
-  
-  var invalidInput = [undefined,{}, null, "", []];
-  invalidInput.forEach(function(input){
-    it('should throw an error if callback success not valid or defined with args['+ JSON.stringify(input)+']', function() {
-        var f = function(){
-          var relayr = relayrInit();
-          relayr.login(input);
-        };
-
-    });          
-  
+  afterEach(function() {
+    localStorage.removeItem("relayrToken")
   });
 
+  it('should throw an error with constructor undefined', function() {
+    var f = function(){
+      var relayr = RELAYR.init(undefined);
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+
+  });
+
+  it('should throw an error with constructor {}', function() {
+    var f = function(){
+      var relayr = RELAYR.init({});
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+  });
+
+  it('should throw an error with constructor null', function() {
+    var f = function(){
+      var relayr = RELAYR.init(null);
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+  });
+
+  it('should throw an error with constructor ""', function() {
+    var f = function(){
+      var relayr = RELAYR.init("");
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+  });
+
+  it('should throw an error with constructor []', function() {
+    var f = function(){
+      var relayr = RELAYR.init([]);
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+  });
+
+  it('should throw an error with constructor {appId:true}', function() {
+    var f = function(){
+      var relayr = RELAYR.init({appId:true});
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+  });
+
+  it('should throw an error with constructor {appId:""}', function() {
+    var f = function(){
+      var relayr = RELAYR.init({appId:""});
+      relayr.login();
+    };
+
+    expect(f).toThrow(new Error("Provide credentials: appId and redirectUri"));
+  });
+
+  it('should throw an error if callback success not valid or defined with args undefined', function() {
+    var f = function(){
+      var relayr = relayrInit();
+      relayr.login(undefined);
+    };
+    expect(f).toThrow();
+  });
+
+  it('should throw an error if callback success not valid or defined with args {}', function() {
+    var f = function(){
+      var relayr = relayrInit();
+      relayr.login({});
+    };
+    expect(f).toThrow();
+  });
+
+  it('should throw an error if callback success not valid or defined with args null', function() {
+    var f = function(){
+      var relayr = relayrInit();
+      relayr.login(null);
+    };
+    expect(f).toThrow();
+  });
+
+  it('should throw an error if callback success not valid or defined with args ""', function() {
+    var f = function(){
+      var relayr = relayrInit();
+      relayr.login("");
+    };
+    expect(f).toThrow();
+  });
+
+  it('should throw an error if callback success not valid or defined with args []', function() {
+    var f = function(){
+      var relayr = relayrInit();
+      relayr.login([]);
+    };
+    expect(f).toThrow();
+  });
 
   it('should call success method when the token exists in localStorage', function() {
     var relayr = relayrInit();
     var callbackCalled = false;
-
-
-
 
     localStorage.setItem("relayrToken",token);
     fakeAjax(function(requests){
@@ -90,11 +163,10 @@ describe('login', function(){
     });
     expect(callbackCalled).toBe(true);
 
-  });         
+  });
 
 
-
-  it('should redirect to the correct oauth login page', function(){
+  it('should redirect to the correct oauth login page', function() {
     //spyOn(window.document, 'location');
     var relayr = relayrInit();
     relayr.login.redirect = function(uri){
@@ -106,15 +178,8 @@ describe('login', function(){
 
       }
     });
-    expect(relayr.login.uri).toBe("https://api.relayr.io/oauth2/auth?client_id=testerAppid&redirect_uri=testerRedirectUri&response_type=token&scope=access-own-user-info")
+    expect(relayr.login.uri).toBe("https://api.relayr.io/oauth2/auth?client_id=testerAppid&redirect_uri=testerRedirectUri&response_type=token&scope=access-own-user-info+configure-devices")
   });
-
-
-  afterEach(function() {
-   localStorage.removeItem("relayrToken")
-  });
-
-
 });
 
 describe('User', function(){
@@ -144,7 +209,7 @@ describe('User', function(){
       expect(relayr.user().getUserInfo().id).toBe("42387492730487324");
     });
     expect(callbackCalled).toBe(true);
-    
+
   });
 
 
@@ -175,7 +240,7 @@ describe('User', function(){
 
     });
     expect(callbackCalled).toBe(true);
-    
+
   });
 
   it('logout should remove key from storage', function(){
@@ -183,14 +248,14 @@ describe('User', function(){
 
     var relayr = relayrInit();
     var storageToken=localStorage.getItem("relayrToken")
-    
+
     relayr.user().logout();
     var check = localStorage.getItem("relayrToken");
     expect(check).toBe(null);
   });
 
   afterEach(function() {
-   localStorage.removeItem("relayrToken")
+    localStorage.removeItem("relayrToken")
   });
 });
 
@@ -203,7 +268,7 @@ describe("devices", function(){
 
       });
     };
-      
+
     expect(f).toThrow(new Error("Provide the method incomingData within your parameters"));
 
   });
@@ -219,7 +284,7 @@ describe('Transmitters', function(){
 
       });
     };
-      
+
     expect(f).toThrow(new Error("You must be logged in to access this method."));
 
   });
@@ -238,7 +303,7 @@ describe('Transmitters', function(){
           callbackCalled = true;
         }
       });
-     
+
       var req= requests[0];
       var transmitterCallback = false;
 
@@ -258,21 +323,21 @@ describe('Transmitters', function(){
 });
 
 /*var relayr = RELAYR.init({
-  appId: "50163677-306e-4030-b0fd-0d5035702d9f",
-  redirectUri:"http://localhost:8001/jsSDK.html" //this setting must match your app
+appId: "50163677-306e-4030-b0fd-0d5035702d9f",
+redirectUri:"http://localhost:8001/jsSDK.html" //this setting must match your app
 });
 
 relayr.login({
-  //This will check if you have a token stored, if not it will redirect to the Login page and use your redirectUri back to come back with the token.
-  //It will recognize the token and automatically call the method below "success"
-  success : function(token){
-    relayr.devices().getDeviceData({
-      deviceId: "ee7e9562-2b95-4c93-a1d3-fdbaaea5c160", 
-      token: token,
-      incomingData: function(data){
-        console.log("lighProx",data);
-      }
-    });     
-  }
+//This will check if you have a token stored, if not it will redirect to the Login page and use your redirectUri back to come back with the token.
+//It will recognize the token and automatically call the method below "success"
+success : function(token){
+relayr.devices().getDeviceData({
+deviceId: "ee7e9562-2b95-4c93-a1d3-fdbaaea5c160",
+token: token,
+incomingData: function(data){
+console.log("lighProx",data);
+}
+});
+}
 });
 */
