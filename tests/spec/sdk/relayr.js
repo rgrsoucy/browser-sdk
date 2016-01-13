@@ -160,7 +160,6 @@ describe('relayr SDK', function() {
 
 
     it('should redirect to the correct oauth login page', function() {
-      //spyOn(window.document, 'location');
       var relayr = relayrInit();
       relayr.login.redirect = function(uri){
 
