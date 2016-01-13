@@ -305,6 +305,118 @@ describe('relayr SDK', function() {
         req.respond(401, { "Content-Type": "application/json" }, JSON.stringify({error: "error"}));
       });
     });
+
+
+    describe('#getDevice', function() {
+        it('should throw an error if no id is provided', function() {
+          var f = function() {
+            relayr.devices().getDevice();
+          };
+
+          expect(f).toThrow();
+        });
+
+        it('should throw an error is no success cb is provided', function() {
+          var f = function() {
+            relayr.devices().getDevice('device-id');
+          };
+
+          expect(f).toThrow();
+        });
+
+        it('should throw an error is no error cb is provided', function() {
+          var f = function() {
+            relayr.devices().getDevice('device-id', function() {});
+          };
+
+          expect(f).toThrow();
+        });
+
+        it('should do a GET to users devices', function() {
+          relayr.devices().getDevice('device-id', function() {}, function() {});
+
+          expect(requests.length).toBe(1);
+          var req = requests[0];
+          expect(req.url).toBe('https://api.relayr.io/devices/device-id');
+        });
+
+        it('should call success callback when it gets device', function(done) {
+          relayr.devices().getDevice('device-id', function() {
+            expect(true).toBeTruthy();
+            done();
+          }, function() {});
+
+          var req = requests[0];
+          req.respond(200, {}, JSON.stringify([]));
+        });
+
+
+        it('should call error callback if the request fails', function(done) {
+          relayr.devices().getDevice('device-id', function() {}, function() {
+            expect(true).toBeTruthy();
+            done();
+          });
+
+          var req = requests[0];
+          req.respond(401, { "Content-Type": "application/json" }, JSON.stringify({error: "error"}));
+        });
+    });
+
+    describe('#getDeviceState', function() {
+        it('should throw an error if no id is provided', function() {
+          var f = function() {
+            relayr.devices().getDeviceState();
+          };
+
+          expect(f).toThrow();
+        });
+
+        it('should throw an error is no success cb is provided', function() {
+          var f = function() {
+            relayr.devices().getDeviceState('device-id');
+          };
+
+          expect(f).toThrow();
+        });
+
+        it('should throw an error is no error cb is provided', function() {
+          var f = function() {
+            relayr.devices().getDeviceState('device-id', function() {});
+          };
+
+          expect(f).toThrow();
+        });
+
+        it('should do a GET to users devices', function() {
+          relayr.devices().getDeviceState('device-id', function() {}, function() {});
+
+          expect(requests.length).toBe(1);
+          var req = requests[0];
+          expect(req.url).toBe('https://api.relayr.io/devices/device-id/state');
+        });
+
+        it('should call success callback when it gets data', function(done) {
+          relayr.devices().getDeviceState('device-id', function() {
+            expect(true).toBeTruthy();
+            done();
+          }, function() {});
+
+          var req = requests[0];
+          req.respond(200, {}, JSON.stringify([]));
+        });
+
+
+        it('should call error callback if the request fails', function(done) {
+          relayr.devices().getDevice('device-id', function() {}, function() {
+            expect(true).toBeTruthy();
+            done();
+          });
+
+          var req = requests[0];
+          req.respond(401, { "Content-Type": "application/json" }, JSON.stringify({error: "error"}));
+        });
+    });
+
   });
 
   describe('groups', function() {
