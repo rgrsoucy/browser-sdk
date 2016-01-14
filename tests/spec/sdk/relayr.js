@@ -224,6 +224,24 @@ describe('relayr SDK', function() {
       });
     });
 
+    describe('#hasToken', function() {
+      beforeEach(function() {
+        spyOn(localStorage, 'getItem');
+      });
+
+      it('returns true if relayrToken is set in localStorage', function() {
+        localStorage.getItem.and.returnValue('token');
+
+        expect(relayr.user().hasToken()).toEqual(true);
+      });
+
+      it('returns false if relayrToken is not set in localStorage', function() {
+        localStorage.getItem.and.returnValue(null);
+
+        expect(relayr.user().hasToken()).toEqual(false);
+      });
+    });
+
     describe('#login', function() {
       it('should give unauthorized 401 if token is invalid', function(done){
         var relayr = relayrInit();
