@@ -172,65 +172,91 @@ describe('relayr SDK', function() {
     });
   });
 
-  describe('User', function(){
-    it('should check if user info returns properties', function(done){
-      var relayr = relayrInit();
-
-      localStorage.setItem("relayrToken",token);
-      relayr.login({
-        success: function() {
-          done();
-        },
-        error: function() {}
-      });
-      expect(requests.length).toBe(1);
-
-      var req= requests[0];
-
-      expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
-      req.respond(200, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
-      relayr.user().getUserInfo();
-
-      expect(relayr.account.id).toBeDefined();
-      expect(relayr.account.id).toBe("42387492730487324");
-    });
-
-
-
-
-    it('should give unauthorized 401 if token is invalid', function(done){
-      var relayr = relayrInit();
-
-      localStorage.setItem("relayrToken",token);
-
-      relayr.login({
-        success: function() {},
-        error: function() {
-          done();
-        }
-      });
-
-      expect(requests.length).toBe(1);
-
-      var req = requests[0];
-      expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
-
-      req.respond(401, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
-    });
-
-    it('logout should remove key from storage', function(){
-      localStorage.setItem("relayrToken",token);
-
-      var relayr = relayrInit();
-      var storageToken=localStorage.getItem("relayrToken")
-
-      relayr.user().logout();
-      var check = localStorage.getItem("relayrToken");
-      expect(check).toBe(null);
+  describe('User', function() {
+    var relayr;
+    beforeEach(function() {
+      relayr = relayrInit();
     });
 
     afterEach(function() {
-      localStorage.removeItem("relayrToken")
+      localStorage.removeItem('relayrToken')
+    });
+
+    describe('#getUserInfo', function() {
+      it('should check if user info returns properties', function(done){
+        localStorage.setItem("relayrToken", token);
+        relayr.login({
+          success: function() {
+            done();
+          },
+          error: function() {}
+        });
+        expect(requests.length).toBe(1);
+
+        var req= requests[0];
+
+        expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
+        req.respond(200, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
+        relayr.user().getUserInfo();
+
+        expect(relayr.account.id).toBeDefined();
+        expect(relayr.account.id).toBe("42387492730487324");
+      });
+    });
+
+    describe('#getToken', function() {
+      it('should scrape the token from location hash', function() {
+        spyOn(localStorage, 'setItem');
+        spyOn(relayr.util, 'getHash').and.returnValue('#access_token=TEST_TOKEN&token_type=TEST_TYPE');
+
+        relayr.user().getToken();
+
+        expect(localStorage.setItem).toHaveBeenCalledWith('relayrToken', 'TEST_TOKEN');
+      });
+    });
+
+    describe('#setToken', function() {
+      it('should store token in localStorage', function() {
+        spyOn(localStorage, 'setItem');
+        relayr.user().setToken('my-new-token');
+
+        expect(localStorage.setItem).toHaveBeenCalledWith('relayrToken', 'my-new-token');
+      });
+    });
+
+    describe('#login', function() {
+      it('should give unauthorized 401 if token is invalid', function(done){
+        var relayr = relayrInit();
+
+        localStorage.setItem("relayrToken", token);
+
+        relayr.login({
+          success: function() {},
+          error: function() {
+            done();
+          }
+        });
+
+        expect(requests.length).toBe(1);
+
+        var req = requests[0];
+        expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
+
+        req.respond(401, {}, JSON.stringify({id:"42387492730487324", email:"something@something.com", name:"billybob"}));
+      });
+    });
+
+    describe('#logout', function() {
+      it('logout should remove key from storage', function(){
+        localStorage.setItem("relayrToken",token);
+
+        var relayr = relayrInit();
+        var storageToken=localStorage.getItem("relayrToken")
+
+        relayr.user().logout();
+        var check = localStorage.getItem("relayrToken");
+        expect(check).toBe(null);
+      });
     });
   });
 
@@ -324,7 +350,7 @@ describe('relayr SDK', function() {
 
       it('should reject promies if the request fails', function(done) {
         relayr.devices().getDevice({
-            deviceId: 'device-id'
+          deviceId: 'device-id'
         }).then(function() {}, function() {
           expect(true).toBeTruthy();
           done();
