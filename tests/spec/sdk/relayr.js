@@ -553,13 +553,13 @@ describe('relayr SDK', function() {
     });
 
     describe('Transmitters', function() {
-        it('it should throw an error when accessing transmitters without being logged in', function() {
-            var f = function() {
-                relayr.transmitters().getTransmitters({});
-            };
+        // it('it should throw an error when accessing transmitters without being logged in', function() {
+        //     var f = function() {
+        //         relayr.transmitters().getTransmitters({});
+        //     };
 
-            expect(f).toThrow(new Error("You must be logged in to access this method."));
-        });
+        //     expect(f).toThrow(new Error("You must be logged in to access this method."));
+        // });
 
         var relayr;
         beforeEach(function() {
@@ -570,7 +570,7 @@ describe('relayr SDK', function() {
             };
         });
 
-        describe('#getTransmitters', function() {
+        fdescribe('#getTransmitters', function() {
             it('should give an array of transmitters', function(done) {
 
 
@@ -598,8 +598,8 @@ describe('relayr SDK', function() {
                     done();
                 });
 
-                var req = requests[1];
-                req.respond(200, {}, JSON.stringify([]));
+                // var req = requests[1];
+                // req.respond(200, {}, JSON.stringify([]));
             });
         });
 
