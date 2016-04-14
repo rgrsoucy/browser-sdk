@@ -570,7 +570,7 @@ describe('relayr SDK', function() {
             };
         });
 
-        fdescribe('#getTransmitters', function() {
+        describe('#getTransmitters', function() {
             it('should give an array of transmitters', function(done) {
 
 
@@ -616,7 +616,7 @@ describe('relayr SDK', function() {
             it('should do a DELETE to users transmitter', function() {
                 relayr.transmitters().delete({
                     deleteId: 'deleteId'
-                }, function() {}, function() {});
+                });
 
                 expect(requests.length).toBe(1);
                 var req = requests[0];
