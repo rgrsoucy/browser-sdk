@@ -1,0 +1,7 @@
+{
+  "name": "relayr-browser-sdk-examples",
+  "version": "0.1.0",
+  "dependencies": {
+    "mqtt": "^1.8.0"
+  }
+}
