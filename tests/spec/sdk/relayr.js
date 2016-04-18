@@ -553,13 +553,6 @@ describe('relayr SDK', function() {
     });
 
     describe('Transmitters', function() {
-        // it('it should throw an error when accessing transmitters without being logged in', function() {
-        //     var f = function() {
-        //         relayr.transmitters().getTransmitters({});
-        //     };
-
-        //     expect(f).toThrow(new Error("You must be logged in to access this method."));
-        // });
 
         var relayr;
         beforeEach(function() {
@@ -571,35 +564,12 @@ describe('relayr SDK', function() {
         });
 
         describe('#getTransmitters', function() {
-            it('should give an array of transmitters', function(done) {
+            it('should do a GET to users transmitters', function() {
+                relayr.transmitters().getTransmitters();
 
-
-                // localStorage.setItem("relayrToken", token);
-                // relayr.login({
-                //     success: function() {},
-                //     error: function() {
-                //         callbackCalled = true;
-                //     }
-                // });
-
-                // var req = requests[0];
-                // var transmitterCallback = false;
-
-                // expect(req.url).toBe("https://api.relayr.io/oauth2/user-info");
-
-                // req.respond(200, {}, JSON.stringify({
-                //     id: "42387492730487324",
-                //     email: "something@something.com",
-                //     name: "billybob"
-                // }));
-                relayr.transmitters().getTransmitters().then(function(transmitters) {
-                    expect(transmitters.length).toBe(0);
-                    expect(transmitters).toBeDefined();
-                    done();
-                });
-
-                // var req = requests[1];
-                // req.respond(200, {}, JSON.stringify([]));
+                expect(requests.length).toBe(1);
+                var req = requests[0];
+                expect(req.url).toBe('https://api.relayr.io/users/test-dummy-account-id/transmitters');
             });
         });
 
@@ -615,7 +585,7 @@ describe('relayr SDK', function() {
 
             it('should do a DELETE to users transmitter', function() {
                 relayr.transmitters().delete({
-                    deleteId: 'deleteId'
+                    transmitterId: 'deleteId'
                 });
 
                 expect(requests.length).toBe(1);
@@ -624,8 +594,8 @@ describe('relayr SDK', function() {
             });
 
             it('should resolve promise when it deletes the transmitter', function(done) {
-                relayr.transmitters.delete({
-                    deleteId: 'deleteId'
+                relayr.transmitters().delete({
+                    transmitterId: 'deleteId'
                 }).then(function() {
                     expect(true).toBeTruthy();
                     done();
@@ -637,8 +607,8 @@ describe('relayr SDK', function() {
 
 
             it('should reject promise if the request fails', function(done) {
-                relayr.transmitters.delete({
-                    deleteId: 'deleteId'
+                relayr.transmitters().delete({
+                    transmitterId: 'deleteId'
                 }).then(function() {}, function() {
                     expect(true).toBeTruthy();
                     done();
