@@ -116,9 +116,11 @@ relayr.login({
 
                 //define what happens when you click the delete button
                 $("#delete").click(function() {
-                    var deleteId = String(msg[0].id);
+                    var transmitter = {
+                        transmitterId: String(msg[0].id)
+                    };
                     //give the command to actually delete it
-                    relayr.transmitters().delete(deleteId).then(
+                    relayr.transmitters().delete(transmitterId).then(
                         function fulfilled(msg) {
                             location.reload();
                         },
@@ -131,12 +133,13 @@ relayr.login({
                 //define what happens when you click the "update name" button
                 $("#updateName").click(function() {
                     //get the ID of the transmitter at the top of the list
-                    var updateId = String(msg[0].id);
-                    var updateName = {
+
+                    var transmitter = {
+                        transmitterId: String(msg[0].id),
                         name: $('.status-box').val()
                     };
                     //give the command to update the name of the transmitter with the top ID with the text from the input box
-                    relayr.transmitters().update(updateId, updateName).then(
+                    relayr.transmitters().update(transmitter).then(
                         function fulfilled(msg) {
                             location.reload();
                         },
