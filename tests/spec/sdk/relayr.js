@@ -552,7 +552,7 @@ describe('relayr SDK', function() {
         });
     });
 
-    describe('Transmitters', function() {
+    fdescribe('Transmitters', function() {
 
         var relayr;
         beforeEach(function() {
@@ -577,14 +577,14 @@ describe('relayr SDK', function() {
         describe('#delete', function() {
             it('should throw an error if no id is provided', function() {
                 var f = function() {
-                    relayr.transmitters().delete();
+                    relayr.transmitters().deleteTransmitter();
                 };
 
                 expect(f).toThrow();
             });
 
             it('should do a DELETE to users transmitter', function() {
-                relayr.transmitters().delete({
+                relayr.transmitters().deleteTransmitter({
                     transmitterId: 'deleteId'
                 });
 
@@ -594,7 +594,7 @@ describe('relayr SDK', function() {
             });
 
             it('should resolve promise when it deletes the transmitter', function(done) {
-                relayr.transmitters().delete({
+                relayr.transmitters().deleteTransmitter({
                     transmitterId: 'deleteId'
                 }).then(function() {
                     expect(true).toBeTruthy();
@@ -607,7 +607,7 @@ describe('relayr SDK', function() {
 
 
             it('should reject promise if the request fails', function(done) {
-                relayr.transmitters().delete({
+                relayr.transmitters().deleteTransmitter({
                     transmitterId: 'deleteId'
                 }).then(function() {}, function() {
                     expect(true).toBeTruthy();
@@ -620,6 +620,11 @@ describe('relayr SDK', function() {
                 }, JSON.stringify({
                     error: "error"
                 }));
+            });
+        });
+        describe('#updateTransmitter', function() {
+            it('should do a thing', function() {
+
             });
         });
     });

@@ -120,7 +120,7 @@ relayr.login({
                         transmitterId: String(msg[0].id)
                     };
                     //give the command to actually delete it
-                    relayr.transmitters().delete(transmitterId).then(
+                    relayr.transmitters().deleteTransmitter(transmitterId).then(
                         function fulfilled(msg) {
                             location.reload();
                         },
@@ -139,7 +139,7 @@ relayr.login({
                         name: $('.status-box').val()
                     };
                     //give the command to update the name of the transmitter with the top ID with the text from the input box
-                    relayr.transmitters().update(transmitter).then(
+                    relayr.transmitters().updateTransmitter(transmitter).then(
                         function fulfilled(msg) {
                             location.reload();
                         },
