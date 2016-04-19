@@ -322,43 +322,6 @@ describe('relayr SDK', function() {
             });
         });
 
-        describe('#getAllDevices', function() {
-
-            it('should do a GET to users devices', function() {
-                relayr.devices().getAllDevices();
-
-                expect(requests.length).toBe(1);
-                var req = requests[0];
-                expect(req.url).toBe('https://api.relayr.io/users/test-dummy-account-id/devices');
-            });
-
-            it('should resolve promise when it gets data', function(done) {
-                relayr.devices().getAllDevices().then(function() {
-                    expect(true).toBeTruthy();
-                    done();
-                }, function() {});
-
-                var req = requests[0];
-                req.respond(200, {}, JSON.stringify([]));
-            });
-
-
-            it('should reject promise if the request fails', function(done) {
-                relayr.devices().getAllDevices().then(function() {}, function() {
-                    expect(true).toBeTruthy();
-                    done();
-                });
-
-                var req = requests[0];
-                req.respond(401, {
-                    "Content-Type": "application/json"
-                }, JSON.stringify({
-                    error: "error"
-                }));
-            });
-        });
-
-
         describe('#getDevice', function() {
             it('should throw an error if no id is provided', function() {
                 var f = function() {
@@ -378,7 +341,7 @@ describe('relayr SDK', function() {
                 expect(req.url).toBe('https://api.relayr.io/devices/device-id');
             });
 
-            it('should resolve promies when it gets device', function(done) {
+            it('should resolve promise when it gets device', function(done) {
                 relayr.devices().getDevice({
                     deviceId: 'device-id'
                 }).then(function() {
@@ -391,7 +354,7 @@ describe('relayr SDK', function() {
             });
 
 
-            it('should reject promies if the request fails', function(done) {
+            it('should reject promise if the request fails', function(done) {
                 relayr.devices().getDevice({
                     deviceId: 'device-id'
                 }).then(function() {}, function() {
@@ -444,6 +407,42 @@ describe('relayr SDK', function() {
                 relayr.devices().getDevice({
                     deviceId: 'device-id'
                 }).then(function() {}, function() {
+                    expect(true).toBeTruthy();
+                    done();
+                });
+
+                var req = requests[0];
+                req.respond(401, {
+                    "Content-Type": "application/json"
+                }, JSON.stringify({
+                    error: "error"
+                }));
+            });
+        });
+
+        describe('#getAllDevices', function() {
+
+            it('should do a GET to users devices', function() {
+                relayr.devices().getAllDevices();
+
+                expect(requests.length).toBe(1);
+                var req = requests[0];
+                expect(req.url).toBe('https://api.relayr.io/users/test-dummy-account-id/devices');
+            });
+
+            it('should resolve promise when it gets data', function(done) {
+                relayr.devices().getAllDevices().then(function() {
+                    expect(true).toBeTruthy();
+                    done();
+                }, function() {});
+
+                var req = requests[0];
+                req.respond(200, {}, JSON.stringify([]));
+            });
+
+
+            it('should reject promise if the request fails', function(done) {
+                relayr.devices().getAllDevices().then(function() {}, function() {
                     expect(true).toBeTruthy();
                     done();
                 });
