@@ -456,6 +456,12 @@ describe('relayr SDK', function() {
             });
         });
 
+        // describe('#sendCommand', function() {
+        //     it('should do a thing', function() {
+
+        //     });
+        // });
+
     });
 
     describe('groups', function() {
@@ -622,8 +628,52 @@ describe('relayr SDK', function() {
             });
         });
         describe('#updateTransmitter', function() {
-            it('should do a thing', function() {
+            it('should throw an error if no id is provided', function() {
+                var f = function() {
+                    relayr.transmitters().deleteTransmitter();
+                };
 
+                expect(f).toThrow();
+            });
+
+            it('should do a PATCH to channels api', function() {
+                relayr.transmitters().updateTransmitter({
+                    transmitterId: 'transmitterId'
+                });
+
+                expect(requests.length).toBe(1);
+                var req = requests[0];
+                expect(req.url).toBe('https://api.relayr.io/transmitters/transmitterId');
+                expect(req.method).toBe('PATCH');
+            });
+
+            it('should resolve promise when it updates the transmitter', function(done) {
+                relayr.transmitters().updateTransmitter({
+                    transmitterId: 'transmitterId'
+                }).then(function() {
+                    expect(true).toBeTruthy();
+                    done();
+                }, function() {});
+
+                var req = requests[0];
+                req.respond(200, {}, JSON.stringify([]));
+            });
+
+
+            it('should reject promise if the request fails', function(done) {
+                relayr.transmitters().updateTransmitter({
+                    transmitterId: 'transmitterId'
+                }).then(function() {}, function() {
+                    expect(true).toBeTruthy();
+                    done();
+                });
+
+                var req = requests[0];
+                req.respond(401, {
+                    "Content-Type": "application/json"
+                }, JSON.stringify({
+                    error: "error"
+                }));
             });
         });
     });
