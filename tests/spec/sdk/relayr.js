@@ -299,7 +299,7 @@ describe('relayr SDK', function() {
         });
     });
 
-    describe('devices', function() {
+    fdescribe('devices', function() {
         var relayr;
         beforeEach(function() {
             relayr = relayrInit();
@@ -456,11 +456,57 @@ describe('relayr SDK', function() {
             });
         });
 
-        // describe('#sendCommand', function() {
-        //     it('should do a thing', function() {
+        describe('#sendCommand', function() {
+            it('should throw an error if no id is provided', function() {
+                var f = function() {
+                    relayr.devices().sendCommand();
+                };
 
-        //     });
-        // });
+                expect(f).toThrow();
+            });
+
+            it('should do a POST to api', function() {
+                relayr.devices().sendCommand({
+                    deviceId: 'device-id',
+                    command: 'test-command'
+                });
+                expect(requests.length).toBe(1);
+                var req = requests[0];
+                expect(req.url).toBe('https://api.relayr.io/devices/device-id/cmd');
+                expect(req.method).toBe('POST');
+            });
+
+            it('should resolve promise when it sends the command', function(done) {
+                relayr.devices().sendCommand({
+                    deviceId: 'device-id',
+                    command: 'test-command'
+                }).then(function() {
+                    expect(true).toBeTruthy();
+                    done();
+                }, function() {});
+
+                var req = requests[0];
+                req.respond(200, {}, JSON.stringify([]));
+            });
+
+
+            it('should reject promise if the command fails', function(done) {
+                relayr.devices().sendCommand({
+                    deviceId: 'device-id',
+                    command: 'test-command'
+                }).then(function() {}, function() {
+                    expect(true).toBeTruthy();
+                    done();
+                });
+
+                var req = requests[0];
+                req.respond(401, {
+                    "Content-Type": "application/json"
+                }, JSON.stringify({
+                    error: "error"
+                }));
+            });
+        });
 
     });
 
@@ -557,7 +603,7 @@ describe('relayr SDK', function() {
         });
     });
 
-    fdescribe('Transmitters', function() {
+    describe('Transmitters', function() {
 
         var relayr;
         beforeEach(function() {
