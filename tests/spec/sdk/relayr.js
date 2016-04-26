@@ -299,7 +299,7 @@ describe('relayr SDK', function() {
         });
     });
 
-    fdescribe('devices', function() {
+    describe('devices', function() {
         var relayr;
         beforeEach(function() {
             relayr = relayrInit();
