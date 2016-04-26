@@ -625,7 +625,7 @@ describe('relayr SDK', function() {
         });
 
 
-        describe('#delete', function() {
+        describe('#deleteTransmitter', function() {
             it('should throw an error if no id is provided', function() {
                 var f = function() {
                     relayr.transmitters().deleteTransmitter();
