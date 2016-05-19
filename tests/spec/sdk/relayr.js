@@ -472,7 +472,7 @@ describe('relayr SDK', function() {
                 });
                 expect(requests.length).toBe(1);
                 var req = requests[0];
-                expect(req.url).toBe('https://api.relayr.io/devices/device-id/cmd');
+                expect(req.url).toBe('https://api.relayr.io/devices/device-id/commands');
                 expect(req.method).toBe('POST');
             });
 
