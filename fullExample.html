@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://developer.relayr.io/relayr-browser-sdk.min.js"></script>
+  <script src="./build/relayr-browser-sdk.min.js"></script>
 </head>
 <body>
 
@@ -24,11 +24,11 @@ relayr.login({
       console.log("All my devices", devices)
       var myDeviceId = devices[0].id;
       relayr.devices().getDeviceData({
-        deviceId: myDeviceId, 
+        deviceId: myDeviceId,
         incomingData: function(data){
           console.log("deviceData",data);
         }
-      });          
+      });
     });
   }
 });
