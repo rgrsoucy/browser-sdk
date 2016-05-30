@@ -25,6 +25,13 @@ open http://localhost:3000
 
 Maybe you need to add .babelrc per hand if it is not copied correctly.
 
+### Tests
+
+```
+npm test
+npm run test:watch
+```
+[assertion library](https://github.com/mjackson/expect)
 
 ### Gulp Tasks
 
