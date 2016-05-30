@@ -4,7 +4,8 @@
   "description": "The relayr browser sdk",
   "scripts": {
     "start": "node server.js",
-    "test": "NODE_ENV=test mocha --recursive --compilers js:babel-core/register"
+    "test": "NODE_ENV=test mocha --recursive --compilers js:babel-core/register",
+    "test:watch": "npm run test -- -w"
   },
   "repository": {
     "type": "git",
@@ -35,10 +36,10 @@
     "gulp-webpack": "^1.5.0",
     "mocha": "^2.3.4",
     "chai": "^3.4.1",
-    "es6-promise": "^3.0.2"
+    "es6-promise": "^3.0.2",
+    "expect": "^1.20.1"
   },
   "dependencies": {
-    "expect": "^1.20.1",
     "react": "^0.14.6",
     "react-dom": "^0.14.6"
   }
