@@ -31,7 +31,7 @@ Maybe you need to add .babelrc per hand if it is not copied correctly.
 npm test
 npm run test:watch
 ```
-[assertion library](https://github.com/mjackson/expect)
+See the assertion library: [assertion library](https://github.com/mjackson/expect)
 
 ### Gulp Tasks
 
