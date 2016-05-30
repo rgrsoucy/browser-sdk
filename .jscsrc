@@ -1,0 +1,15 @@
+{
+	"preset": "airbnb",
+	"validateIndentation": null,
+	"requireTrailingComma": null,
+	"disallowMultipleLineBreaks": false,
+	"requireCamelCaseOrUpperCaseIdentifiers": {"ignoreProperties": true},
+	"requirePaddingNewLinesAfterBlocks": false,
+	"safeContextKeyword": false,
+	"requireCapitalizedConstructors": {
+	    "allExcept": ["widgets", "mqtt", "connection"]
+	},
+	"requireSpacesInAnonymousFunctionExpression": false,
+	"requireDollarBeforejQueryAssignment": false,
+	"maximumLineLength": false
+}
