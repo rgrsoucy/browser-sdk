@@ -1,2 +1,7 @@
-//implement main
-export default { test: true };
+//implement relayr
+
+export default class Relayr {
+	constructor(project) {
+		this.project = project;
+	}
+}

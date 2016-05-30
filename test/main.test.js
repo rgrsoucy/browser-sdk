@@ -1,10 +1,10 @@
 import expect from 'expect';
-import main from '../src/main';
+import Relayr from '../src/main';
 
-describe('Write some tests', () => {
-  describe('in blocks', () => {
-    it('should be tested', () => {
-      expect(main.test).toBe(true);
+describe('Main', () => {
+  describe('can be instantiated', () => {
+    it('should be a constructor', () => {
+    	expect(new Relayr).toBeA(Relayr);
     });
   });
 });
