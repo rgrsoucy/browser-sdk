@@ -19,8 +19,7 @@ For a list of the basic available functionalities in the SDK please refer to our
 
 ```
 npm install
-npm start
-open http://localhost:3000
+
 ```
 
 Maybe you need to add .babelrc per hand if it is not copied properly.
@@ -45,3 +44,10 @@ npm test
 npm run test:watch
 ```
 [assertion library](https://github.com/mjackson/expect)
+
+### Run the webpack dev server and run some examples
+
+```
+npm start
+open http://localhost:3000/examples/index.html
+```
