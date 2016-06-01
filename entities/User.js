@@ -1,19 +1,25 @@
 class User {
-  constructor(token) {
-    this.token = token;
-    _getUserById();
-  }
+    constructor(token) {
+        this.token: token,
+        user
+    }
 
-  _getUserById(){
-    this.userId = "123";
-    this.email = "email@relayr.io"
-  }
+    getUserById() {
+        this.userId = "123";
+        this.email = "email@relayr.io"
+    }
 
-  get token() {
-    return this.token;
-  }
+    get token() {
+        return this.token;
+    }
 
 
 }
 
-module.exports =  User;
+module.exports = User;
+
+//getToken
+//setToken
+//hasToken
+//getUserInfo
+//logout
