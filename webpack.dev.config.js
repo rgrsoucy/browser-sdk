@@ -13,7 +13,9 @@ module.exports = {
     filename: 'relayr-browser-sdk.js', //bundle includes node_modules
     publicPath: '/dist/'
   },
-  plugins: [],
+  plugins: [
+    new webpack.HotModuleReplacementPlugin()
+  ],
   module: {
     loaders: [{
       test: /\.js$/,

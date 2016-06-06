@@ -46,4 +46,4 @@ class Oauth2 {
 
 }
 
-module.exports =  Oauth2;
+export default Oauth2;
