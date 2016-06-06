@@ -1,16 +1,12 @@
-import Oauth2 from 'authorization/oauth2';
+import Oauth2 from '../authorization/oauth2.js';
 
-var chai = require('chai');
-var sinon = require('sinon');
-var sinonChai = require('sinon-chai');
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
 var expect = chai.expect;
 chai.use(sinonChai);
 
 let oauthInstance;
-
-let localStorage = {
-    setItem: function() {}
-};
 
 describe('oauth2', function() {
     beforeEach(function() {
@@ -74,6 +70,22 @@ describe('oauth2', function() {
                 oauthInstance.login();
 
                 expect(oauthInstance._loginRedirect).not.to.have.been.called;
+            });
+
+            it('should fetch token from localStorage', function() {
+                localStorage.setItem('relayr_access_token', 'FAKE_ACCESS_TOKEN');
+
+                oauthInstance.login();
+
+                expect(oauthInstance.token).to.equal('FAKE_ACCESS_TOKEN');
+            });
+
+            it('should redirect if access token is not present', function() {
+                localStorage.removeItem('relayr_access_token');
+
+                oauthInstance.login();
+
+                expect(oauthInstance._loginRedirect).to.have.been.called;
             });
         });
     });
