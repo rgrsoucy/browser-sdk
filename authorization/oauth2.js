@@ -22,7 +22,9 @@ class Oauth2 {
         this._loginRedirect(`https://api.relayr.io/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`);
     }
 
-    _loginRedirect() {}
+    _loginRedirect(uri) {
+        //window.location = uri;
+    }
 
     parseToken(tokenURL) {
         var parts = tokenURL.split('#');
