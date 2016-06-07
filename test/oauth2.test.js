@@ -149,4 +149,43 @@ describe('oauth2', function() {
             });
         });
     });
+
+    describe('#setToken', function() {
+        beforeEach(function() {
+            let token = 'A_FAKE_TOKEN'
+            localStorage.setItem('relayrToken', token);
+
+            let options = {
+                appId: 'fakeAppId',
+                redirectURI: 'fakeURI',
+                persist: true
+            };
+            oauthInstance = new Oauth2(options);
+        });
+
+        it('should remove the token from local storage', function() {
+            oauthInstance.logout();
+            expect(localStorage.getItem('relayrToken')).to.equal('A_FAKE_TOKEN');
+        });
+    });
+
+    describe('#logout', function() {
+        beforeEach(function() {
+            let token = 'A_FAKE_TOKEN'
+            localStorage.setItem('relayrToken', token);
+
+            let options = {
+                appId: 'fakeAppId',
+                redirectURI: 'fakeURI',
+                persist: true
+            };
+            oauthInstance = new Oauth2(options);
+        });
+
+        it('should remove the token from local storage', function() {
+            oauthInstance.logout();
+            expect(localStorage.getItem('relayrToken')).to.throw(Error);
+        });
+    });
+
 });
