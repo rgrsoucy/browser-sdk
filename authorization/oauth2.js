@@ -50,7 +50,6 @@ class Oauth2 {
         }
 
         this.token = authParams.token_type + ' ' + authParams.access_token;
-        console.log(this.token);
         this.setToken(this.token);
     }
 
