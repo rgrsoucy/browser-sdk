@@ -1,11 +1,11 @@
 export
 default class Device {
-    constructor(deviceId, userId) {
-        this.deviceId = deviceId;
-        this.userId = userId;
+    constructor(options) {
+        this.deviceId = options.deviceId;
+        this.userId = options.userId;
     }
 
-    getDeviceData(deviceId) {
+    getDeviceData() {
         if (!(this.deviceId)) {
             throw new Error('Provide the deviceId during instantiation');
         }
