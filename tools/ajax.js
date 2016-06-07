@@ -4,14 +4,19 @@ default class Ajax {
     this.tokenType = options.tokenType;
     this.token = options.token;
     this.uri = options.uri || "https://api.relayr.io/"
+    this.customXHR;
   }
 
+
   get(url, raw) {
+    if (!url) throw new Error('Please provide atleast a url');
+    if (typeof(url) !== "string") throw new Error('Please provide a string url');
+
     return new Promise((resolve, reject) => {
       var xhrObject = this._xhrRequest({
         type: "GET",
         url: url,
-        isObject: true
+        isObject: raw || true
       }).then((result) => {
         resolve(result);
       }).catch((xhrObject) => {
@@ -33,15 +38,23 @@ default class Ajax {
   }
 
   _xhrRequest(options, body) {
-    var xhrObject = new XMLHttpRequest();
+    let xhrObject;
+    if (this.customXHR) {
+      xhrObject = new this.customXHR;
+    } else {
+      xhrObject = new XMLHttpRequest();
+    }
+
+    xhrObject.open(
+      options.type,
+      options.url,
+      true
+    );
+
+    xhrObject.setRequestHeader('Authorization', options.token);
+    xhrObject.setRequestHeader('Content-Type', 'application/json');
 
     return new Promise((resolve, reject) => {
-
-      xhrObject.open(
-        options.type,
-        options.url,
-        true
-      );
 
       xhrObject.onreadystatechange = function() {
         if (xhrObject.readyState === 4) {
@@ -59,9 +72,6 @@ default class Ajax {
         }
       };
 
-
-      xhrObject.setRequestHeader('Authorization', options.token);
-      xhrObject.setRequestHeader('Content-Type', 'application/json');
       if (body) {
         xhrObject.send(JSON.stringify(body));
       } else {
@@ -69,5 +79,7 @@ default class Ajax {
       }
 
     });
+
+
   }
 }

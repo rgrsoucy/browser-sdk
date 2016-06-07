@@ -27,6 +27,7 @@
     "babel-preset-react": "^6.0.15",
     "babel-preset-stage-0": "^6.0.15",
     "chai": "^3.4.1",
+    "chai-as-promised": "^5.3.0",
     "es6-promise": "^3.0.2",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.6.2",
@@ -34,10 +35,10 @@
     "mock-local-storage": "^1.0.2",
     "phantomjs-prebuilt": "^2.1.7",
     "sinon": "git+https://github.com/uberVU/Sinon.JS",
+    "sinon-as-promised": "^4.0.0",
     "sinon-chai": "^2.8.0",
     "webpack": "^1.12.2",
     "webpack-dev-server": "^1.12.1",
-    "sinon-as-promised": "^4.0.0",
     "webpack-node-externals": "^1.2.0"
   }
 }
