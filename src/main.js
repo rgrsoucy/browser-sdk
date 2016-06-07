@@ -1,8 +1,51 @@
-//implement relayr
 import Oauth2 from '../authorization/oauth2';
+import User from '../entities/User';
 
-export default class Relayr {
+export
+default class Relayr {
   constructor(project) {
     this.project = project;
+    this.oauth2;
+
+    this.config = {
+      mqtt: {
+        endpoint: "tcp://127.0.0.1:1883"
+      },
+      ajax: {
+        uri: "api.relayr.io"
+      }
+    }
+    this.currentUser;
   }
+
+  authorize(optionalToken) {
+    return new Promise((resolve, reject) => {
+
+      const oauth2 = new Oauth2({
+        appId: this.project.id,
+        redirectURI: this.project.redirectURI,
+      });
+      if (!optionalToken) {
+        oauth2.login();
+        this.config.ajax.token = oauth2.token;
+
+      } else {
+        this.config.ajax.token = optionalToken;
+
+      }
+
+      this.currentUser = new User(this.config);
+      resolve(this.currentUser);
+    });
+  }
+
 }
+
+//usage
+const relayrLib = new Relayr({
+  id: "124",
+  redirectURI: "/somewhere"
+})
+relayrLib.authorize().then(function(user) {
+  console.log(user);
+});
