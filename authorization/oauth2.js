@@ -19,7 +19,14 @@ class Oauth2 {
             return;
         }
 
-        this._loginRedirect(`https://api.relayr.io/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`);
+        let authURL = {
+            client_id: this.appId,
+            redirect_uri: this.redirectURI,
+            scope: 'access-own-user-info+configure-devices'
+        };
+
+        let uri = ('https://api.relayr.io/oauth2/auth?client_id=' + authURL.client_id + '&redirect_uri=' + authURL.redirect_uri + '&response_type=token&scope=' + authURL.scope);
+        this._loginRedirect(uri) //`https://api.relayr.io/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`);
     }
 
     _loginRedirect(uri) {
@@ -43,9 +50,19 @@ class Oauth2 {
         }
 
         this.token = authParams.token_type + ' ' + authParams.access_token;
+        this.setToken(this.token);
+    }
+
+    setToken(token) {
+        localStorage.setItem('relayrToken', this.token);
     }
 
 
+    logout() {
+        localStorage.removeItem('relayrToken');
+    }
+
 }
 
-export default Oauth2;
+export
+default Oauth2;
