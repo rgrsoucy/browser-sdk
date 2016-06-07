@@ -119,7 +119,12 @@ describe('oauth2', function() {
   describe('#_parseToken', function() {
     it('should return token provided in URL as a query paramter', function() {
       oauthInstance._parseToken('example.com/oauth#access_token=A_FAKE_TOKEN&token_type=Bearer');
-      expect(oauthInstance.token).to.equal('Bearer A_FAKE_TOKEN');
+      expect(oauthInstance.token).to.equal('A_FAKE_TOKEN');
+    });
+
+    it('should return token type provided in URL as a query paramter', function() {
+      oauthInstance._parseToken('example.com/oauth#access_token=A_FAKE_TOKEN&token_type=Bearer');
+      expect(oauthInstance.tokenType).to.equal('Bearer');
     });
 
     it('should throw an error when the URL is emptys', function() {
