@@ -30,7 +30,6 @@
     "es6-promise": "^3.0.2",
     "eslint": "^1.10.3",
     "eslint-plugin-react": "^3.6.2",
-
     "mocha": "^2.3.4",
     "mock-local-storage": "^1.0.2",
     "phantomjs-prebuilt": "^2.1.7",
@@ -38,6 +37,7 @@
     "sinon-chai": "^2.8.0",
     "webpack": "^1.12.2",
     "webpack-dev-server": "^1.12.1",
+    "sinon-as-promised": "^4.0.0",
     "webpack-node-externals": "^1.2.0"
   }
 }
