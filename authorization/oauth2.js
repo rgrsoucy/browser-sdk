@@ -33,7 +33,7 @@ class Oauth2 {
         //window.location = uri;
     }
 
-    parseToken(tokenURL) {
+    _parseToken(tokenURL) {
         var parts = tokenURL.split('#');
         if (parts[0].length === 0 || parts[1].length === 0) {
             throw Error('The provided URL is not correctly formatted');
@@ -50,6 +50,7 @@ class Oauth2 {
         }
 
         this.token = authParams.token_type + ' ' + authParams.access_token;
+        console.log(this.token);
         this.setToken(this.token);
     }
 
