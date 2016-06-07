@@ -116,29 +116,29 @@ describe('oauth2', function() {
         });
     });
 
-    describe('#parseToken', function() {
+    describe('#_parseToken', function() {
         it('should return token provided in URL as a query paramter', function() {
-            oauthInstance.parseToken('example.com/oauth#access_token=A_FAKE_TOKEN&token_type=Bearer');
+            oauthInstance._parseToken('example.com/oauth#access_token=A_FAKE_TOKEN&token_type=Bearer');
             expect(oauthInstance.token).to.equal('Bearer A_FAKE_TOKEN');
         });
 
         it('should throw an error when the URL is emptys', function() {
             var fn = function() {
-                oauthInstance.parseToken('');
+                oauthInstance._parseToken('');
             };
             expect(fn).to.throw(Error);
         });
 
         it('should throw an error when no query parameter is provided', function() {
             var fn = function() {
-                oauthInstance.parseToken('example.com/oauth#');
+                oauthInstance._parseToken('example.com/oauth#');
             };
             expect(fn).to.throw(Error);
         });
 
         it('should throw an error when no access token is provided', function() {
             var fn = function() {
-                oauthInstance.parseToken('example.com/oauth#BLABLA');
+                oauthInstance._parseToken('example.com/oauth#BLABLA');
             };
             expect(fn).to.throw(Error);
         });
@@ -153,7 +153,7 @@ describe('oauth2', function() {
     describe('#setToken', function() {
         beforeEach(function() {
             let token = 'A_FAKE_TOKEN'
-            localStorage.setItem('relayrToken', token);
+                // localStorage.setItem('relayrToken', token);
 
             let options = {
                 appId: 'fakeAppId',
@@ -161,30 +161,31 @@ describe('oauth2', function() {
                 persist: true
             };
             oauthInstance = new Oauth2(options);
+            oauthInstance.token = 'A_FAKE_TOKEN'
         });
 
-        it('should remove the token from local storage', function() {
-            oauthInstance.logout();
+        it('should save token tolocal storage', function() {
+            oauthInstance.setToken();
             expect(localStorage.getItem('relayrToken')).to.equal('A_FAKE_TOKEN');
         });
+
     });
 
     describe('#logout', function() {
         beforeEach(function() {
-            let token = 'A_FAKE_TOKEN'
-            localStorage.setItem('relayrToken', token);
-
             let options = {
                 appId: 'fakeAppId',
                 redirectURI: 'fakeURI',
                 persist: true
             };
             oauthInstance = new Oauth2(options);
+            oauthInstance.token = 'A_FAKE_TOKEN'
+            localStorage.setItem('relayrToken', oauthInstance.token);
         });
 
         it('should remove the token from local storage', function() {
             oauthInstance.logout();
-            expect(localStorage.getItem('relayrToken')).to.throw(Error);
+            expect(localStorage.getItem('relayrToken')).to.be.null;
         });
     });
 
