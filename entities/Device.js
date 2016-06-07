@@ -4,34 +4,65 @@ export
 default class Device {
   constructor(options) {
     this.deviceId = options.deviceId;
-    this.userId = options.userId;
+    this.name = options.name;
+    this.model = options.model;
+    this.owner = options.owner;
+    this.openToPublic = options.public;
   }
 
-  getDeviceData() {
+  // getAllDevices() {
+  //   if (!(this.userId)) {
+  //     throw new Error('Provide the userId during instantiation');
+  //   }
+  //   return new Promise(function(resolve, reject) {
+  //     let callConfig = {
+  //       url: '/users/' + this.userId + '/devices',
+  //       type: 'GET'
+  //     }
+
+  //     ajax(callConfig).then(
+  //       //get the resolved promise back from ajax with json response text
+  //       function(allDevicesArray) {
+  //         resolve(allDevicesArray)
+  //       }).catch(function(error) {
+  //       reject(error); //if the ajax doesn't resolve right
+  //     });
+  //   });
+  // }
+
+  // getDevice() {
+  //   if (!(this.deviceId)) {
+  //     throw new Error('Provide the userId during instantiation');
+  //   }
+  //   return new Promise(function(resolve, reject) {
+  //     let callConfig = {
+  //       url: '/users/' + this.userId + '/devices',
+  //       type: 'GET'
+  //     }
+
+  //     ajax(callConfig).then(
+  //       //get the resolved promise back from ajax with json response text
+  //       function(allDevicesArray) {
+  //         resolve(allDevicesArray)
+  //       }).catch(function(error) {
+  //       reject(error); //if the ajax doesn't resolve right
+  //     });
+  //   });
+  // }
+
+
+
+
+  updateDevice() {
+    //patch: devices/deviceId
     if (!(this.deviceId)) {
-      throw new Error('Provide the deviceId during instantiation');
+      throw new Error('Provide the userId during instantiation');
     }
-    return new Promise(function(resolve, reject) {
-      let callConfig = {
-        url: 'devices/' + this.deviceId,
-        type: 'GET'
-      }
-
-      //resolve does this:
-      function fulfilled() {
-        ajax(callConfig).then(
-          //get the resolved promise back from ajax with json response text
-          function() {
-            resolve(device.incomingData)
-          }).catch(error); //if the ajax doesn't resolve right
-      },
-      //reject does this;
-      function rejected() {
-        reject(error);
-      }
-    });
   }
-
+  getDeviceState() {}
+  deleteDevice() {}
+  sendCommand() {}
+  connect() {}
 };
 
 // getDeviceState

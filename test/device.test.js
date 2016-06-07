@@ -17,38 +17,69 @@ describe('Device', function() {
   beforeEach(function() {
     let options = {
       deviceId: 'fakeDeviceId',
-      userId: 'fakeUserId'
+      name: 'fakeDeviceName',
+      model: 'fakeModel',
+      owner: 'fakeOwner',
+      public: false
     };
 
     deviceInstance = new Device(options);
   });
 
-  describe('#getDeviceData', function() {
-    beforeEach(function() {
-      sinon.spy(deviceInstance, '_ajax');
-    });
-
+  describe('#updateDevice', function() {
     it('should throw an error if no deviceId given to look up', function() {
       deviceInstance.deviceId = null;
       var fn = function() {
-        deviceInstance.getDevice();
+        deviceInstance.updateDevice();
       };
       expect(fn).to.throw(Error);
     });
+  });
 
-    it('should do something with promises', function() {
-      var blah = 'foo';
-
-      var result = deviceInstance.getDeviceData();
-
-      expect(result).to.eventually.equal(blah);
-    });
-
+  describe('#getDeviceState', function() {
 
   });
-});
 
-//  getDevice
-// getDeviceState
-// getAllDevices
-// sendCommand
+  describe('#deleteDevice', function() {
+
+  });
+
+  describe('#sendCommand', function() {
+
+  });
+
+  describe('#connect', function() {
+
+  });
+
+
+  // describe('#getAllDevices', function() {
+  //   beforeEach(function() {
+
+  //   });
+
+  //   it('should throw an error if no deviceId given to look up', function() {
+  //     deviceInstance.deviceId = null;
+  //     var fn = function() {
+  //       deviceInstance.getDevice();
+  //     };
+  //     expect(fn).to.throw(Error);
+  //   });
+
+  //   it('should hit ajax with the right options', function() {
+
+  //   });
+
+  //   it('should resolve the promise with an array of objects', function() {
+
+  //   });
+
+  //   it('should reject with the xhr object', function() {
+
+  //   });
+
+
+  // });
+
+
+});
