@@ -25,12 +25,12 @@ class Oauth2 {
             scope: 'access-own-user-info+configure-devices'
         };
 
-        let uri = ('https://api.relayr.io/oauth2/auth?client_id=' + authURL.client_id + '&redirect_uri=' + authURL.redirect_uri + '&response_type=token&scope=' + authURL.scope);
-        this._loginRedirect(uri) //`https://api.relayr.io/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`);
+        let uri = `https://api.relayr.io/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
+        this._loginRedirect(uri);
     }
 
     _loginRedirect(uri) {
-        //window.location = uri;
+        window.location.assign(uri);
     }
 
     _parseToken(tokenURL) {
