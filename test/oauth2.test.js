@@ -108,12 +108,6 @@ describe('oauth2', function() {
       sinon.spy(oauthInstance, '_loginRedirect');
     });
 
-    it('should build the redirect from the appID and redirect URI', function() {
-      //do we need this?
-      let uri = 'https://api.relayr.io/oauth2/auth?client_id=fakeAppId&redirect_uri=fakeURI&response_type=token&scope=access-own-user-info+configure-devices';
-      oauthInstance._loginRedirect(uri)
-      expect(oauthInstance._loginRedirect).to.have.been.calledWith('https://api.relayr.io/oauth2/auth?client_id=fakeAppId&redirect_uri=fakeURI&response_type=token&scope=access-own-user-info+configure-devices')
-    });
   });
 
   describe('#_parseToken', function() {
