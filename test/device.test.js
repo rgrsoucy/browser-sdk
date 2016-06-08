@@ -27,6 +27,10 @@ describe('Device', function() {
   });
 
   describe('#updateDevice', function() {
+    beforeEach(function() {
+      sinon.spy(deviceInstance, 'ajax.patch');
+    });
+
     it('should throw an error if no deviceId given to look up', function() {
       deviceInstance.deviceId = null;
       var fn = function() {
@@ -34,7 +38,14 @@ describe('Device', function() {
       };
       expect(fn).to.throw(Error);
     });
+
+    it('should hit the ajax with a patch and the correct url', function() {
+      deviceInstance.updateDevice(options);
+      expect(ajax.patch).to.have.been.calledWith(options);
+    });
+
   });
+
 
   describe('#getDeviceState', function() {
 
