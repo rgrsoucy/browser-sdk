@@ -25,7 +25,7 @@ class Oauth2 {
             redirect_uri: this.redirectURI,
             scope: 'access-own-user-info+configure-devices'
         };
-        console.log(this.uri)
+
         let uri = `${this.uri}oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
         this._loginRedirect(uri);
     }
