@@ -1,5 +1,6 @@
 import Oauth2 from '../authorization/oauth2';
 import User from '../entities/User';
+import Ajax from '../tools/Ajax';
 
 export
 default class Relayr {
@@ -31,6 +32,7 @@ default class Relayr {
             });
             if (!optionalToken) {
                 oauth2.login();
+
                 this.config.ajax.token = oauth2.token;
 
             } else {
@@ -46,13 +48,8 @@ default class Relayr {
     getCurrentConfig() {
         return this.config;
     }
-}
 
-// //usage
-// const relayrLib = new Relayr({
-//   id: "124",
-//   redirectURI: "/somewhere"
-// })
-// relayrLib.authorize().then(function(user) {
-//   console.log(user);
-// });
+    customAjax(ajaxConfiguration) {
+        return new Ajax(ajaxConfiguration || this.config.ajax);
+    }
+}
