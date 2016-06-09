@@ -8,6 +8,7 @@ class Oauth2 {
     }
 
     login(optUser, ctx) {
+
         if (!this.redirectURI) {
             throw Error('OAuth2 a valid redirect uri must be provided on login');
         } else if (!this.appId) {
@@ -19,6 +20,13 @@ class Oauth2 {
             this.token = storedToken;
             return;
         }
+        try {
+
+            if (this._parseToken(window.location.href)) return;
+        } catch (e) {
+
+        }
+
 
         let authURL = {
             client_id: this.appId,
@@ -51,8 +59,10 @@ class Oauth2 {
         }
 
         this.token = authParams.token_type + ' ' + authParams.access_token;
-        console.log(this.token);
+
         this.setToken(this.token);
+        return this.token;
+
     }
 
     setToken(token) {
