@@ -1,25 +1,42 @@
-class User {
-    constructor(token) {
-        this.token: token,
-        user
-    }
+import Ajax from '../tools/ajax.js'
 
-    getUserById() {
-        this.userId = "123";
-        this.email = "email@relayr.io"
-    }
+export
+default class User {
+  constructor(config) {
+    this.config = config;
+    this.ajax = new Ajax(config.ajax);
+  }
 
-    get token() {
-        return this.token;
-    }
+  getUserInfo() {
+    return new Promise((resolve, reject) => {
+      if (this.userInfo) {
+        resolve(this.userInfo);
+      } else {
+        this.ajax.get("/oauth2/user-info").then((response) => {
+          this.userInfo = response;
+          resolve(response)
+        }).catch((error) => {
+          reject(error);
+        });
 
+      }
+    });
+  }
 
+  getMyDevices() {
+    return new Promise((resolve, reject) => {
+      this.getUserInfo().then(() => {
+        console.log(this.userInfo.id)
+        this.ajax.get(`/users/${this.userInfo.id}/devices`).then((response) => {
+          resolve(response)
+        }).catch((error) => {
+          reject(error);
+        });
+      });
+    })
+
+  }
+  _getConfig() {
+    return this.config;
+  }
 }
-
-module.exports = User;
-
-//getToken
-//setToken
-//hasToken
-//getUserInfo
-//logout
