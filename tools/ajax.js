@@ -47,7 +47,7 @@ default class Ajax {
 
     xhrObject.open(
       options.type,
-      options.url,
+      this.uri + options.url,
       true
     );
 

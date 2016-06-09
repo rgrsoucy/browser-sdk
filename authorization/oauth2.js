@@ -1,6 +1,7 @@
 const TOKEN_KEY = 'relayr_access_token';
 class Oauth2 {
     constructor(options) {
+        this.uri = options.uri || "https://api.relayr.io/";
         this.appId = options.appId;
         this.redirectURI = options.redirectURI;
         this.shouldPersist = options.persist || false;
@@ -24,8 +25,8 @@ class Oauth2 {
             redirect_uri: this.redirectURI,
             scope: 'access-own-user-info+configure-devices'
         };
-
-        let uri = `https://api.relayr.io/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
+        console.log(this.uri)
+        let uri = `${this.uri}oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
         this._loginRedirect(uri);
     }
 

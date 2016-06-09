@@ -3,48 +3,49 @@ import User from '../entities/User';
 
 export
 default class Relayr {
-  constructor(project, customConfig) {
-    this.project = project;
-    this.oauth2;
+    constructor(project, customConfig) {
+        this.project = project;
+        this.oauth2;
 
-    this.config = {
-      mqtt: {
-        endpoint: "tcp://127.0.0.1:1883"
-      },
-      ajax: {
-        uri: "api.relayr.io"
-      }
+        this.config = {
+            mqtt: {
+                endpoint: "tcp://127.0.0.1:1883"
+            },
+            ajax: {
+                uri: "api.relayr.io"
+            }
+        }
+        if (customConfig) {
+            Object.assign(this.config, customConfig);
+        }
+        this.currentUser;
     }
-    if (customConfig) {
-      Object.assign(this.config, customConfig);
+
+    authorize(optionalToken) {
+        return new Promise((resolve, reject) => {
+
+            const oauth2 = new Oauth2({
+                uri: this.config.ajax.uri,
+                appId: this.project.id,
+                redirectURI: this.project.redirectURI,
+            });
+            if (!optionalToken) {
+                oauth2.login();
+                this.config.ajax.token = oauth2.token;
+
+            } else {
+                this.config.ajax.token = optionalToken;
+
+            }
+
+            this.currentUser = new User(this.config);
+            resolve(this.currentUser);
+        });
     }
-    this.currentUser;
-  }
 
-  authorize(optionalToken) {
-    return new Promise((resolve, reject) => {
-
-      const oauth2 = new Oauth2({
-        appId: this.project.id,
-        redirectURI: this.project.redirectURI,
-      });
-      if (!optionalToken) {
-        oauth2.login();
-        this.config.ajax.token = oauth2.token;
-
-      } else {
-        this.config.ajax.token = optionalToken;
-
-      }
-
-      this.currentUser = new User(this.config);
-      resolve(this.currentUser);
-    });
-  }
-
-  getCurrentConfig() {
-    return this.config;
-  }
+    getCurrentConfig() {
+        return this.config;
+    }
 }
 
 // //usage

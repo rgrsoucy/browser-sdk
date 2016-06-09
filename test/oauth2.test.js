@@ -15,6 +15,7 @@ describe('oauth2', function() {
 
     beforeEach(function() {
         let options = {
+            uri: "https://api.relayr.io/",
             appId: 'fakeAppId',
             redirectURI: 'fakeURI'
         };
