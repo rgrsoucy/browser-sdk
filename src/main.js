@@ -3,7 +3,7 @@ import User from '../entities/User';
 
 export
 default class Relayr {
-  constructor(project) {
+  constructor(project, customConfig) {
     this.project = project;
     this.oauth2;
 
@@ -14,6 +14,9 @@ default class Relayr {
       ajax: {
         uri: "api.relayr.io"
       }
+    }
+    if (customConfig) {
+      Object.assign(this.config, customConfig);
     }
     this.currentUser;
   }
@@ -39,13 +42,16 @@ default class Relayr {
     });
   }
 
+  getCurrentConfig() {
+    return this.config;
+  }
 }
 
-//usage
-const relayrLib = new Relayr({
-  id: "124",
-  redirectURI: "/somewhere"
-})
-relayrLib.authorize().then(function(user) {
-  console.log(user);
-});
+// //usage
+// const relayrLib = new Relayr({
+//   id: "124",
+//   redirectURI: "/somewhere"
+// })
+// relayrLib.authorize().then(function(user) {
+//   console.log(user);
+// });
