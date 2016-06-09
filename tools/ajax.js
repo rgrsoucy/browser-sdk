@@ -50,7 +50,7 @@ default class Ajax {
             true
         );
 
-        xhrObject.setRequestHeader('Authorization', options.token);
+        xhrObject.setRequestHeader('Authorization', this.token);
         xhrObject.setRequestHeader('Content-Type', 'application/json');
 
         return new Promise((resolve, reject) => {
