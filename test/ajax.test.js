@@ -41,7 +41,7 @@ describe('Ajax', function() {
     expect(ajaxInstance.token).to.equal("FAKE_TOKEN");
   });
 
-  describe('get', function() {
+  describe('#get', function() {
 
     it('Should return a promise when calling ajaxInstance._xhrRequest()', function(done) {
 
@@ -99,7 +99,173 @@ describe('Ajax', function() {
     });
   });
 
+  describe('#post', function() {
+    it('Should pass the correct options to the _xhrRequest', function() {
 
+      var options = {
+        url: "fakeUrl",
+        type: "POST",
+        post: {
+          thingtopost: 'something'
+        },
+        isObject: true
+      }
+      ajaxInstance.customXHR = this.xhr;
+      ajaxInstance.post("fakeUrl", {
+        thingtopost: 'something'
+      }, null);
 
+      expect(ajaxInstance._xhrRequest).to.have.been.calledWith(options)
+
+    });
+
+    it('Should have url in ajaxInstance.post', function() {
+      var fn = function() {
+        ajaxInstance.post(null);
+      }
+
+      expect(fn).to.throw(Error)
+    });
+
+    it('Should have a string in a url', function() {
+      var fn = function() {
+        ajaxInstance.post(8);
+      }
+
+      expect(fn).to.throw(Error)
+    });
+
+    it('Should return a promise when calling ajaxInstance._xhrRequest()', function(done) {
+
+      var data = {
+        "propertyName": "someName"
+      };
+
+      var dataJson = JSON.stringify(data);
+      ajaxInstance.customXHR = this.xhr;
+      ajaxInstance._xhrRequest({
+        url: "/oauth-userinfo",
+        type: "POST",
+        isObject: true,
+      }, null).then((result) => {
+        expect(result).to.deep.equal(data);
+        done();
+      });
+
+      this.requests[0].respond(200, {
+        'Content-Type': 'text/json'
+      }, dataJson);
+    });
+  });
+  describe('#patch', function() {
+    it('Should pass the correct options to the _xhrRequest', function() {
+
+      var options = {
+        url: "fakeUrl",
+        type: "PATCH",
+        patch: {
+          thingtopatch: 'something'
+        },
+        isObject: true
+      }
+      ajaxInstance.customXHR = this.xhr;
+      ajaxInstance.patch("fakeUrl", {
+        thingtopatch: 'something'
+      }, null);
+
+      expect(ajaxInstance._xhrRequest).to.have.been.calledWith(options)
+
+    });
+
+    it('Should have url in ajaxInstance.patch', function() {
+      var fn = function() {
+        ajaxInstance.patch(null);
+      }
+
+      expect(fn).to.throw(Error)
+    });
+
+    it('Should have a string in a url', function() {
+      var fn = function() {
+        ajaxInstance.patch(8);
+      }
+
+      expect(fn).to.throw(Error)
+    });
+
+    it('Should return a promise when calling ajaxInstance._xhrRequest()', function(done) {
+
+      var data = {
+        "propertyName": "someName"
+      };
+
+      var dataJson = JSON.stringify(data);
+      ajaxInstance.customXHR = this.xhr;
+      ajaxInstance._xhrRequest({
+        url: "/oauth-userinfo",
+        type: "PATCH",
+        isObject: true,
+      }, null).then((result) => {
+        expect(result).to.deep.equal(data);
+        done();
+      });
+
+      this.requests[0].respond(200, {
+        'Content-Type': 'text/json'
+      }, dataJson);
+    });
+  });
+  describe('#delete', function() {
+    it('Should pass the correct options to the _xhrRequest', function() {
+
+      var options = {
+        url: "fakeUrl",
+        type: "DELETE",
+        isObject: true
+      }
+      ajaxInstance.customXHR = this.xhr;
+      ajaxInstance.delete("fakeUrl", null);
+
+      expect(ajaxInstance._xhrRequest).to.have.been.calledWith(options)
+
+    });
+
+    it('Should have url in ajaxInstance.patch', function() {
+      var fn = function() {
+        ajaxInstance.delete(null);
+      }
+      expect(fn).to.throw(Error)
+    });
+
+    it('Should have a string in a url', function() {
+      var fn = function() {
+        ajaxInstance.delete(8);
+      }
+      expect(fn).to.throw(Error)
+    });
+
+    it('Should return a promise when calling ajaxInstance._xhrRequest()', function(done) {
+
+      var data = {
+        "propertyName": "someName"
+      };
+
+      var dataJson = JSON.stringify(data);
+      ajaxInstance.customXHR = this.xhr;
+      ajaxInstance._xhrRequest({
+        url: "/oauth-userinfo",
+        type: "DELETE",
+        isObject: true,
+      }, null).then((result) => {
+        expect(result).to.deep.equal(data);
+        done();
+      });
+
+      this.requests[0].respond(204, {
+        'Content-Type': 'text/json'
+      }, dataJson);
+    });
+
+  });
 
 });
