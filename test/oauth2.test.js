@@ -1,10 +1,15 @@
-import Oauth2 from '../authorization/oauth2.js';
+import mockStorage from 'mock-localstorage';
+let localStorage = new mockStorage();
+global.localStorage = localStorage
 
+import Oauth2 from '../authorization/oauth2.js';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import jsdom from 'mocha-jsdom';
 var expect = chai.expect;
+
+
 chai.use(sinonChai);
 
 let oauthInstance;
@@ -190,7 +195,7 @@ describe('oauth2', function() {
 
         it('should remove the token from local storage', function() {
             oauthInstance.logout();
-            expect(localStorage.getItem('relayr_access_token')).to.be.null;
+            expect(localStorage.getItem('relayr_access_token')).to.be.undefined;
         });
     });
 
