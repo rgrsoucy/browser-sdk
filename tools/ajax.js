@@ -38,12 +38,7 @@ default class Ajax {
 
     _xhrRequest(options, body) {
         let xhrObject;
-        if (this.customXHR) {
-            xhrObject = new this.customXHR;
-        } else {
-            xhrObject = new XMLHttpRequest();
-        }
-
+        xhrObject = new XMLHttpRequest();
         xhrObject.open(
             options.type,
             this.uri + options.url,
