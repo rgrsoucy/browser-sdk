@@ -170,7 +170,7 @@ describe('oauth2', function() {
 
         it('should save token tolocal storage', function() {
             oauthInstance.setToken();
-            expect(localStorage.getItem('relayrToken')).to.equal('A_FAKE_TOKEN');
+            expect(localStorage.getItem("relayr_access_token")).to.equal('A_FAKE_TOKEN');
         });
 
     });
@@ -185,12 +185,12 @@ describe('oauth2', function() {
             oauthInstance = new Oauth2(options);
             oauthInstance.token = 'A_FAKE_TOKEN';
 
-            localStorage.setItem('relayrToken', oauthInstance.token);
+            localStorage.setItem('relayr_access_token', oauthInstance.token);
         });
 
         it('should remove the token from local storage', function() {
             oauthInstance.logout();
-            expect(localStorage.getItem('relayrToken')).to.be.null;
+            expect(localStorage.getItem('relayr_access_token')).to.be.null;
         });
     });
 

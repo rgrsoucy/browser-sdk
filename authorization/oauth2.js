@@ -16,6 +16,7 @@ class Oauth2 {
         }
 
         let storedToken = localStorage.getItem(TOKEN_KEY);
+
         if (this.shouldPersist && storedToken) {
             this.token = storedToken;
             return;
@@ -66,12 +67,12 @@ class Oauth2 {
     }
 
     setToken(token) {
-        localStorage.setItem('relayrToken', this.token);
+        localStorage.setItem(TOKEN_KEY, this.token);
     }
 
 
     logout() {
-        localStorage.removeItem('relayrToken');
+        localStorage.removeItem(TOKEN_KEY);
     }
 
 }

@@ -1,6 +1,6 @@
 import Oauth2 from '../authorization/oauth2';
 import User from '../entities/User';
-import Ajax from '../tools/Ajax';
+import Ajax from '../tools/ajax';
 
 export
 default class Relayr {
@@ -10,7 +10,7 @@ default class Relayr {
 
         this.config = {
             mqtt: {
-                endpoint: "tcp://127.0.0.1:1883"
+                endpoint: "mqtt.relayr.io"
             },
             ajax: {
                 uri: "api.relayr.io"
