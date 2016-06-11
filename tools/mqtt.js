@@ -17,11 +17,20 @@ default class Mqtt {
         this.endpoint = this.config.endpoint;
         this.port = this.config.port
         this.clientId = 'JSDK_' + Math.floor((Math.random() * 1000))
-        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
         this._topics = {};
+        return this;
+
+    }
+
+    init() {
+        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
+        return this;
     }
 
     connect(config) {
+        if (!config) throw Error("You must provide configuration options")
+        if (!config.userName) throw Error("You must provide userName in options")
+        if (!config.password) throw Error("You must provide password in options")
         return new Promise((resolve, reject) => {
 
             let options = {
@@ -29,8 +38,6 @@ default class Mqtt {
                 keepAliveInterval: 10,
                 cleanSession: true,
                 useSSL: true,
-                userName: config.user,
-                password: config.password,
                 onSuccess: () => {
                     this._onConnectSuccess();
                     resolve();
@@ -40,22 +47,25 @@ default class Mqtt {
                     reject();
                 }
             };
-
-            this.client.onConnectionLost = () => {
-                this._onConnectionLost();
-            };
-            this.client.onMessageArrived = (data) => {
-                this._onMessageArrived(data)
-            };
-            this.client.connect(options);
+            Object.assign(this.config, config);
+            if (this.client) {
+                this.client.onConnectionLost = () => {
+                    this._onConnectionLost();
+                };
+                this.client.onMessageArrived = (data) => {
+                    this._onMessageArrived(data)
+                };
+                this.client.connect(options);
+            }
+            resolve();
         });
     }
 
 
     subscribe(topic, eventCallback) {
-        if (this.client.isConnected()) this.client.subscribe(topic, 0);
-
-        console.log(this._topics)
+        if (!topic) throw Error("You must provide a topic")
+        if (!eventCallback) throw Error("You must provide a callback for live events")
+        if (this.client && this.client.isConnected()) this.client.subscribe(topic, 0);
 
         if (this._topics[topic]) {
             this._topics[topic].subscribers.push(eventCallback);
@@ -64,11 +74,10 @@ default class Mqtt {
             this._topics[topic].subscribers = [];
             this._topics[topic].subscribers.push(eventCallback);
         }
-
+        return this
     }
 
     _onConnectSuccess() {
-        console.log("onSuccess", this._topics)
         for (let topic in this._topics) {
             console.log(topic)
             this.client.subscribe(topic, 0)
@@ -81,14 +90,6 @@ default class Mqtt {
 
     _onConnectionLost() {
         console.log('Lost connection');
-        setTimeout(function() {
-            self.client.isConnected = false;
-            self.connect(self.lastParam);
-
-            if (!self.forceDisconnect) {
-                self.connect(self.lastParam);
-            }
-        }, this.config.mqttTimeout);
     }
 
     _onMessageArrived(data) {
@@ -97,7 +98,7 @@ default class Mqtt {
             let dataTopic = data._getDestinationName().split('/v1/')[1];
             let incomingData = (data._getPayloadString());
             incomingData = JSON.parse(data._getPayloadString());
-            console.log(incomingData)
+
             for (let topic in this._topics) {
                 for (var i = this.topics[topic].subscribers - 1; i >= 0; i--) {
                     let subscriber = this.topic[topic].subscribers[i];
