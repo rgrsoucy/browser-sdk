@@ -9,6 +9,7 @@ default class Relayr {
         this.oauth2;
 
         this.config = {
+            persistToken: true,
             mqtt: {
                 endpoint: "mqtt.relayr.io"
             },
@@ -29,7 +30,7 @@ default class Relayr {
                 uri: this.config.ajax.uri,
                 appId: this.project.id,
                 redirectURI: this.project.redirectURI,
-                persist: true
+                persist: this.config.persistToken
             });
             if (!optionalToken) {
                 oauth2.login();
