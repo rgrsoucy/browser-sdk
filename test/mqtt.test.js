@@ -8,13 +8,13 @@ var expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
-let ajaxInstance;
+let mqttInstance;
 
 
 describe('Mqtt', function() {
 
     beforeEach(function() {
-
+        mqttInstance = new Mqtt();
     });
 
     afterEach(function() {

@@ -1,63 +1,82 @@
+import Paho from '../vendors/mqttws31.min.js';
 export
 default class Mqtt {
     constructor(config) {
+        var self = this;
+        this.paho = new Paho;
 
         this.config = {
+            endpoint: "mqtt.relayr.io",
+            port: 443,
             mqttTimeout: 10000
         }
 
         if (config) {
             Object.assign(this.config, config);
         }
-        this.endpoint = options.endpoint;
-        this.port = options.port
+        this.endpoint = this.config.endpoint;
+        this.port = this.config.port
         this.clientId = 'JSDK_' + Math.floor((Math.random() * 1000))
-        this.client = new Paho.MQTT.Client(this.endpoint, this.port, this.clientId);
+        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
         this._topics = {};
-
     }
 
     connect(config) {
-        let options = {
-            timeout: 30,
-            keepAliveInterval: 10,
-            cleanSession: true,
-            useSSL: true,
-            userName: config.user,
-            password: config.password,
-            onSuccess: this._onConnectSuccess,
-            onFailure: this._onConnectFailure
-        };
+        return new Promise((resolve, reject) => {
 
-        this.client.onConnectionLost = _onConnectionLost;
-        this.client.onMessageArrived = _onMessageArrived;
-        this.client.connect(options);
+            let options = {
+                timeout: 30,
+                keepAliveInterval: 10,
+                cleanSession: true,
+                useSSL: true,
+                userName: config.user,
+                password: config.password,
+                onSuccess: () => {
+                    this._onConnectSuccess();
+                    resolve();
+                },
+                onFailure: () => {
+                    this._onConnectFailure()
+                    reject();
+                }
+            };
+
+            this.client.onConnectionLost = () => {
+                this._onConnectionLost();
+            };
+            this.client.onMessageArrived = (data) => {
+                this._onMessageArrived(data)
+            };
+            this.client.connect(options);
+        });
     }
 
 
     subscribe(topic, eventCallback) {
-        this.client.subscribe(topic, 0);
+        if (this.client.isConnected()) this.client.subscribe(topic, 0);
 
-        let thisTopic = this._topics[topic];
-        if (thisTopic) {
-            thisTopic.subscribers.push(eventCallback);
+        console.log(this._topics)
+
+        if (this._topics[topic]) {
+            this._topics[topic].subscribers.push(eventCallback);
         } else {
-            thisTopic.subscribers = [];
+            this._topics[topic] = {};
+            this._topics[topic].subscribers = [];
+            this._topics[topic].subscribers.push(eventCallback);
         }
 
     }
 
     _onConnectSuccess() {
-
-        this.topics.forEach(function(subscription) {
-            this.client.subscribe(subscription.credentials.topic, 0);
-        });
+        console.log("onSuccess", this._topics)
+        for (let topic in this._topics) {
+            console.log(topic)
+            this.client.subscribe(topic, 0)
+        }
     }
 
     _onConnectFailure() {
-        if (!this.forceDisconnect) {
-            this.connect(this.credentials);
-        }
+        console.log("onFailure")
     }
 
     _onConnectionLost() {
@@ -78,7 +97,7 @@ default class Mqtt {
             let dataTopic = data._getDestinationName().split('/v1/')[1];
             let incomingData = (data._getPayloadString());
             incomingData = JSON.parse(data._getPayloadString());
-
+            console.log(incomingData)
             for (let topic in this._topics) {
                 for (var i = this.topics[topic].subscribers - 1; i >= 0; i--) {
                     let subscriber = this.topic[topic].subscribers[i];
