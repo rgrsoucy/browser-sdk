@@ -29,6 +29,7 @@ default class Relayr {
                 uri: this.config.ajax.uri,
                 appId: this.project.id,
                 redirectURI: this.project.redirectURI,
+                persist: true
             });
             if (!optionalToken) {
                 oauth2.login();
