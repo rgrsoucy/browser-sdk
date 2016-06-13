@@ -1,9 +1,8 @@
 import Paho from '../vendors/mqttws31.min.js';
-export
-default class Mqtt {
+
+class Mqtt {
     constructor(config) {
         var self = this;
-        this.paho = new Paho;
 
         this.config = {
             endpoint: "mqtt.relayr.io",
@@ -18,13 +17,16 @@ default class Mqtt {
         this.port = this.config.port
         this.clientId = 'JSDK_' + Math.floor((Math.random() * 1000))
         this._topics = {};
+
+        try {
+            this.paho = new Paho;
+            this._initClient();
+        } catch (e) {
+            //Caught when window is not present
+        }
+
         return this;
 
-    }
-
-    init() {
-        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
-        return this;
     }
 
     connect(config) {
@@ -114,4 +116,12 @@ default class Mqtt {
         }
     }
 
+    _initClient() {
+        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
+        return this;
+    }
+
 }
+
+export
+let mqtt = new Mqtt();
