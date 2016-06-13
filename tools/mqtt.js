@@ -42,12 +42,12 @@ default class Mqtt {
                     this._onConnectSuccess();
                     resolve();
                 },
-                onFailure: () => {
-                    this._onConnectFailure()
+                onFailure: (err) => {
+                    this._onConnectFailure(err)
                     reject();
                 }
             };
-            Object.assign(this.config, config);
+            Object.assign(options, config);
             if (this.client) {
                 this.client.onConnectionLost = () => {
                     this._onConnectionLost();
@@ -84,8 +84,8 @@ default class Mqtt {
         }
     }
 
-    _onConnectFailure() {
-        console.log("onFailure")
+    _onConnectFailure(err) {
+        console.log("onFailure", err)
     }
 
     _onConnectionLost() {
@@ -100,8 +100,8 @@ default class Mqtt {
             incomingData = JSON.parse(data._getPayloadString());
 
             for (let topic in this._topics) {
-                for (var i = this.topics[topic].subscribers - 1; i >= 0; i--) {
-                    let subscriber = this.topic[topic].subscribers[i];
+                for (var i = this._topics[topic].subscribers.length - 1; i >= 0; i--) {
+                    let subscriber = this._topics[topic].subscribers[i];
                     if (subscriber) {
                         subscriber(incomingData);
                     }
