@@ -112,9 +112,9 @@ describe('Device', function() {
 
       deviceInstance.updateDevice(patch, true).then((response) => {
         //console.log(response);
+        expect(patch).to.deep.equal(response);
         done();
       });
-      expect(patch).to.deep.equal(response);
 
       //this is the api
       this.requests[0].respond(200, {
@@ -142,9 +142,10 @@ describe('Device', function() {
       deviceInstance.ajax.customXHR = this.xhr;
       deviceInstance.deleteDevice(data).then((response) => {
         // console.log((deviceInstance === undefined));
+        console.log(response);
+        expect(response).to.be.defined;
         done();
       });
-      expect(deviceInstance).to.be.undefined;
 
       //this is the api
       this.requests[0].respond(204, {
