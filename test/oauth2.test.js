@@ -3,12 +3,16 @@ import Oauth2 from '../authorization/oauth2.js';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import jsdom from 'mocha-jsdom';
 var expect = chai.expect;
 chai.use(sinonChai);
 
 let oauthInstance;
 
 describe('oauth2', function() {
+
+  jsdom();
+
   beforeEach(function() {
     let options = {
       appId: 'fakeAppId',
@@ -111,20 +115,15 @@ describe('oauth2', function() {
     it('should build the redirect from the appID and redirect URI', function() {
       //do we need this?
       let uri = 'https://api.relayr.io/oauth2/auth?client_id=fakeAppId&redirect_uri=fakeURI&response_type=token&scope=access-own-user-info+configure-devices';
-      oauthInstance._loginRedirect(uri)
-      expect(oauthInstance._loginRedirect).to.have.been.calledWith('https://api.relayr.io/oauth2/auth?client_id=fakeAppId&redirect_uri=fakeURI&response_type=token&scope=access-own-user-info+configure-devices')
+      oauthInstance._loginRedirect(uri);
+      expect(oauthInstance._loginRedirect).to.have.been.calledWith('https://api.relayr.io/oauth2/auth?client_id=fakeAppId&redirect_uri=fakeURI&response_type=token&scope=access-own-user-info+configure-devices');
     });
   });
 
   describe('#_parseToken', function() {
     it('should return token provided in URL as a query paramter', function() {
       oauthInstance._parseToken('example.com/oauth#access_token=A_FAKE_TOKEN&token_type=Bearer');
-      expect(oauthInstance.token).to.equal('A_FAKE_TOKEN');
-    });
-
-    it('should return token type provided in URL as a query paramter', function() {
-      oauthInstance._parseToken('example.com/oauth#access_token=A_FAKE_TOKEN&token_type=Bearer');
-      expect(oauthInstance.tokenType).to.equal('Bearer');
+      expect(oauthInstance.token).to.equal('Bearer A_FAKE_TOKEN');
     });
 
     it('should throw an error when the URL is emptys', function() {
@@ -157,8 +156,7 @@ describe('oauth2', function() {
 
   describe('#setToken', function() {
     beforeEach(function() {
-      let token = 'A_FAKE_TOKEN'
-        // localStorage.setItem('relayrToken', token);
+      let token = 'A_FAKE_TOKEN';
 
       let options = {
         appId: 'fakeAppId',
@@ -166,7 +164,7 @@ describe('oauth2', function() {
         persist: true
       };
       oauthInstance = new Oauth2(options);
-      oauthInstance.token = 'A_FAKE_TOKEN'
+      oauthInstance.token = 'A_FAKE_TOKEN';
     });
 
     it('should save token tolocal storage', function() {
@@ -184,7 +182,8 @@ describe('oauth2', function() {
         persist: true
       };
       oauthInstance = new Oauth2(options);
-      oauthInstance.token = 'A_FAKE_TOKEN'
+      oauthInstance.token = 'A_FAKE_TOKEN';
+
       localStorage.setItem('relayrToken', oauthInstance.token);
     });
 

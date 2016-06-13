@@ -26,7 +26,7 @@ default class User {
   getMyDevices() {
     return new Promise((resolve, reject) => {
       this.getUserInfo().then(() => {
-        console.log(this.userInfo.id)
+        // console.log(this.userInfo.id)
         this.ajax.get(`/users/${this.userInfo.id}/devices`).then((response) => {
           resolve(response)
         }).catch((error) => {

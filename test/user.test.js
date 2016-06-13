@@ -30,30 +30,33 @@ describe('User', function() {
     }.bind(this);
 
   });
+  describe('#getUserInfo', function() {
 
-  it('should get the current config', function() {
-    expect(userInstance._getConfig()).to.deep.equal(fakeConfig);
-  });
 
-  it('should resolve a promise with user info', function(done) {
-    let userStub = {
-      id: "123",
-      email: "john@doe",
-      name: "billy"
-    }
+    it('should get the current config', function() {
+      expect(userInstance._getConfig()).to.deep.equal(fakeConfig);
+    });
 
-    userInstance.ajax.customXHR = this.xhr;
-    userInstance.getUserInfo().then((userInfo) => {
-      expect(userInfo).to.deep.equal(userStub);
-      done();
+    it('should resolve a promise with user info', function(done) {
+      let userStub = {
+        id: "123",
+        email: "john@doe",
+        name: "billy"
+      }
+
+      userInstance.ajax.customXHR = this.xhr;
+      userInstance.getUserInfo().then((userInfo) => {
+        expect(userInfo).to.deep.equal(userStub);
+        done();
+      });
+
+
+      this.requests[0].respond(200, {
+        'Content-Type': 'text/json'
+      }, JSON.stringify(userStub));
     });
 
 
-    this.requests[0].respond(200, {
-      'Content-Type': 'text/json'
-    }, JSON.stringify(userStub));
+
   });
-
-
-
 });
