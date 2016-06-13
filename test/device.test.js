@@ -242,9 +242,13 @@ describe('Device', function() {
 
             deviceInstance._channelCredentials = credentialsStub
 
-            deviceInstance.connect(function(sensorData) {
-                expect(sensorData).to.deep.equal(fakeSensorReadings)
-                done();
+            deviceInstance.connect().then((connection) => {
+
+                connection.on("data", (dataStream) => {
+                    console.log("Sensor readings", dataStream)
+                    done();
+                })
+                //expect(sensorData).to.deep.equal(fakeSensorReadings)
             });
 
 

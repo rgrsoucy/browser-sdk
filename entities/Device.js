@@ -1,4 +1,5 @@
 import Ajax from '../tools/ajax.js';
+import Connection from '../tools/connection.js';
 import {
     mqtt
 }
@@ -104,14 +105,22 @@ default class Device {
         });
     }
 
-    connect(eventCallback) {
-        if (!eventCallback) throw Error("You must provide a callback for data")
-        let options = {
-            password: this._channelCredentials.credentials.password,
-            userName: this._channelCredentials.credentials.user
+    connect(transport) {
+        if (!transport) {
+            transport = "mqtt"
         }
-        mqtt.subscribe(this._channelCredentials.credentials.topic, eventCallback);
-        mqtt.connect(options)
+        let connection = new Connection();
+
+        return new Promise((resolve, reject) => {
+            //if (!eventCallback) throw Error("You must provide a callback for data")
+            let options = {
+                password: this._channelCredentials.credentials.password,
+                userName: this._channelCredentials.credentials.user
+            }
+            mqtt.subscribe(this._channelCredentials.credentials.topic, connection.event);
+            mqtt.connect(options)
+            resolve(connection)
+        })
         return this;
     }
 };
