@@ -131,7 +131,3 @@ default class Device {
     //do some mqtt nonsense
   }
 };
-
-// getDeviceState
-// getAllDevices
-// sendCommand
