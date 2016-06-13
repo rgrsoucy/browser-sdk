@@ -79,7 +79,7 @@ describe('User', function() {
 
       this.requests[0].respond(200, {
         'Content-Type': 'text/json'
-      }, JSON.stringify(groupStub));
+      }, JSON.stringify(transmitterStub));
     });
   });
 });
