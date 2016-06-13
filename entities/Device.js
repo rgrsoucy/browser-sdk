@@ -99,7 +99,7 @@ default class Device {
     return new Promise((resolve, reject) => {
       this.ajax.delete(`/devices/${this.deviceId}`, null)
         .then((response) => {
-          //do some stuff with mqtt or some shit?
+          //right now the object hangs around, but on the cloud it is gone
           resolve(response)
         }).catch((error) => {
           reject(error);
