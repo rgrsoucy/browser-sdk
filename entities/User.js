@@ -2,41 +2,41 @@ import Ajax from '../tools/ajax.js'
 
 export
 default class User {
-    constructor(config) {
-        this.config = config;
-        this.ajax = new Ajax(config.ajax);
-    }
+  constructor(config) {
+    this.config = config;
+    this.ajax = new Ajax(config.ajax);
+  }
 
-    getUserInfo() {
-        return new Promise((resolve, reject) => {
-            if (this.userInfo) {
-                resolve(this.userInfo);
-            } else {
-                this.ajax.get("/oauth2/user-info").then((response) => {
-                    this.userInfo = response;
-                    resolve(response)
-                }).catch((error) => {
-                    reject(error);
-                });
-
-            }
+  getUserInfo() {
+    return new Promise((resolve, reject) => {
+      if (this.userInfo) {
+        resolve(this.userInfo);
+      } else {
+        this.ajax.get("/oauth2/user-info").then((response) => {
+          this.userInfo = response;
+          resolve(response)
+        }).catch((error) => {
+          reject(error);
         });
-    }
 
-    getMyDevices() {
-        return new Promise((resolve, reject) => {
-            this.getUserInfo().then(() => {
-                console.log(this.userInfo.id)
-                this.ajax.get(`/users/${this.userInfo.id}/devices`).then((response) => {
-                    resolve(response)
-                }).catch((error) => {
-                    reject(error);
-                });
-            });
-        })
+      }
+    });
+  }
 
-    }
-    _getConfig() {
-        return this.config;
-    }
+  getMyDevices() {
+    return new Promise((resolve, reject) => {
+      this.getUserInfo().then(() => {
+        // console.log(this.userInfo.id)
+        this.ajax.get(`/users/${this.userInfo.id}/devices`).then((response) => {
+          resolve(response)
+        }).catch((error) => {
+          reject(error);
+        });
+      });
+    })
+
+  }
+  _getConfig() {
+    return this.config;
+  }
 }
