@@ -34,8 +34,21 @@ default class User {
         });
       });
     })
-
   }
+
+  getMyGroups() {
+    return new Promise((resolve, reject) => {
+      this.getUserInfo().then(() => {
+        // console.log(this.userInfo.id)
+        this.ajax.get(`/users/${this.userInfo.id}/groups`).then((response) => {
+          resolve(response)
+        }).catch((error) => {
+          reject(error);
+        });
+      });
+    })
+  }
+
   _getConfig() {
     return this.config;
   }
