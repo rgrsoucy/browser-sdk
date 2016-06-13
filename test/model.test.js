@@ -24,7 +24,6 @@ describe('Model', function() {
 
 
     this.xhr = sinon.useFakeXMLHttpRequest();
-    // console.log(this.xhr);
     this.requests = [];
 
     this.xhr.onCreate = function(xhr) {
@@ -77,7 +76,6 @@ describe('Model', function() {
       }]
       modelInstance.ajax.customXHR = this.xhr;
       modelInstance.getAllModels().then((result) => {
-        console.log(result);
         expect(result).to.include(sampleModel[0]);
         done();
       });
