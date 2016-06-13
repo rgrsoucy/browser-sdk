@@ -109,9 +109,10 @@ default class Device {
         if (!transport) {
             transport = "mqtt"
         }
-        let connection = new Connection();
 
-        return new Promise((resolve, reject) => {
+        let connection = new Connection();
+        let getChannel = this.getChannel();
+        let subscribeMqtt = new Promise((resolve, reject) => {
             //if (!eventCallback) throw Error("You must provide a callback for data")
             let options = {
                 password: this._channelCredentials.credentials.password,
@@ -121,6 +122,11 @@ default class Device {
             mqtt.connect(options)
             resolve(connection)
         })
-        return this;
+
+        return new Promise((resolve, reject) => {
+            Promise.all([getChannel, subscribeMqtt]).then((all) => {
+                resolve(all[1])
+            });
+        });
     }
 };

@@ -95,13 +95,14 @@ class Mqtt {
     }
 
     _onMessageArrived(data) {
-        try {
-            let deviceId = data._getDestinationName().split('/v1/')[1].split('/')[0];
-            let dataTopic = data._getDestinationName().split('/v1/')[1];
-            let incomingData = (data._getPayloadString());
-            incomingData = JSON.parse(data._getPayloadString());
 
-            for (let topic in this._topics) {
+        let deviceId = data._getDestinationName().split('/v1/')[1].split('/')[0];
+        let dataTopic = data._getDestinationName().split('/v1/')[1];
+        let incomingData = (data._getPayloadString());
+        incomingData = JSON.parse(data._getPayloadString());
+
+        for (let topic in this._topics) {
+            if (this._topics[topic].subscribers) {
                 for (var i = this._topics[topic].subscribers.length - 1; i >= 0; i--) {
                     let subscriber = this._topics[topic].subscribers[i];
                     if (subscriber) {
@@ -109,11 +110,10 @@ class Mqtt {
                     }
                 }
 
-
             }
-        } catch (err) {
-            console.log('Incoming data function error:', err);
+
         }
+
     }
 
     _initClient() {
