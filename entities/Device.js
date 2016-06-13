@@ -11,54 +11,7 @@ default class Device {
     this.ajax = new Ajax(config.ajax);
   }
 
-
-
-
-  // getAllDevices() {
-  //   if (!(this.userId)) {
-  //     throw new Error('Provide the userId during instantiation');
-  //   }
-  //   return new Promise(function(resolve, reject) {
-  //     let callConfig = {
-  //       url: '/users/' + this.userId + '/devices',
-  //       type: 'GET'
-  //     }
-
-  //     ajax(callConfig).then(
-  //       //get the resolved promise back from ajax with json response text
-  //       function(allDevicesArray) {
-  //         resolve(allDevicesArray)
-  //       }).catch(function(error) {
-  //       reject(error); //if the ajax doesn't resolve right
-  //     });
-  //   });
-  // }
-
-  // getDevice() {
-  //   if (!(this.deviceId)) {
-  //     throw new Error('Provide the userId during instantiation');
-  //   }
-  //   return new Promise(function(resolve, reject) {
-  //     let callConfig = {
-  //       url: '/users/' + this.userId + '/devices',
-  //       type: 'GET'
-  //     }
-
-  //     ajax(callConfig).then(
-  //       //get the resolved promise back from ajax with json response text
-  //       function(allDevicesArray) {
-  //         resolve(allDevicesArray)
-  //       }).catch(function(error) {
-  //       reject(error); //if the ajax doesn't resolve right
-  //     });
-  //   });
-  // }
-
-
-
-
   updateDevice(patch, raw) {
-    //patch: devices/deviceId
     if (!(this.deviceId)) {
       throw new Error('Provide the userId during instantiation');
     } else if (!(patch)) {
@@ -107,7 +60,6 @@ default class Device {
     })
   }
   sendCommand(command, raw) {
-    //patch: devices/deviceId
     if (!(this.deviceId)) {
       throw new Error('Provide the userId during instantiation');
     } else if (!(command)) {
@@ -131,7 +83,3 @@ default class Device {
     //do some mqtt nonsense
   }
 };
-
-// getDeviceState
-// getAllDevices
-// sendCommand

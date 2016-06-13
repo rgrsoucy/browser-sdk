@@ -141,8 +141,6 @@ describe('Device', function() {
 
       deviceInstance.ajax.customXHR = this.xhr;
       deviceInstance.deleteDevice(data).then((response) => {
-        // console.log((deviceInstance === undefined));
-        console.log(response);
         expect(response).to.be.defined;
         done();
       });
