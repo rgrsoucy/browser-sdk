@@ -245,10 +245,10 @@ describe('Device', function() {
             deviceInstance.connect().then((connection) => {
 
                 connection.on("data", (dataStream) => {
-                    console.log("Sensor readings", dataStream)
+
+                    expect(dataStream).to.deep.equal(fakeSensorReadings)
                     done();
                 })
-                //expect(sensorData).to.deep.equal(fakeSensorReadings)
             });
 
 
