@@ -65,7 +65,7 @@ default class Device {
     }
     sendCommand(command, raw) {
         if (!(this.deviceId)) {
-            throw new Error('Provide the userId during instantiation');
+            throw new Error('Provide the deviceId during instantiation');
         } else if (!(command)) {
             throw new Error('Provide a command');
         }
@@ -105,22 +105,19 @@ default class Device {
         });
     }
 
-    connect(transport) {
-        if (!transport) {
-            transport = "mqtt"
-        }
+    connect(transport = 'mqtt') {
 
         let connection = new Connection();
         let getChannel = this.getChannel();
         let subscribeMqtt = new Promise((resolve, reject) => {
-            //if (!eventCallback) throw Error("You must provide a callback for data")
             let options = {
                 password: this._channelCredentials.credentials.password,
                 userName: this._channelCredentials.credentials.user
             }
             mqtt.subscribe(this._channelCredentials.credentials.topic, connection.event);
-            mqtt.connect(options)
-            resolve(connection)
+            mqtt.connect(options).then(() => {
+                resolve(connection)
+            });
         })
 
         return new Promise((resolve, reject) => {
