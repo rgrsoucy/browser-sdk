@@ -1,9 +1,8 @@
 import Paho from '../vendors/mqttws31.min.js';
-export
-default class Mqtt {
+
+class Mqtt {
     constructor(config) {
         var self = this;
-        this.paho = new Paho;
 
         this.config = {
             endpoint: "mqtt.relayr.io",
@@ -18,13 +17,16 @@ default class Mqtt {
         this.port = this.config.port
         this.clientId = 'JSDK_' + Math.floor((Math.random() * 1000))
         this._topics = {};
+
+        try {
+            this.paho = new Paho;
+            this._initClient();
+        } catch (e) {
+            //Caught when window is not present
+        }
+
         return this;
 
-    }
-
-    init() {
-        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
-        return this;
     }
 
     connect(config) {
@@ -93,13 +95,14 @@ default class Mqtt {
     }
 
     _onMessageArrived(data) {
-        try {
-            let deviceId = data._getDestinationName().split('/v1/')[1].split('/')[0];
-            let dataTopic = data._getDestinationName().split('/v1/')[1];
-            let incomingData = (data._getPayloadString());
-            incomingData = JSON.parse(data._getPayloadString());
 
-            for (let topic in this._topics) {
+        let deviceId = data._getDestinationName().split('/v1/')[1].split('/')[0];
+        let dataTopic = data._getDestinationName().split('/v1/')[1];
+        let incomingData = (data._getPayloadString());
+        incomingData = JSON.parse(data._getPayloadString());
+
+        for (let topic in this._topics) {
+            if (this._topics[topic].subscribers) {
                 for (var i = this._topics[topic].subscribers.length - 1; i >= 0; i--) {
                     let subscriber = this._topics[topic].subscribers[i];
                     if (subscriber) {
@@ -107,11 +110,18 @@ default class Mqtt {
                     }
                 }
 
-
             }
-        } catch (err) {
-            console.log('Incoming data function error:', err);
+
         }
+
+    }
+
+    _initClient() {
+        this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
+        return this;
     }
 
 }
+
+export
+let mqtt = new Mqtt();
