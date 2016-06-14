@@ -7,10 +7,16 @@ default class Ajax {
         this.customXHR;
     }
 
+    get(url, raw, queryObj) {
+        if (!url) {
+            throw new Error('Please provide atleast a url');
+        }
+        if (typeof(url) !== "string") {
+            throw new Error('Please provide a string url');
+        }
 
-    get(url, raw) {
-        if (!url) throw new Error('Please provide atleast a url');
-        if (typeof(url) !== "string") throw new Error('Please provide a string url');
+
+        url += this._serializeQueryStr(queryObj);
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
@@ -79,6 +85,21 @@ default class Ajax {
                 reject(xhrObject);
             });
         });
+    }
+
+    _serializeQueryStr(obj) {
+        var str = [];
+
+        if (!obj || Object.keys(obj).length === 0) {
+            return '';
+        }
+
+        for (var p in obj) {
+            if (obj.hasOwnProperty(p)) {
+                str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
+            }
+        }
+        return '?' + str.join('&');
     }
 
     _xhrRequest(options, body) {

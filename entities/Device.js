@@ -4,6 +4,7 @@ import {
     mqtt
 }
 from '../tools/mqtt';
+
 export
 default class Device {
     constructor(config) {
@@ -57,11 +58,11 @@ default class Device {
             this.ajax.delete(`/devices/${this.deviceId}`, null)
                 .then((response) => {
                     //right now the object hangs around, but on the cloud it is gone
-                    resolve(response)
+                    resolve(response);
                 }).catch((error) => {
                     reject(error);
                 });
-        })
+        });
     }
     sendCommand(command, raw) {
         if (!(this.deviceId)) {
@@ -81,7 +82,7 @@ default class Device {
                 }).catch((error) => {
                     reject(error);
                 });
-        })
+        });
     }
 
     getChannel(transport) {
