@@ -17,7 +17,7 @@ const fakeConfig = {
     deviceId: 'fakeDeviceId',
     ajax: {
         url: 'fakeURL',
-        dataUrl: 'http://test-data.example.com',
+        dataUri: 'http://test-data.example.com',
         token: '12345',
         tokenType: 'Bearer'
     }

@@ -15,12 +15,13 @@ default class Relayr {
         this.config = {
             persistToken: true,
             mqtt: {
-                endpoint: "mqtt.relayr.io"
+                endpoint: 'mqtt.relayr.io'
             },
             ajax: {
-                uri: "api.relayr.io"
+                uri: 'api.relayr.io',
+                dataUri: 'data-api.relayr.io'
             }
-        }
+        };
         if (customConfig) {
             Object.assign(this.config, customConfig);
         }
