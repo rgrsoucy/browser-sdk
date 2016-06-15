@@ -1,5 +1,6 @@
 import Ajax from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
+import DeviceHistory from './history/DeviceHistory';
 import {
     mqtt
 }
@@ -14,6 +15,7 @@ default class Device {
         this.owner = config.owner;
         this.openToPublic = config.public;
         this.ajax = new Ajax(config.ajax);
+        this.history = new DeviceHistory(config);
     }
 
     updateDevice(patch, raw) {
@@ -43,6 +45,10 @@ default class Device {
                     reject(error);
                 });
         });
+    }
+
+    getHistoricalData(opts) {
+        return this.history.getHistoricalData(opts);
     }
 
     deleteDevice(raw) {

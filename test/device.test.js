@@ -3,6 +3,7 @@ import {
 }
 from '../tools/mqtt';
 import Device from '../entities/Device.js';
+import DeviceHistory from '../entities/history/DeviceHistory.js';
 
 import chai from 'chai';
 import sinon from 'sinon';
@@ -290,5 +291,28 @@ describe('Device', function() {
 
 
     // });
+
+    describe('getHistoricalData', function() {
+        let sandbox;
+        beforeEach(function() {
+            sandbox = sinon.sandbox.create();
+            sandbox.spy(deviceInstance.history, 'getHistoricalData');
+        });
+
+        afterEach(function() {
+            sandbox.restore();
+        });
+
+        it('create a instance of device history ', function() {
+            expect(deviceInstance.history).to.be.instanceof(DeviceHistory);
+        })
+
+        it('should get historical data from device history object', function() {
+            deviceInstance.getHistoricalData({ period: '1m' });
+
+            expect(deviceInstance.history.getHistoricalData).to.have.been.calledOnce;
+            expect(deviceInstance.history.getHistoricalData).to.have.been.calledWith({ period: '1m' });
+        });
+    });
 
 });

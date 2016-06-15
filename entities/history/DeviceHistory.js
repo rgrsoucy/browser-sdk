@@ -1,39 +1,6 @@
 import Ajax from '../../tools/ajax.js';
 import sampleCalculator from './sampleCalculator';
-
-class DeviceHistoryPoints {
-    constructor(response) {
-        if (!response.results) { return {}; }
-
-        let devicesPoints = {};
-
-        response.results.forEach((res) => {
-            var key = this._getKey(res.meaning, res.path);
-            if (devicesPoints[key]) {
-                devicesPoints[key].points = devicesPoints[key].points.concat(res.points);
-            } else {
-                devicesPoints[key] = res;
-            }
-        });
-
-        this.devicesPoints = devicesPoints;
-    }
-
-    _getKey(meaning, path) {
-        if (!path || path === 'null') {
-            return meaning;
-        }
-
-        if (!meaning || meaning === 'null') {
-            return path;
-        }
-        return `${meaning}-${path}`;
-    }
-
-    get(meaning, path) {
-        return this.devicesPoints[this._getKey(meaning, path)];
-    }
-}
+import DeviceHistoryPoints from './DeviceHistoryPoints';
 
 export default class DeviceHistory {
     constructor(config) {
@@ -72,7 +39,7 @@ export default class DeviceHistory {
         return new Promise((resolve, reject) => {
             this.ajax.get(`${this.dataUrl}/history/devices/${this.deviceId}`, true, queryParams).then(function(response) {
                 resolve({
-                    points: new DeviceHistoryPoints(response),
+                    points: new DeviceHistoryPoints(response.results),
                     response: response
                 });
             }, reject);
