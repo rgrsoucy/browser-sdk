@@ -11,9 +11,12 @@ let cache = {
 
 export
 default class Model {
-    constructor(config) {
+    constructor(modelId = null, config) {
         this.config = config;
         this.ajax = new Ajax(config.ajax);
+        if (modelId) {
+            this.modelId = modelId
+        }
     }
 
     getAllModels() {
@@ -21,7 +24,7 @@ default class Model {
             if (cache.public.toArray.length > 0) {
                 resolve(cache.public.toArray);
             } else {
-                this.ajax.get('device-models?limit=100000', null).then((response) => {
+                this.ajax.get('device-models?limit=100000', null, "application/hal+json").then((response) => {
                     cache.public.toArray = response.models
                     this._makeDictionary(cache.public.toArray);
                     resolve(cache.public.toArray)
@@ -33,19 +36,33 @@ default class Model {
     }
 
     getModel(modelId) {
-        return new Promise((resolve, reject) => {
+        if (this.modelId && !modelId) {
+            modelId = this.modelId;
+        }
 
-            if (cache.public.toArray.length > 0) {
-                resolve(cache.public.toDictionary[modelId]);
+        if (cache.public.toArray.length > 0) {
 
-            } else {
-                this.getAllModels().then(() => {
-                    this.getModel(modelId).then((model) => {
-                        resolve(model)
-                    });
+            return new Promise((resolve, reject) => {
+                resolve(cache.public.toDictionary[modelId] || null);
+            })
+        } else {
+            return new Promise((resolve, reject) => {
+                if (!cache.public.fetching) cache.public.fetching = this.getAllModels();
+                cache.public.fetching.then((response) => {
+                    cache.public.fetching = null;
+                    resolve(this._getModelById(modelId));
                 });
-            }
-        });
+            });
+
+        }
+    }
+
+    _getModelById(modelId) {
+        if (cache.public.toArray.length > 0) {
+            return (cache.public.toDictionary[modelId] || null);
+        } else {
+            return null
+        }
     }
 
     _getPublicModelsFromArray() {
@@ -57,6 +74,9 @@ default class Model {
     }
 
     _makeDictionary(modelsArray) {
+        if (!modelsArray) {
+            return;
+        }
         if (!cache.public.toDictionary) cache.public.toDictionary = {};
         var len = modelsArray.length;
         let i = 0;

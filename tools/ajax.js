@@ -93,11 +93,11 @@ default class Ajax {
 
         xhrObject.open(
             options.type,
-            options.url,
+            this.uri + options.url,
             true
         );
 
-        xhrObject.setRequestHeader('Authorization', options.token);
+        xhrObject.setRequestHeader('Authorization', this.token);
         xhrObject.setRequestHeader('Content-Type', options.contentType);
 
         return new Promise((resolve, reject) => {

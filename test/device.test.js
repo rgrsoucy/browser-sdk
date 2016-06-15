@@ -13,17 +13,11 @@ chai.use(sinonChai);
 let mqttSingleton = mqtt;
 let deviceInstance;
 let fakeConfig;
-// let deviceStub;
-// let fakeResolved;
+let fakeDevice;
 
 describe('Device', function() {
     beforeEach(function() {
         fakeConfig = {
-            deviceId: 'fakeDeviceId',
-            name: 'fakeDeviceName',
-            model: 'fakeModel',
-            owner: 'fakeOwner',
-            openToPublic: false,
             ajax: {
                 url: 'fakeURL',
                 token: '12345',
@@ -31,20 +25,15 @@ describe('Device', function() {
             }
         };
 
-        // deviceStub = {
-        //   deviceId: 'fakeDeviceId',
-        //   name: 'newFakeDeviceName',
-        //   model: 'fakeModel',
-        //   owner: 'fakeOwner',
-        //   openToPublic: true,
-        //   ajax: {
-        //     url: 'fakeURL',
-        //     token: '12345',
-        //     tokenType: 'Bearer'
-        //   }
-        // };
+        fakeDevice = {
+            id: 'fake1234abcds',
+            name: 'fakeDeviceName',
+            modelId: 'fakeModel',
+            owner: 'fakeOwner',
+            openToPublic: false,
+        }
 
-        deviceInstance = new Device(fakeConfig);
+        deviceInstance = new Device(fakeDevice, fakeConfig);
 
         this.xhr = sinon.useFakeXMLHttpRequest();
         // console.log(this.xhr);
@@ -54,23 +43,12 @@ describe('Device', function() {
             this.requests.push(xhr);
         }.bind(this);
 
-
-
-        // fakeResolved = function(value) {
-        //   return {
-        //     then: function(callback) {
-        //       callback(deviceStub);
-        //     }
-        //   }
-        // }
-        // sinon.stub(deviceInstance.ajax, "patch").returns(fakeResolved(deviceStub));
-
     });
 
     describe('#updateDevice', function() {
         // beforeEach(function() {});
 
-        it('should throw an error if no deviceId given to look up', function() {
+        it('should throw an error if no device id given to look up', function() {
             deviceInstance.deviceId = null;
             var fn = function() {
                 deviceInstance.updateDevice();
@@ -132,8 +110,8 @@ describe('Device', function() {
     });
 
     describe('#deleteDevice', function() {
-        it('should throw an error if no deviceId given to look up', function() {
-            deviceInstance.deviceId = null;
+        it('should throw an error if no device Id given to look up', function() {
+            deviceInstance.id = null;
             var fn = function() {
                 deviceInstance.deleteDevice();
             };
@@ -159,7 +137,7 @@ describe('Device', function() {
 
     describe('#sendCommand', function() {
 
-        it('should throw an error if no deviceId given to look up', function() {
+        it('should throw an error if no device Id given to look up', function() {
             deviceInstance.deviceId = null;
             var fn = function() {
                 deviceInstance.sendCommand();
@@ -201,7 +179,7 @@ describe('Device', function() {
         it('should give back channel credentials', function(done) {
             let credentialsStub = {
                 "channelId": "50a66b82-cb538",
-                "deviceId": "1234",
+                "id": "1234",
                 "credentials": {
                     "user": "2b6:3b383d97-82dc6a",
                     "password": "vcGqoSr",
@@ -210,7 +188,7 @@ describe('Device', function() {
                 }
             }
 
-            deviceInstance.deviceId = "1234"
+            deviceInstance.id = "1234"
 
             deviceInstance.getChannel().then((credentials) => {
                 expect(credentials).to.deep.equal(credentialsStub);
@@ -268,7 +246,7 @@ describe('Device', function() {
 
     //   });
 
-    //   it('should throw an error if no deviceId given to look up', function() {
+    //   it('should throw an error if no device Id given to look up', function() {
     //     deviceInstance.deviceId = null;
     //     var fn = function() {
     //       deviceInstance.getDevice();

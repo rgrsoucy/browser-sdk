@@ -29,7 +29,7 @@ describe('Model', function() {
             }
         };
 
-        modelInstance = new Model(fakeConfig);
+        modelInstance = new Model(null, fakeConfig);
 
 
         this.xhr = sinon.useFakeXMLHttpRequest();
@@ -45,7 +45,6 @@ describe('Model', function() {
         cache.public.toArray = [];
         cache.public.toDictionary = {};
     });
-
 
     describe('#getAllModels', function() {
         it('should return an object of models available on the platform', function(done) {
@@ -110,6 +109,22 @@ describe('Model', function() {
             let modelId = "85dad151-e0e1-407b-9ec8-25f28de92849"
             modelInstance.getModel(modelId).then((result) => {
                 expect(result.id).to.equal(modelId)
+                done();
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleModel));
+
+        });
+
+        it('should return null when model is not found', function(done) {
+
+            let sampleModel = relayrMockModels;
+            let modelId = "oh.noes.im.a.model.now.:("
+            modelInstance.getModel(modelId).then((model) => {
+                console.log(model, "here")
+                expect(model).to.be.null;
                 done();
             });
 
