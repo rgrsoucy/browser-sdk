@@ -291,5 +291,4 @@ describe('Device', function() {
 
     // });
 
-
 });

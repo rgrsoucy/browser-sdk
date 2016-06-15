@@ -42,12 +42,7 @@ default class Device {
                 }).catch((error) => {
                     reject(error);
                 });
-        })
-    }
-
-
-    getDeviceState() {
-
+        });
     }
 
     deleteDevice(raw) {
