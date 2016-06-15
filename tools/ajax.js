@@ -8,7 +8,7 @@ default class Ajax {
     }
 
 
-    get(url, raw) {
+    get(url, raw, contentType = 'application/json') {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -16,7 +16,8 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: "GET",
                 url: url,
-                isObject: raw || true
+                isObject: raw || true,
+                contentType: contentType
             }).then((result) => {
                 resolve(result);
             }).catch((xhrObject) => {
@@ -25,7 +26,7 @@ default class Ajax {
         });
     }
 
-    post(url, post, raw) {
+    post(url, post, raw, contentType = 'application/json') {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -34,7 +35,8 @@ default class Ajax {
                 type: "POST",
                 url: url,
                 post: post,
-                isObject: raw || true
+                isObject: raw || true,
+                contentType: contentType
             }).then((result) => {
                 resolve(result);
 
@@ -44,7 +46,7 @@ default class Ajax {
         });
     }
 
-    patch(url, patch, raw) {
+    patch(url, patch, raw, contentType = 'application/json') {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -53,7 +55,8 @@ default class Ajax {
                 type: "PATCH",
                 url: url,
                 patch: patch,
-                isObject: raw || true
+                isObject: raw || true,
+                contentType: contentType
             }).then((result) => {
                 resolve(result);
 
@@ -63,7 +66,7 @@ default class Ajax {
         });
     }
 
-    delete(url, raw) {
+    delete(url, raw, contentType = 'application/json') {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -71,7 +74,8 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: "DELETE",
                 url: url,
-                isObject: raw || true
+                isObject: raw || true,
+                contentType: contentType
             }).then((result) => {
                 resolve(result);
 
@@ -82,10 +86,10 @@ default class Ajax {
     }
 
     _xhrRequest(options, body) {
+
         let xhrObject;
 
         xhrObject = new XMLHttpRequest();
-
 
         xhrObject.open(
             options.type,
@@ -93,9 +97,8 @@ default class Ajax {
             true
         );
 
-
         xhrObject.setRequestHeader('Authorization', options.token);
-        xhrObject.setRequestHeader('Content-Type', 'application/json');
+        xhrObject.setRequestHeader('Content-Type', options.contentType);
 
         return new Promise((resolve, reject) => {
 

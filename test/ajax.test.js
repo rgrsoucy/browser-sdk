@@ -18,7 +18,7 @@ describe('Ajax', function() {
         let options = {
             tokenType: "Bearer",
             token: "FAKE_TOKEN",
-            uri: null
+            uri: null,
         }
 
         ajaxInstance = new Ajax(options);
@@ -57,14 +57,14 @@ describe('Ajax', function() {
             ajaxInstance._xhrRequest({
                 url: "/oauth-userinfo",
                 type: "GET",
-                isObject: true,
+                isObject: true
             }, null).then((result) => {
                 expect(result).to.deep.equal(data);
                 done();
             });
 
             this.requests[0].respond(200, {
-                'Content-Type': 'text/json'
+                'Content-Type': 'application/json'
             }, dataJson);
         });
 
@@ -74,7 +74,8 @@ describe('Ajax', function() {
             var options = {
                 url: "/oauth-userinfo",
                 type: "GET",
-                isObject: true
+                isObject: true,
+                contentType: 'application/json'
             }
 
             ajaxInstance.get("/oauth-userinfo");
