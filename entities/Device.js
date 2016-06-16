@@ -100,7 +100,7 @@ default class Device {
             } else {
 
                 let body = {
-                    id: this.deviceId,
+                    deviceId: this.deviceId,
                     transport: transport || "mqtt"
                 }
                 this.ajax.post(`/channels`, body)
@@ -115,23 +115,22 @@ default class Device {
     }
 
     connect(transport = 'mqtt') {
-
         let connection = new Connection();
         let getChannel = this.getChannel();
-        let subscribeMqtt = new Promise((resolve, reject) => {
+
+        var subscribeMqtt = () => {
             let options = {
                 password: this._channelCredentials.credentials.password,
                 userName: this._channelCredentials.credentials.user
-            }
+            };
             mqtt.subscribe(this._channelCredentials.credentials.topic, connection.event);
-            mqtt.connect(options).then(() => {
-                resolve(connection)
-            });
-        })
+
+            return mqtt.connect(options);
+        };
 
         return new Promise((resolve, reject) => {
-            Promise.all([getChannel, subscribeMqtt]).then((all) => {
-                resolve(all[1])
+            getChannel.then(subscribeMqtt).then(function() {
+                resolve(connection);
             });
         });
     }
