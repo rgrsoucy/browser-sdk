@@ -5,6 +5,8 @@ from '../tools/mqtt';
 import Device from '../entities/Device.js';
 import DeviceHistory from '../entities/history/DeviceHistory.js';
 
+import readingFixture from './fixtures/devices/readings.fixture';
+
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -366,9 +368,56 @@ describe('Device', function() {
                 done()
             });
 
+<<<<<<< HEAD
             this.requests[0].respond(204, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(credentialsStub));
         });
     });
 });
+=======
+    describe('#getReadings', function() {
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.deviceId = null;
+            var fn = function() {
+                deviceInstance.getReadings();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should get the data from the device/readings resource', function() {
+            deviceInstance.getReadings();
+            expect(this.requests[0].url).to.contain('/devices/fakeDeviceId/readings');
+        });
+
+        describe('on success', function() {
+            it('should resolve promise with the list of the readings', function(done) {
+                deviceInstance.getReadings().then(function(response) {
+                    expect(response).to.be.deep.equal(readingFixture);
+                    done();
+                });
+
+                this.requests[0].respond(200, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify(readingFixture));
+            });
+        });
+
+        describe('on failure', function() {
+            it('should fail promise error message', function() {
+                deviceInstance.getReadings().then(() => {}, function(d) {
+                    expect(JSON.parse(d.response).message).to.be.deep.equal('oh noes');
+                    done();
+                });
+
+                this.requests[0].respond(404, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify({
+                    message: 'oh noes'
+                }));
+            });
+        });
+    });
+
+});
+>>>>>>> 2.0.0-dev-readings

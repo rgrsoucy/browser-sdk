@@ -51,6 +51,13 @@ default class Device {
         return this.history.getHistoricalData(opts);
     }
 
+    getReadings() {
+        if (!(this.deviceId)) {
+            throw new Error('Provid a device id');
+        }
+        return this.ajax.get(`${this.ajax.uri}/devices/${this.deviceId}/readings`);
+    }
+
     deleteDevice(raw) {
         if (!(this.deviceId)) {
             throw new Error('Provide the userId during instantiation');
