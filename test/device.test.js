@@ -308,11 +308,67 @@ describe('Device', function() {
         })
 
         it('should get historical data from device history object', function() {
-            deviceInstance.getHistoricalData({ period: '1m' });
+            deviceInstance.getHistoricalData({
+                period: '1m'
+            });
 
             expect(deviceInstance.history.getHistoricalData).to.have.been.calledOnce;
-            expect(deviceInstance.history.getHistoricalData).to.have.been.calledWith({ period: '1m' });
+            expect(deviceInstance.history.getHistoricalData).to.have.been.calledWith({
+                period: '1m'
+            });
         });
     });
+    describe('#getDeviceState', function() {
 
+        let sampleState = {
+            "readings": [{
+                "path": "",
+                "meaning": "",
+                "value": "",
+                "received": 12345
+            }],
+            "version": {
+                "commands": {
+                    "number": 0,
+                    "ts": 12345
+                },
+                "configurations": {
+                    "number": 0,
+                    "ts": 12345
+                },
+                "readings": {
+                    "number": 0,
+                    "ts": 12345
+                },
+                "metadata": {
+                    "number": 0,
+                    "ts": 12345
+                }
+            },
+            "metadata": {},
+            "configurations": [],
+            "commands": []
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.deviceId = null;
+            var fn = function() {
+                deviceInstance.getDeviceState();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing state', function(done) {
+            let response;
+
+            deviceInstance.getDeviceState().then((response) => {
+                expect(response).to.deep.equal(sampleState);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(credentialsStub));
+        });
+    });
 });

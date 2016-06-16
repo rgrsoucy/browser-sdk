@@ -128,4 +128,49 @@ default class Device {
             });
         });
     }
+    getDeviceState() {
+        if (!(this.deviceId)) {
+            throw new Error('Provide the deviceId during instantiation');
+        }
+        return new Promise((resolve, reject) => {
+            this.ajax.get(`/devices/${this.deviceId}/state`, raw)
+                .then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
+    }
+
+    getDeviceConfigurations() {
+        // api/devices/deviceId/configurations
+    }
+
+    setDeviceConfigurations() {
+        // api/devices/deviceId/configurations
+        //POST
+    }
+
+    getDeviceCommands() {
+        // api/devices/deviceId/commands
+    }
+
+    setDeviceCommands() {
+        // api/devices/deviceId/commands
+        //POST
+    }
+
+    getDeviceMetadata() {
+        // api/devices/deviceId/metadata
+    }
+
+    setDeviceMetadata() {
+        // api/devices/deviceId/metadata
+        //POST
+    }
+
+    deleteDeviceMetadata() {
+        // api/devices/deviceId/metadata
+        //DELETE
+    }
 };
