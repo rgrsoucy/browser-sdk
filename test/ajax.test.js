@@ -98,6 +98,51 @@ describe('Ajax', function() {
 
             expect(fn).to.throw(Error)
         });
+
+        it('Should throw an error upon server response 4xx', function(done) {
+
+            var data = {
+                "id": "a3aad38e-55db-4c59-bb82-d98b38fc2b83",
+                "name": "John Smith",
+                "email": "test_user@relayr.io"
+            };
+
+            var dataJson = JSON.stringify(data);
+            var config = {
+                url: "/oauth-userinfo",
+                type: "GET",
+                isObject: true,
+            }
+
+            expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
+            this.requests[0].respond(404, {});
+        });
+
+        it('Should throw an error upon server response 5xx', function(done) {
+
+            var data = {
+                "id": "a3aad38e-55db-4c59-bb82-d98b38fc2b83",
+                "name": "John Smith",
+                "email": "test_user@relayr.io"
+            };
+
+            var dataJson = JSON.stringify(data);
+            var config = {
+                url: "/oauth-userinfo",
+                type: "GET",
+                isObject: true,
+            }
+
+            expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
+            this.requests[0].respond(500, {});
+        });
+
+
+
+
+
+
+
     });
 
 

@@ -102,6 +102,7 @@ default class Ajax {
             xhrObject.onreadystatechange = function() {
                 if (xhrObject.readyState === 4) {
                     if (xhrObject.status > 199 && xhrObject.status < 299) {
+                        //2xx success
                         if (options.isObject) {
 
                             resolve(JSON.parse(xhrObject.responseText));
@@ -109,9 +110,13 @@ default class Ajax {
 
                             resolve(xhrObject.responseText);
                         }
-                    }
-                    if (xhrObject.status > 399 && xhrObject.status < 600) {
-
+                    } else if (xhrObject.status > 399 && xhrObject.status < 499) {
+                        //4xx client error
+                        console.log('there seems to be a problem on the client side');
+                        reject(xhrObject);
+                    } else if (xhrObject.status > 499) {
+                        //5xx server error
+                        console.log('there seems to be a problem on the server side');
                         reject(xhrObject);
                     }
                 }
