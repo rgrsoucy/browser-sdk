@@ -98,9 +98,39 @@ describe('Ajax', function() {
 
             expect(fn).to.throw(Error)
         });
+
+        describe('query parameters', function() {
+            it('should create a query params string of query object', function() {
+                ajaxInstance.get('/test', true, {
+                    one: 1,
+                    two: 2,
+                    three: 3
+                });
+
+                expect(this.requests[0].url).to.contain('?one=1&two=2&three=3');
+            });
+
+            it('should URI encode all query parameters', function() {
+                ajaxInstance.get('/test', true, {
+                    complicated: '-- test *'
+                });
+
+                expect(this.requests[0].url).to.contain('?complicated=--%20test%20*');
+            });
+
+            it('should not add any query string if no query parameter object was provided', function() {
+                ajaxInstance.get('/test', true);
+
+                expect(this.requests[0].url).to.not.contain('?');
+            });
+
+            it('should not add any query string if the query parameter objec is empty', function() {
+                ajaxInstance.get('/test', true, {});
+
+                expect(this.requests[0].url).to.not.contain('?');
+            });
+        });
     });
-
-
 
 
 });

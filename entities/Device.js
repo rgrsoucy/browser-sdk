@@ -1,9 +1,11 @@
 import Ajax from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
+import DeviceHistory from './history/DeviceHistory';
 import {
     mqtt
 }
 from '../tools/mqtt';
+
 export
 default class Device {
     constructor(config) {
@@ -13,6 +15,7 @@ default class Device {
         this.owner = config.owner;
         this.openToPublic = config.public;
         this.ajax = new Ajax(config.ajax);
+        this.history = new DeviceHistory(config);
     }
 
     updateDevice(patch, raw) {
@@ -41,12 +44,11 @@ default class Device {
                 }).catch((error) => {
                     reject(error);
                 });
-        })
+        });
     }
 
-
-    getDeviceState() {
-
+    getHistoricalData(opts) {
+        return this.history.getHistoricalData(opts);
     }
 
     deleteDevice(raw) {
@@ -57,11 +59,11 @@ default class Device {
             this.ajax.delete(`/devices/${this.deviceId}`, null)
                 .then((response) => {
                     //right now the object hangs around, but on the cloud it is gone
-                    resolve(response)
+                    resolve(response);
                 }).catch((error) => {
                     reject(error);
                 });
-        })
+        });
     }
     sendCommand(command, raw) {
         if (!(this.deviceId)) {
@@ -81,7 +83,7 @@ default class Device {
                 }).catch((error) => {
                     reject(error);
                 });
-        })
+        });
     }
 
     getChannel(transport) {
