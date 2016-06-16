@@ -135,12 +135,13 @@ default class Device {
             });
         });
     }
+
     getDeviceState() {
         if (!(this.deviceId)) {
             throw new Error('Provide the deviceId during instantiation');
         }
         return new Promise((resolve, reject) => {
-            this.ajax.get(`/devices/${this.deviceId}/state`, raw)
+            this.ajax.get(`/devices/${this.deviceId}/state`, null)
                 .then((response) => {
                     resolve(response);
                 }).catch((error) => {
@@ -151,6 +152,17 @@ default class Device {
 
     getDeviceConfigurations() {
         // api/devices/deviceId/configurations
+        if (!(this.deviceId)) {
+            throw new Error('Provide the deviceId during instantiation');
+        }
+        return new Promise((resolve, reject) => {
+            this.ajax.get(`/devices/${this.deviceId}/configurations`, null)
+                .then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 
     setDeviceConfigurations() {
@@ -160,6 +172,17 @@ default class Device {
 
     getDeviceCommands() {
         // api/devices/deviceId/commands
+        if (!(this.deviceId)) {
+            throw new Error('Provide the deviceId during instantiation');
+        }
+        return new Promise((resolve, reject) => {
+            this.ajax.get(`/devices/${this.deviceId}/commands`, null)
+                .then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 
     setDeviceCommands() {
@@ -169,6 +192,17 @@ default class Device {
 
     getDeviceMetadata() {
         // api/devices/deviceId/metadata
+        if (!(this.deviceId)) {
+            throw new Error('Provide the deviceId during instantiation');
+        }
+        return new Promise((resolve, reject) => {
+            this.ajax.get(`/devices/${this.deviceId}/metadata`, null)
+                .then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 
     setDeviceMetadata() {
@@ -179,5 +213,17 @@ default class Device {
     deleteDeviceMetadata() {
         // api/devices/deviceId/metadata
         //DELETE
+        if (!(this.deviceId)) {
+            throw new Error('Provide the userId during instantiation');
+        }
+        return new Promise((resolve, reject) => {
+            this.ajax.delete(`/devices/${this.deviceId}/metadata`, null)
+                .then((response) => {
+                    //right now the object hangs around, but on the cloud it is gone
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 };

@@ -320,6 +320,50 @@ describe('Device', function() {
             });
         });
     });
+
+    describe('#getReadings', function() {
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.deviceId = null;
+            var fn = function() {
+                deviceInstance.getReadings();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should get the data from the device/readings resource', function() {
+            deviceInstance.getReadings();
+            expect(this.requests[0].url).to.contain('/devices/fakeDeviceId/readings');
+        });
+
+        describe('on success', function() {
+            it('should resolve promise with the list of the readings', function(done) {
+                deviceInstance.getReadings().then(function(response) {
+                    expect(response).to.be.deep.equal(readingFixture);
+                    done();
+                });
+
+                this.requests[0].respond(200, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify(readingFixture));
+            });
+        });
+
+        describe('on failure', function() {
+            it('should fail promise error message', function() {
+                deviceInstance.getReadings().then(() => {}, function(d) {
+                    expect(JSON.parse(d.response).message).to.be.deep.equal('oh noes');
+                    done();
+                });
+
+                this.requests[0].respond(404, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify({
+                    message: 'oh noes'
+                }));
+            });
+        });
+    });
+
     describe('#getDeviceState', function() {
 
         let sampleState = {
@@ -368,56 +412,130 @@ describe('Device', function() {
                 done()
             });
 
-<<<<<<< HEAD
             this.requests[0].respond(204, {
                 'Content-Type': 'text/json'
-            }, JSON.stringify(credentialsStub));
+            }, JSON.stringify(sampleState));
         });
     });
-});
-=======
-    describe('#getReadings', function() {
+
+    describe('#getDeviceConfiguration', function() {
+
+        let sampleConfiguration = {
+            "configurations": ['something']
+        }
+
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.deviceId = null;
             var fn = function() {
-                deviceInstance.getReadings();
+                deviceInstance.getDeviceConfigurations();
             };
             expect(fn).to.throw(Error);
         });
 
-        it('should get the data from the device/readings resource', function() {
-            deviceInstance.getReadings();
-            expect(this.requests[0].url).to.contain('/devices/fakeDeviceId/readings');
-        });
+        it('should return the correct object describing the configurations', function(done) {
+            let response;
 
-        describe('on success', function() {
-            it('should resolve promise with the list of the readings', function(done) {
-                deviceInstance.getReadings().then(function(response) {
-                    expect(response).to.be.deep.equal(readingFixture);
-                    done();
-                });
-
-                this.requests[0].respond(200, {
-                    'Content-Type': 'text/json'
-                }, JSON.stringify(readingFixture));
+            deviceInstance.getDeviceConfigurations().then((response) => {
+                expect(response).to.deep.equal(sampleConfiguration);
+                done()
             });
-        });
 
-        describe('on failure', function() {
-            it('should fail promise error message', function() {
-                deviceInstance.getReadings().then(() => {}, function(d) {
-                    expect(JSON.parse(d.response).message).to.be.deep.equal('oh noes');
-                    done();
-                });
-
-                this.requests[0].respond(404, {
-                    'Content-Type': 'text/json'
-                }, JSON.stringify({
-                    message: 'oh noes'
-                }));
-            });
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleConfiguration));
         });
     });
 
+    describe('#setDeviceConfigurations', function() {
+
+    });
+
+    describe('#getDeviceCommands', function() {
+
+        let sampleCommands = {
+            "commands": ['do it']
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.deviceId = null;
+            var fn = function() {
+                deviceInstance.getDeviceCommands();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing state', function(done) {
+            let response;
+
+            deviceInstance.getDeviceCommands().then((response) => {
+                expect(response).to.deep.equal(sampleCommands);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleCommands));
+        });
+    });
+
+    describe('#setDeviceCommands', function() {
+
+    });
+
+    describe('#getDeviceMetadata', function() {
+
+        let sampleMetadata = {
+            "metadata": ['metaaaaaa']
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.deviceId = null;
+            var fn = function() {
+                deviceInstance.getDeviceMetadata();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing Metadata', function(done) {
+            let response;
+
+            deviceInstance.getDeviceMetadata().then((response) => {
+                expect(response).to.deep.equal(sampleMetadata);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleMetadata));
+        });
+    });
+
+    describe('#setDeviceMetadata', function() {
+
+    });
+
+    describe('#deleteDeviceMetadata', function() {
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.deviceId = null;
+            var fn = function() {
+                deviceInstance.deleteDeviceMetadata();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should delete the metadata ', function(done) {
+            let data = {}
+            deviceInstance.deleteDeviceMetadata(data).then((response) => {
+                expect(response).to.be.defined;
+                done();
+            });
+
+            //this is the api
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(data));
+        });
+
+    });
+
 });
->>>>>>> 2.0.0-dev-readings
