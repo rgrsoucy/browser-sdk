@@ -66,7 +66,6 @@ describe('Model', function() {
         it('should keep a cache after each request', function(done) {
 
             let sampleModel = relayrMockModels;
-            //console.log(sampleModel)
 
             let firstTime = modelInstance.getAllModels().then((result) => {
 
@@ -123,7 +122,6 @@ describe('Model', function() {
             let sampleModel = relayrMockModels;
             let modelId = "oh.noes.im.a.model.now.:("
             modelInstance.getModel(modelId).then((model) => {
-                console.log(model, "here")
                 expect(model).to.be.null;
                 done();
             });
