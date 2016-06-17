@@ -14,7 +14,7 @@ chai.use(sinonChai);
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 const fakeConfig = {
-    deviceId: 'fakeDeviceId',
+    id: 'fakeDeviceId',
     ajax: {
         url: 'fakeURL',
         dataUri: 'http://test-data.example.com',
@@ -159,8 +159,8 @@ describe('DeviceHistory', function() {
                         expect(historyResponse.response).to.be.deep.equal(DeviceHistoryFixture);
                     });
 
-                    it('should contain the deviceId', function() {
-                        expect(historyResponse.points.get('fake-meaning', 'fake-path').deviceId).to.be.equal('fake-history-device-id');
+                    it('should contain the device Id', function() {
+                        expect(historyResponse.points.get('fake-meaning', 'fake-path').id).to.be.equal('fake-history-device-id');
                     });
 
 
@@ -173,11 +173,11 @@ describe('DeviceHistory', function() {
                     });
 
                     it('should work when the reading does not have a path', function() {
-                        expect(historyResponse.points.get('fake-meaning', null).deviceId).to.be.equal('fake-history-device-id-no-path');
+                        expect(historyResponse.points.get('fake-meaning', null).id).to.be.equal('fake-history-device-id-no-path');
                     });
 
                     it('should work when the reading does not have a meaning', function() {
-                        expect(historyResponse.points.get(null, 'fake-path').deviceId).to.be.equal('fake-history-device-id-no-meaning');
+                        expect(historyResponse.points.get(null, 'fake-path').id).to.be.equal('fake-history-device-id-no-meaning');
                     });
                 });
 

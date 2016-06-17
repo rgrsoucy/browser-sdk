@@ -6,21 +6,28 @@ import {
 }
 from '../tools/mqtt';
 
+import Model from '../entities/Model';
+
 export
 default class Device {
-    constructor(config) {
-        this.deviceId = config.deviceId;
-        this.name = config.name;
-        this.model = config.model;
-        this.owner = config.owner;
-        this.openToPublic = config.public;
+    constructor(rawDevice = {}, config) {
+        this.rawDevice = rawDevice;
+        this.config = config;
+
+        this.id = rawDevice.id;
+        this.name = rawDevice.name;
+        this.modelId = rawDevice.modelId;
+        this.model = new Model(this.modelId, config)
+        this.description = rawDevice.description;
+        this.owner = rawDevice.owner;
+        this.openToPublic = rawDevice.public;
         this.ajax = new Ajax(config.ajax);
         this.history = new DeviceHistory(config);
     }
 
     updateDevice(patch, raw) {
-        if (!(this.deviceId)) {
-            throw new Error('Provide the userId during instantiation');
+        if (!(this.id)) {
+            throw new Error('Provide the device id during instantiation');
         } else if (!(patch)) {
             throw new Error('Provide a patch of parameters to update');
         } else if (!(Object.keys(patch).length)) {
@@ -34,10 +41,10 @@ default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/devices/${this.deviceId}`, patch, raw)
+            this.ajax.patch(`/devices/${this.id}`, patch, {raw:raw})
                 .then((response) => {
                     this.name = response.name;
-                    this.model = response.model;
+                    this.modelId = response.modelId;
                     this.owner = response.owner;
                     this.openToPublic = response.public;
                     resolve(response);
@@ -47,23 +54,29 @@ default class Device {
         });
     }
 
+
     getHistoricalData(opts) {
         return this.history.getHistoricalData(opts);
     }
 
     getReadings() {
-        if (!(this.deviceId)) {
+        if (!(this.id)) {
             throw new Error('Provid a device id');
         }
-        return this.ajax.get(`${this.ajax.uri}/devices/${this.deviceId}/readings`);
+        return this.ajax.get(`/devices/${this.id}/readings`);
+    }
+
+    getDeviceState() {
+
+
     }
 
     deleteDevice(raw) {
-        if (!(this.deviceId)) {
-            throw new Error('Provide the userId during instantiation');
+        if (!(this.id)) {
+            throw new Error('Provide the device id during instantiation');
         }
         return new Promise((resolve, reject) => {
-            this.ajax.delete(`/devices/${this.deviceId}`, null)
+            this.ajax.delete(`/devices/${this.id}`)
                 .then((response) => {
                     //right now the object hangs around, but on the cloud it is gone
                     resolve(response);
@@ -72,9 +85,10 @@ default class Device {
                 });
         });
     }
+
     sendCommand(command, raw) {
-        if (!(this.deviceId)) {
-            throw new Error('Provide the deviceId during instantiation');
+        if (!(this.id)) {
+            throw new Error('Provide the device id during instantiation');
         } else if (!(command)) {
             throw new Error('Provide a command');
         }
@@ -84,7 +98,7 @@ default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/devices/${this.deviceId}`, patch, raw)
+            this.ajax.patch(`/devices/${this.id}`, patch, {raw:raw})
                 .then((response) => {
                     resolve(response);
                 }).catch((error) => {
@@ -100,7 +114,7 @@ default class Device {
             } else {
 
                 let body = {
-                    deviceId: this.deviceId,
+                    id: this.id,
                     transport: transport || "mqtt"
                 }
                 this.ajax.post(`/channels`, body)

@@ -81,7 +81,7 @@ describe('Transmitter', function() {
       }
       let response;
 
-      transmitterInstance.ajax.customXHR = this.xhr;
+
 
       transmitterInstance.updateTransmitter(patch, true).then((response) => {
         expect(patch).to.deep.equal(response);
@@ -108,7 +108,6 @@ describe('Transmitter', function() {
     it('should delete the transmitterInstance', function(done) {
       let data = {}
 
-      transmitterInstance.ajax.customXHR = this.xhr;
       transmitterInstance.deleteTransmitter(data).then((response) => {
         expect(response).to.be.defined;
         done();

@@ -18,7 +18,7 @@ describe('Ajax', function() {
         let options = {
             tokenType: "Bearer",
             token: "FAKE_TOKEN",
-            uri: null
+            uri: null,
         }
 
         ajaxInstance = new Ajax(options);
@@ -57,14 +57,14 @@ describe('Ajax', function() {
             ajaxInstance._xhrRequest({
                 url: "/oauth-userinfo",
                 type: "GET",
-                isObject: true,
+                isObject: true
             }, null).then((result) => {
                 expect(result).to.deep.equal(data);
                 done();
             });
 
             this.requests[0].respond(200, {
-                'Content-Type': 'text/json'
+                'Content-Type': 'application/json'
             }, dataJson);
         });
 
@@ -74,7 +74,8 @@ describe('Ajax', function() {
             var options = {
                 url: "/oauth-userinfo",
                 type: "GET",
-                isObject: true
+                isObject: true,
+                contentType: 'application/json'
             }
 
             ajaxInstance.get("/oauth-userinfo");
@@ -101,19 +102,19 @@ describe('Ajax', function() {
 
         describe('query parameters', function() {
             it('should create a query params string of query object', function() {
-                ajaxInstance.get('/test', true, {
+                ajaxInstance.get('/test', {raw:true, queryObj: {
                     one: 1,
                     two: 2,
                     three: 3
-                });
+                }});
 
                 expect(this.requests[0].url).to.contain('?one=1&two=2&three=3');
             });
 
             it('should URI encode all query parameters', function() {
-                ajaxInstance.get('/test', true, {
+                ajaxInstance.get('/test', {raw:true, queryObj: {
                     complicated: '-- test *'
-                });
+                }});
 
                 expect(this.requests[0].url).to.contain('?complicated=--%20test%20*');
             });

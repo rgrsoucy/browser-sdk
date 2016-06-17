@@ -12,12 +12,12 @@ default class Transmitter {
     this.ajax = new Ajax(config.ajax);
   }
 
-  deleteTransmitter(raw) {
+  deleteTransmitter(opts) {
     if (!(this.transmitterId)) {
       throw new Error('Provide the transmitterId during instantiation');
     }
     return new Promise((resolve, reject) => {
-      this.ajax.delete(`/transmitters/${this.transmitterId}`, null)
+      this.ajax.delete(`/transmitters/${this.transmitterId}`, opts)
         .then((response) => {
           //right now the object hangs around, but on the cloud it is gone
           resolve(response);
@@ -27,7 +27,7 @@ default class Transmitter {
     });
   }
 
-  updateTransmitter(patch, raw) {
+  updateTransmitter(patch, opts) {
     if (!(this.transmitterId)) {
       throw new Error('Provide the transmitterId during instantiation');
     } else if (!(patch)) {
@@ -43,7 +43,7 @@ default class Transmitter {
     }
 
     return new Promise((resolve, reject) => {
-      this.ajax.patch(`/transmitters/this.transmitterId}`, patch, raw)
+      this.ajax.patch(`/transmitters/this.transmitterId}`, patch, opts)
         .then((response) => {
           this.transmitterId = response.transmitterId,
           this.secret = response.secret,
