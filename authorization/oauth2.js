@@ -5,7 +5,7 @@ class Oauth2 {
         this.appId = options.appId;
         this.redirectURI = options.redirectURI;
         this.shouldPersist = options.persist || false;
-        this.protocol = options.protocol || 'https';
+        this.protocol = options.protocol || 'https://';
     }
 
     login(optUser, ctx) {
@@ -33,7 +33,7 @@ class Oauth2 {
             scope: 'access-own-user-info+configure-devices'
         };
 
-        let uri = `${this.protocol}://${this.uri}/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
+        let uri = `${this.protocol}${this.uri}/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
 
         this._loginRedirect(uri);
     }
