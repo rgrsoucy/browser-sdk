@@ -132,5 +132,25 @@ describe('Ajax', function() {
         });
     });
 
+    describe('#post', function() {
+        it('should create a xhr request with the body', function() {
+            ajaxInstance.post('/test', {
+                fakeKey: 'fakeValue'
+            });
+
+            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({ fakeKey: 'fakeValue' }));
+        });
+    });
+
+    describe('#patch', function() {
+        it('should create a xhr request with the body', function() {
+            ajaxInstance.patch('/test', {
+                fakeKey: 'fakeValue'
+            });
+
+            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({ fakeKey: 'fakeValue' }));
+        });
+    });
+
 
 });

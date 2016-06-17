@@ -225,45 +225,46 @@ describe('Device', function() {
             }, JSON.stringify(credentialsStub));
         });
 
+        describe('on sucessful connection', function() {
+            let sandbox;
+            beforeEach(function() {
+                sandbox = sinon.sandbox.create();
+                sandbox.stub(mqtt, 'connect').returns(new Promise((resolve) => {
+                    resolve();
+                }));
 
-        it('should connect to mqtt and return with a callback for events', function(done) {
-            let credentialsStub = {
-                "channelId": "50a66b82-cb538",
-                "deviceId": "1234",
-                "credentials": {
-                    "user": "2b6:3b383d97-82dc6a",
-                    "password": "vcGqoSr",
-                    "clientId": "502139731",
-                    "topic": "/v1/50a66c96-bac80"
-                }
-            }
-
-            let fakeSensorReadings = {
-                meaning: "temp",
-                value: 50
-            }
-
-            deviceInstance._channelCredentials = credentialsStub
-
-            deviceInstance.connect().then((connection) => {
-
-                connection.on("data", (dataStream) => {
-
-                    expect(dataStream).to.deep.equal(fakeSensorReadings)
-                    done();
-                })
+                deviceInstance._channelCredentials = {
+                    credentials: {
+                        topic: 'fake-topic'
+                    }
+                };
             });
 
+            afterEach(function() {
+                sandbox.restore();
+            });
 
-            let myTopic = credentialsStub.credentials.topic;
+            it('should setup a connection with channel credentials over mqtt', function(done) {
+                deviceInstance.connect().then(() => {
+                    done();
+                });
+            });
 
-            function mockWSSEvent() {
-                mqttSingleton._topics[myTopic].subscribers.forEach((subscriber) => {
-                    subscriber(fakeSensorReadings)
-                })
-            }
-            mockWSSEvent();
+            it('should notify data listeners with data from mqtt', function(done) {
+                deviceInstance.connect().then(function(connection) {
+                    connection.on('data', function(message) {
+                        expect(message).to.deep.equal({ data: 'fake-reading' });
+                        done();
+                    });
+                    mqttSingleton._topics['fake-topic'].subscribers.forEach(function(sub) {
+                        console.log(sub);
+                        sub(({ data: 'fake-reading' }));
+                    });
+                });
+
+            });
         });
+
     });
 
     // describe('#getAllDevices', function() {

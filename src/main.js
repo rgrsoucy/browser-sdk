@@ -1,66 +1,68 @@
 import Oauth2 from '../authorization/oauth2';
 import User from '../entities/User';
+import Device from '../entities/Device';
 import Ajax from '../tools/ajax';
 import {
     mqtt
 }
 from '../tools/mqtt';
 
-export
-default class Relayr {
-    constructor(project, customConfig) {
-        this.project = project;
-        this.oauth2;
+export let device = Device;
 
-        this.config = {
-            persistToken: true,
-            mqtt: {
-                endpoint: 'mqtt.relayr.io'
-            },
-            ajax: {
-                uri: 'api.relayr.io',
-                dataUri: 'data-api.relayr.io'
-            }
-        };
-        if (customConfig) {
-            Object.assign(this.config, customConfig);
-        }
-        this.currentUser;
+const config = {
+    persistToken: true,
+    mqtt: {
+        endpoint: 'mqtt.relayr.io'
+    },
+    ajax: {
+        uri: 'api.relayr.io',
+        dataUri: 'data-api.relayr.io'
     }
+};
 
-    authorize(optionalToken) {
+let currentUser;
+let project;
+export
+default {
+    init: function(p, customConfig) {
+        project = p;
+
+        if (customConfig) {
+            Object.assign(config, customConfig);
+        }
+    },
+
+    authorize: function(optionalToken) {
         return new Promise((resolve, reject) => {
 
             const oauth2 = new Oauth2({
-                uri: this.config.ajax.uri,
-                appId: this.project.id,
-                redirectURI: this.project.redirectURI,
-                persist: this.config.persistToken
+                uri: config.ajax.uri,
+                appId: project.id,
+                redirectURI: project.redirectURI,
+                persist: config.persistToken
             });
             if (!optionalToken) {
                 oauth2.login();
 
-                this.config.ajax.token = oauth2.token;
+                config.ajax.token = oauth2.token;
 
             } else {
-                this.config.ajax.token = optionalToken;
-
+                config.ajax.token = optionalToken;
             }
 
-            this.currentUser = new User(this.config);
-            resolve(this.currentUser);
+            currentUser = new User(config);
+            resolve(currentUser);
         });
-    }
+    },
 
-    getCurrentConfig() {
-        return this.config;
-    }
+    getConfig: function() {
+        return config;
+    },
 
-    customAjax(ajaxConfiguration) {
-        return new Ajax(ajaxConfiguration || this.config.ajax);
+    customAjax: function(ajaxConfiguration) {
+        return new Ajax(ajaxConfiguration || config.ajax);
     }
-
-}
+};
 
 // console.log(mqtt)
 

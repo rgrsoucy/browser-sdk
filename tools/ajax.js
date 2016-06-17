@@ -31,7 +31,7 @@ default class Ajax {
         });
     }
 
-    post(url, post, raw) {
+    post(url, body, raw) {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -39,11 +39,10 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: "POST",
                 url: url,
-                post: post,
+                body: body,
                 isObject: raw || true
             }).then((result) => {
                 resolve(result);
-
             }).catch((xhrObject) => {
                 reject(xhrObject);
             });
@@ -58,7 +57,7 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: "PATCH",
                 url: url,
-                patch: patch,
+                body: patch,
                 isObject: raw || true
             }).then((result) => {
                 resolve(result);
@@ -102,7 +101,7 @@ default class Ajax {
         return '?' + str.join('&');
     }
 
-    _xhrRequest(options, body) {
+    _xhrRequest(options) {
         let xhrObject;
 
         xhrObject = new XMLHttpRequest();
@@ -110,12 +109,12 @@ default class Ajax {
 
         xhrObject.open(
             options.type,
-            options.url,
+            this.uri + options.url,
             true
         );
 
 
-        xhrObject.setRequestHeader('Authorization', options.token);
+        xhrObject.setRequestHeader('Authorization', this.token);
         xhrObject.setRequestHeader('Content-Type', 'application/json');
 
         return new Promise((resolve, reject) => {
@@ -138,8 +137,8 @@ default class Ajax {
                 }
             };
 
-            if (body) {
-                xhrObject.send(JSON.stringify(body));
+            if (options.body) {
+                xhrObject.send(JSON.stringify(options.body));
             } else {
                 xhrObject.send();
             }
