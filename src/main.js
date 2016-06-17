@@ -30,7 +30,6 @@ default {
         if (customConfig) {
             Object.assign(config, customConfig);
         }
-        this.currentUser;
     },
 
     authorize: function(optionalToken) {
@@ -49,7 +48,6 @@ default {
 
             } else {
                 config.ajax.token = optionalToken;
-
             }
 
             currentUser = new User(config);

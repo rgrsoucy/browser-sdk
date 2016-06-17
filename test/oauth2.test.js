@@ -9,8 +9,7 @@ chai.use(sinonChai);
 
 import mockStorage from 'mock-localstorage';
 let localStorage = new mockStorage();
-console.log("local", localStorage)
-global.localStorage = localStorage
+global.localStorage = localStorage;
 
 let oauthInstance;
 
