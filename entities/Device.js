@@ -23,7 +23,7 @@ default class Device {
 
     updateDevice(patch, raw) {
         if (!(this.id)) {
-            throw new Error('Provide the deviceId during instantiation');
+            throw new Error('Provide the device id during instantiation');
         } else if (!(patch)) {
             throw new Error('Provide a patch of parameters to update');
         } else if (!(Object.keys(patch).length)) {
@@ -56,7 +56,7 @@ default class Device {
 
     deleteDevice(raw) {
         if (!(this.id)) {
-            throw new Error('Provide the deviceId during instantiation');
+            throw new Error('Provide the device id during instantiation');
         }
         return new Promise((resolve, reject) => {
             this.ajax.delete(`/devices/${this.id}`, null)
@@ -70,7 +70,7 @@ default class Device {
     }
     sendCommand(command, raw) {
         if (!(this.id)) {
-            throw new Error('Provide the deviceId during instantiation');
+            throw new Error('Provide the device id during instantiation');
         } else if (!(command)) {
             throw new Error('Provide a command');
         }

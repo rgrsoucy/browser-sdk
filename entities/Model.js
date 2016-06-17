@@ -18,11 +18,11 @@ let cache = {
 
 export
 default class Model {
-    constructor(modelId = null, config) {
+    constructor(id = null, config) {
         this.config = config;
         this.ajax = new Ajax(config.ajax);
-        if (modelId) {
-            this.modelId = modelId
+        if (id) {
+            this.id = id
         }
     }
 
@@ -42,20 +42,20 @@ default class Model {
         });
     }
 
-    getModel(modelId) {
-        if (this.modelId && !modelId) {
-            modelId = this.modelId;
+    getModel(id) {
+        if (this.id && !id) {
+            id = this.id;
         }
 
-        if (cache.public.toDictionary[modelId]) {
+        if (cache.public.toDictionary[id]) {
             return new Promise((resolve, reject) => {
-                resolve(cache.public.toDictionary[modelId]);
+                resolve(cache.public.toDictionary[id]);
             })
         } else {
             return new Promise((resolve, reject) => {
-                this.ajax.get(`device-models/${modelId}`, null, "application/hal+json").then((model) => {
+                this.ajax.get(`device-models/${id}`, null, "application/hal+json").then((model) => {
                     cache.public.toArray.push(model)
-                    cache.public.toDictionary[modelId] = model;
+                    cache.public.toDictionary[id] = model;
                     resolve(model)
                 }).catch((error) => {
                     reject(error);
@@ -64,9 +64,9 @@ default class Model {
         }
     }
 
-    _getModelById(modelId) {
+    _getModelById(id) {
         if (cache.public.toArray.length > 0) {
-            return (cache.public.toDictionary[modelId] || null);
+            return (cache.public.toDictionary[id] || null);
         } else {
             return null
         }
