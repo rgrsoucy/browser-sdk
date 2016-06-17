@@ -18,7 +18,7 @@ chai.use(sinonChai);
 
 let modelInstance;
 let fakeConfig;
-
+console.log(cache.init())
 describe('Model', function() {
     beforeEach(function() {
         fakeConfig = {
@@ -42,8 +42,7 @@ describe('Model', function() {
     });
 
     afterEach(function() {
-        cache.public.toArray = [];
-        cache.public.toDictionary = {};
+      cache.clear();
     });
 
     describe('#getAllModels', function() {
@@ -113,22 +112,24 @@ describe('Model', function() {
 
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
-            }, JSON.stringify(sampleModel));
+            }, JSON.stringify(sampleModel.models[0]));
 
         });
 
-        it('should return null when model is not found', function(done) {
+        it('should return 404 when model is not found', function(done) {
 
             let sampleModel = relayrMockModels;
             let modelId = "oh.noes.im.a.model.now.:("
             modelInstance.getModel(modelId).then((model) => {
-                expect(model).to.be.null;
-                done();
+
+            }).catch((error)=>{
+              expect(error.status).to.equal(404);
+              done();
             });
 
-            this.requests[0].respond(200, {
+            this.requests[0].respond(404, {
                 'Content-Type': 'text/json'
-            }, JSON.stringify(sampleModel));
+            }, "Not found");
 
         });
     });

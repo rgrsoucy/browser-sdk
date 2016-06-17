@@ -3,9 +3,16 @@ import Ajax from '../tools/ajax.js'
 
 export
 let cache = {
+    init:()=>{
+
+    },
     public: {
         toArray: [],
         toDictionary: {}
+    },
+    clear:()=>{
+        cache.public.toArray =[];
+        cache.public.toDictionary =[];
     }
 }
 
@@ -40,20 +47,20 @@ default class Model {
             modelId = this.modelId;
         }
 
-        if (cache.public.toArray.length > 0) {
-
+        if (cache.public.toDictionary[modelId]) {
             return new Promise((resolve, reject) => {
-                resolve(cache.public.toDictionary[modelId] || null);
+                resolve(cache.public.toDictionary[modelId]);
             })
         } else {
             return new Promise((resolve, reject) => {
-                if (!cache.public.fetching) cache.public.fetching = this.getAllModels();
-                cache.public.fetching.then((response) => {
-                    cache.public.fetching = null;
-                    resolve(this._getModelById(modelId));
+                this.ajax.get(`device-models/${modelId}`, null, "application/hal+json").then((model) => {
+                    cache.public.toArray.push(model)
+                    cache.public.toDictionary[modelId] = model;
+                    resolve(model)
+                }).catch((error) => {
+                    reject(error);
                 });
             });
-
         }
     }
 
