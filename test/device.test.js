@@ -225,7 +225,7 @@ describe('Device', function() {
             }, JSON.stringify(credentialsStub));
         });
 
-        describe('hh', function() {
+        describe('on sucessful connection', function() {
             let sandbox;
             beforeEach(function() {
                 sandbox = sinon.sandbox.create();

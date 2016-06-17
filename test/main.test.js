@@ -19,7 +19,7 @@ chai.use(chaiPromise);
 
 describe('Main', function() {
 
-    describe.only('#authorize', function() {
+    describe('#authorize', function() {
         beforeEach(function() {
             main.init({
                 id: 'fake-project-id'
