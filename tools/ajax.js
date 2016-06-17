@@ -43,7 +43,6 @@ default class Ajax {
                 isObject: raw || true
             }).then((result) => {
                 resolve(result);
-
             }).catch((xhrObject) => {
                 reject(xhrObject);
             });
