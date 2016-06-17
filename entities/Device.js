@@ -16,6 +16,9 @@ default class Device {
         this.openToPublic = config.public;
         this.ajax = new Ajax(config.ajax);
         this.history = new DeviceHistory(config);
+        this.configurations = [];
+        this.commands = [];
+        this.metadata = {}
     }
 
     updateDevice(patch, raw) {
@@ -158,6 +161,7 @@ default class Device {
         return new Promise((resolve, reject) => {
             this.ajax.get(`/devices/${this.deviceId}/configurations`, null)
                 .then((response) => {
+                    this.configurations = response;
                     resolve(response);
                 }).catch((error) => {
                     reject(error);
@@ -165,9 +169,29 @@ default class Device {
         });
     }
 
-    setDeviceConfigurations() {
+    setDeviceConfigurations(schema) {
         // api/devices/deviceId/configurations
         //POST
+        if (!(this.deviceId)) {
+            throw new Error('Provide the userId during instantiation');
+        } else if (!(schema)) {
+            throw new Error('Provide a schema of parameters to set');
+        } else if (!(Object.keys(schema).length)) {
+            throw new Error('Provide a schema with some parameters to set');
+        }
+        if (!(schema.path && schema.name && schema.value)) {
+            throw new Error('Provide a schema with path, name, and value');
+        }
+
+        return new Promise((resolve, reject) => {
+            this.ajax.post(`/devices/${this.deviceId}/configurations`, schema, null)
+                .then((response) => {
+                    this.configurations.push(response);
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 
     getDeviceCommands() {
@@ -185,9 +209,29 @@ default class Device {
         });
     }
 
-    setDeviceCommands() {
+    setDeviceCommands(schema) {
         // api/devices/deviceId/commands
         //POST
+        if (!(this.deviceId)) {
+            throw new Error('Provide the userId during instantiation');
+        } else if (!(schema)) {
+            throw new Error('Provide a schema of parameters to set');
+        } else if (!(Object.keys(schema).length)) {
+            throw new Error('Provide a schema with some parameters to set');
+        }
+        if (!(schema.path && schema.name && schema.value)) {
+            throw new Error('Provide a schema with path, name, and value');
+        }
+
+        return new Promise((resolve, reject) => {
+            this.ajax.post(`/devices/${this.deviceId}/commands`, schema, null)
+                .then((response) => {
+                    this.commands.push(response);
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 
     getDeviceMetadata() {
@@ -205,9 +249,26 @@ default class Device {
         });
     }
 
-    setDeviceMetadata() {
+    setDeviceMetadata(schema) {
         // api/devices/deviceId/metadata
         //POST
+        if (!(this.deviceId)) {
+            throw new Error('Provide the userId during instantiation');
+        } else if (!(schema)) {
+            throw new Error('Provide a schema of parameters to set');
+        } else if (!(Object.keys(schema).length)) {
+            throw new Error('Provide a schema with some parameters to set');
+        }
+
+        return new Promise((resolve, reject) => {
+            this.ajax.post(`/devices/${this.deviceId}/metadata`, schema, null)
+                .then((response) => {
+                    this.metadata = response;
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+        });
     }
 
     deleteDeviceMetadata() {
