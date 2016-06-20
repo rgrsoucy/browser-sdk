@@ -7,7 +7,10 @@ let MQTTMock = {
     subscribe: function() {},
     connect: function() {}
 };
-Device.__Rewire__('Mqtt', function() { return MQTTMock; });
+Device.__Rewire__('mqtt', MQTTMock);
+Device.__Rewire__('sharedChannel', {
+    credentials: {}
+});
 
 import chai from 'chai';
 import sinon from 'sinon';

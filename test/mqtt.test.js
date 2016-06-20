@@ -2,67 +2,64 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised'
-import {
-    mqtt
-}
-from '../tools/mqtt.js';
+import Mqtt from '../tools/mqtt.js';
 var expect = chai.expect;
 
 var jsdom = require('mocha-jsdom')
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
-let mqttSingleton;
-
-
 describe('Mqtt', function() {
     jsdom();
 
+    let mqtt;
     beforeEach(function() {
 
-        mqttSingleton = mqtt;
-        sinon.spy(mqttSingleton, "connect");
-    });
-
-    afterEach(function() {
-
-        mqttSingleton.connect.restore();
-
+        mqtt = new Mqtt();
+        mqtt.client = {
+            connect: sinon.spy(),
+            isConnected: function() {}
+        };
     });
 
     describe('connect', function() {
+        let options = {
+            userName: 'bob',
+            password: 'lovesCake123'
+        };
 
         it('should throw if userName and password are not in options', function() {
-
             let options = {
-                NotuserName: "bob",
-                NoTpassword: "lovesCake123"
-            }
+                NotuserName: 'bob',
+                NoTpassword: 'lovesCake123'
+            };
             var fn = function() {
-                mqttSingleton.connect(options)
-            }
+                mqtt.connect(options);
+            };
             expect(fn).to.throw(Error);
         });
 
         it('should pass if userName and password are in options', function() {
+            mqtt.connect(options);
 
-            let options = {
-                userName: "bob",
-                password: "lovesCake123"
-            }
-            mqttSingleton.connect(options)
-            expect(mqttSingleton.connect).to.have.been.calledWith(options);
+            expect(mqtt.client.connect.getCall(0).args[0]).to.have.property('userName', 'bob');
+            expect(mqtt.client.connect.getCall(0).args[0]).to.have.property('password', 'lovesCake123');
         });
 
-    });
+        it('should not create a connection if it is already connecting', function() {
+            mqtt.connect(options);
+            mqtt.connect(options);
 
+            expect(mqtt.client.connect).to.have.been.calledOnce;
+        });
+    });
 
     describe('subscribe', function() {
 
         it('should throw if no topic was provided to subscribe', function() {
 
             var fn = function() {
-                mqttSingleton.subscribe(null, null);
+                mqtt.subscribe(null, null);
             }
             expect(fn).to.throw(Error);
         });
@@ -70,7 +67,7 @@ describe('Mqtt', function() {
         it('should throw if no callback was provided to subscribe', function() {
 
             var fn = function() {
-                mqttSingleton.subscribe("/v1/someId/topic", null);
+                mqtt.subscribe("/v1/someId/topic", null);
             }
             expect(fn).to.throw(Error);
         });
@@ -78,11 +75,11 @@ describe('Mqtt', function() {
         it('should store subscription in an array to connect later', function() {
 
             let myTopic = "/v1/someId/topic";
-            mqttSingleton.subscribe(myTopic, function() {
+            mqtt.subscribe(myTopic, function() {
 
             });
 
-            expect(mqttSingleton._topics[myTopic]).to.be.defined;
+            expect(mqtt._topics[myTopic]).to.be.defined;
         });
 
         it('should trigger stored callback when event is fired', function(done) {
@@ -90,23 +87,63 @@ describe('Mqtt', function() {
             let fakeSensorReadings = {
                 meaning: "temp",
                 value: 50
-            }
+            };
 
             let myTopic = "/v1/someId/topic2";
-            mqttSingleton.subscribe(myTopic, function(sensorData) {
+            mqtt.subscribe(myTopic, function(sensorData) {
 
-                expect(sensorData).to.deep.equal(fakeSensorReadings)
+                expect(sensorData).to.deep.equal(fakeSensorReadings);
                 done();
             });
 
             function mockWSSEvent() {
-                mqttSingleton._topics[myTopic].subscribers.forEach((subscriber) => {
-                    subscriber(fakeSensorReadings)
-                })
+                mqtt._topics[myTopic].subscribers.forEach((subscriber) => {
+                    subscriber(fakeSensorReadings);
+                });
             }
             mockWSSEvent();
         });
 
+        describe('on message arrived', function() {
+            beforeEach(function() {
+                mqtt.connect({
+                    userName: 'bob',
+                    password: 'lovesCake123'
+                });
+            });
+            it('should notify the subscriber to that topic', function(done) {
+
+                mqtt.subscribe('fake-topic', function(data) {
+                    expect(data).to.be.have.property('test', 123);
+                    done();
+                });
+
+                mqtt.client.onMessageArrived({
+                    _getDestinationName: function() {
+                        return 'fake-topic';
+                    },
+                    _getPayloadString: function() {
+                        return '{ "test": 123 }';
+                    }
+                });
+            });
+
+            it('should not notify other subscribers', function() {
+                var cbSpy = sinon.spy();
+                mqtt.subscribe('another-topic', cbSpy);
+
+                mqtt.client.onMessageArrived({
+                    _getDestinationName: function() {
+                        return 'fake-topic';
+                    },
+                    _getPayloadString: function() {
+                        return '{ "test": 123 }';
+                    }
+                });
+
+                expect(cbSpy).not.to.have.been.calledOnce;
+            });
+        });
 
     });
 });
