@@ -14,12 +14,12 @@ default class Device {
         this.id = rawDevice.id;
         this.name = rawDevice.name;
         this.modelId = rawDevice.modelId;
-        this.model = new Model(this.modelId, config)
+        this.model = new Model(this.modelId, config);
         this.description = rawDevice.description;
         this.owner = rawDevice.owner;
         this.openToPublic = rawDevice.public;
         this.ajax = new Ajax(config.ajax);
-        this.history = new DeviceHistory(config);
+        this.history = new DeviceHistory(rawDevice, config);
     }
 
     updateDevice(patch, raw) {
@@ -111,10 +111,10 @@ default class Device {
             } else {
 
                 let body = {
-                    id: this.id,
+                    deviceId: this.id,
                     transport: transport || "mqtt"
                 }
-                this.ajax.post(`/channels`, body)
+                this.ajax.post(`channels`, body)
                     .then((response) => {
                         this._channelCredentials = response;
                         resolve(response);
