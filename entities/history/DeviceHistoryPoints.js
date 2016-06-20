@@ -9,7 +9,8 @@ export default class DeviceHistoryPoints {
             if (devicesPoints[key]) {
                 devicesPoints[key].points = devicesPoints[key].points.concat(res.points);
             } else {
-                devicesPoints[key] = res;
+                devicesPoints[key] = Object.assign({id:res.deviceId}, res);
+                delete devicesPoints[key].deviceId;
             }
         });
 

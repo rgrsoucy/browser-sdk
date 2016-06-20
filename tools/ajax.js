@@ -7,22 +7,22 @@ default class Ajax {
         this.customXHR;
     }
 
-    get(url, raw, queryObj) {
+    get(url, opts ={contentType: 'application/json'}) {
+
         if (!url) {
             throw new Error('Please provide atleast a url');
         }
         if (typeof(url) !== "string") {
             throw new Error('Please provide a string url');
         }
-
-
-        url += this._serializeQueryStr(queryObj);
+        url += this._serializeQueryStr(opts.queryObj);
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
                 type: "GET",
                 url: url,
-                isObject: raw || true
+                isObject: opts.raw || true,
+                contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
             }).catch((xhrObject) => {
@@ -31,7 +31,8 @@ default class Ajax {
         });
     }
 
-    post(url, body, raw) {
+
+    post(url, body, opts ={contentType: 'application/json'}) {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -40,7 +41,8 @@ default class Ajax {
                 type: "POST",
                 url: url,
                 body: body,
-                isObject: raw || true
+                isObject: opts.raw || true,
+                contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
             }).catch((xhrObject) => {
@@ -49,7 +51,7 @@ default class Ajax {
         });
     }
 
-    patch(url, patch, raw) {
+    patch(url, body, opts ={contentType: 'application/json'}) {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -57,8 +59,9 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: "PATCH",
                 url: url,
-                body: patch,
-                isObject: raw || true
+                body: body,
+                isObject: opts.raw || true,
+                contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
 
@@ -68,7 +71,7 @@ default class Ajax {
         });
     }
 
-    delete(url, raw) {
+    delete(url, opts ={contentType: 'application/json'}) {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== "string") throw new Error('Please provide a string url');
 
@@ -76,7 +79,8 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: "DELETE",
                 url: url,
-                isObject: raw || true
+                isObject: opts.raw || true,
+                contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
 
@@ -85,6 +89,7 @@ default class Ajax {
             });
         });
     }
+
 
     _serializeQueryStr(obj) {
         var str = [];
@@ -101,11 +106,12 @@ default class Ajax {
         return '?' + str.join('&');
     }
 
+
     _xhrRequest(options) {
+
         let xhrObject;
 
         xhrObject = new XMLHttpRequest();
-
 
         xhrObject.open(
             options.type,
@@ -113,9 +119,9 @@ default class Ajax {
             true
         );
 
-
         xhrObject.setRequestHeader('Authorization', this.token);
-        xhrObject.setRequestHeader('Content-Type', 'application/json');
+        xhrObject.setRequestHeader('Content-Type', options.contentType);
+
 
         return new Promise((resolve, reject) => {
 

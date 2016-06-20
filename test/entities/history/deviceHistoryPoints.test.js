@@ -17,8 +17,8 @@ describe('DeviceHistoryPoint', function() {
         deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.results);
     });
 
-    it('should contain the deviceId', function() {
-        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').deviceId).to.be.equal('fake-history-device-id');
+    it('should contain the id', function() {
+        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').id).to.be.equal('fake-history-device-id');
     });
 
     it('should have all the points from one reading', function() {
@@ -30,10 +30,10 @@ describe('DeviceHistoryPoint', function() {
     });
 
     it('should work when the reading does not have a path', function() {
-        expect(deviceHistoryPointsInstance.get('fake-meaning', null).deviceId).to.be.equal('fake-history-device-id-no-path');
+        expect(deviceHistoryPointsInstance.get('fake-meaning', null).id).to.be.equal('fake-history-device-id-no-path');
     });
 
     it('should work when the reading does not have a meaning', function() {
-        expect(deviceHistoryPointsInstance.get(null, 'fake-path').deviceId).to.be.equal('fake-history-device-id-no-meaning');
+        expect(deviceHistoryPointsInstance.get(null, 'fake-path').id).to.be.equal('fake-history-device-id-no-meaning');
     });
 });
