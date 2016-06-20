@@ -1,12 +1,11 @@
 import Ajax from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
 import DeviceHistory from './history/DeviceHistory';
-import {
-    mqtt
-}
-from '../tools/mqtt';
+import { mqtt } from '../tools/mqtt';
 
 import Model from '../entities/Model';
+
+let sharedChannel = null;
 
 export
 default class Device {
@@ -17,12 +16,12 @@ default class Device {
         this.id = rawDevice.id;
         this.name = rawDevice.name;
         this.modelId = rawDevice.modelId;
-        this.model = new Model(this.modelId, config)
+        this.model = new Model(this.modelId, config);
         this.description = rawDevice.description;
         this.owner = rawDevice.owner;
         this.openToPublic = rawDevice.public;
         this.ajax = new Ajax(config.ajax);
-        this.history = new DeviceHistory(config);
+        this.history = new DeviceHistory(rawDevice, config);
         this.configurations = [];
         this.commands = [];
         this.metadata = {}
@@ -108,16 +107,19 @@ default class Device {
     getChannel(transport) {
         return new Promise((resolve, reject) => {
             if (this._channelCredentials) {
-                resolve(this._channelCredentials)
+                resolve(this._channelCredentials);
             } else {
 
                 let body = {
-                    id: this.id,
-                    transport: transport || "mqtt"
-                }
-                this.ajax.post(`/channels`, body)
+                    deviceId: this.id,
+                    transport: transport || 'mqtt'
+                };
+                this.ajax.post(`channels`, body)
                     .then((response) => {
                         this._channelCredentials = response;
+                        if (!sharedChannel) {
+                            sharedChannel = this._channelCredentials;
+                        }
                         resolve(response);
                     }).catch((error) => {
                         reject(error);
@@ -130,13 +132,13 @@ default class Device {
         let connection = new Connection();
         let getChannel = this.getChannel();
 
-        var subscribeMqtt = () => {
+        var subscribeMqtt = (newChannelCredentials) => {
             let options = {
-                password: this._channelCredentials.credentials.password,
-                userName: this._channelCredentials.credentials.user
+                password: sharedChannel.credentials.password,
+                userName: sharedChannel.credentials.user
             };
-            mqtt.subscribe(this._channelCredentials.credentials.topic, connection.event);
 
+            mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
             return mqtt.connect(options);
         };
 

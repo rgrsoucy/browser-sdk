@@ -1,10 +1,11 @@
 const TOKEN_KEY = 'relayr_access_token';
 class Oauth2 {
     constructor(options) {
-        this.uri = options.uri || "https://api.relayr.io/";
+        this.uri = options.uri || 'api.relayr.io';
         this.appId = options.appId;
         this.redirectURI = options.redirectURI;
         this.shouldPersist = options.persist || false;
+        this.protocol = options.protocol || 'https://';
     }
 
     login(optUser, ctx) {
@@ -22,12 +23,9 @@ class Oauth2 {
             return;
         }
         try {
-
             if (this._parseToken(window.location.href)) return;
         } catch (e) {
-
         }
-
 
         let authURL = {
             client_id: this.appId,
@@ -35,7 +33,8 @@ class Oauth2 {
             scope: 'access-own-user-info+configure-devices'
         };
 
-        let uri = `${this.uri}oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
+        let uri = `${this.protocol}${this.uri}/oauth2/auth?client_id=${this.appId}&redirect_uri=${this.redirectURI}&response_type=token&scope=access-own-user-info+configure-devices`;
+
         this._loginRedirect(uri);
     }
 
@@ -45,15 +44,21 @@ class Oauth2 {
 
     _parseToken(tokenURL) {
         var parts = tokenURL.split('#');
-        if (parts[0].length === 0 || parts[1].length === 0) {
+
+        if (parts[0] && parts[0].length === 0 || parts[1] && parts[1].length === 0) {
             throw Error('The provided URL is not correctly formatted');
         }
+
+
         var queryParams = parts[1].split('&');
+
+
         var authParams = queryParams.reduce(function(accumulator, pair) {
             var tuple = pair.split('=');
             accumulator[tuple[0]] = tuple[1];
             return accumulator;
         }, {});
+
 
         if (!authParams.token_type) {
             throw Error('The provided URL does not contain a access token');

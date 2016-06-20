@@ -6,7 +6,7 @@ function connection() {
     this.buffer = [];
     this.event = function(data) {
         if (self._dataSubscriber) {
-            self._dataSubscriber(data)
+            self._dataSubscriber(data);
         } else {
             self.buffer.push(data);
         }

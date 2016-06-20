@@ -41,11 +41,13 @@ class Mqtt {
                 cleanSession: true,
                 useSSL: true,
                 onSuccess: () => {
+                    this.isConnecting = false;
                     this._onConnectSuccess();
                     resolve();
                 },
                 onFailure: (err) => {
-                    this._onConnectFailure(err)
+                    this.isConnecting = false;
+                    this._onConnectFailure(err);
                     reject();
                 }
             };
@@ -55,9 +57,13 @@ class Mqtt {
                     this._onConnectionLost();
                 };
                 this.client.onMessageArrived = (data) => {
-                    this._onMessageArrived(data)
+                    this._onMessageArrived(data);
                 };
-                this.client.connect(options);
+
+                if (!this.isConnecting) {
+                    this.client.connect(options);
+                    this.isConnecting = true;
+                }
             }
             resolve();
         });
@@ -81,8 +87,7 @@ class Mqtt {
 
     _onConnectSuccess() {
         for (let topic in this._topics) {
-            console.log(topic)
-            this.client.subscribe(topic, 0)
+            this.client.subscribe(topic, 0);
         }
     }
 
@@ -95,25 +100,20 @@ class Mqtt {
     }
 
     _onMessageArrived(data) {
-
-        let deviceId = data._getDestinationName().split('/v1/')[1].split('/')[0];
-        let dataTopic = data._getDestinationName().split('/v1/')[1];
+        let dataTopic = data._getDestinationName();
         let incomingData = (data._getPayloadString());
         incomingData = JSON.parse(data._getPayloadString());
 
-        for (let topic in this._topics) {
-            if (this._topics[topic].subscribers) {
-                for (var i = this._topics[topic].subscribers.length - 1; i >= 0; i--) {
-                    let subscriber = this._topics[topic].subscribers[i];
-                    if (subscriber) {
-                        subscriber(incomingData);
-                    }
+        let subscribers = this._topics[dataTopic] ? this._topics[dataTopic].subscribers : null;
+        if (subscribers) {
+            for (var i = subscribers.length - 1; i >= 0; i--) {
+                let subscriber = subscribers[i];
+                if (subscriber) {
+                    subscriber(incomingData);
                 }
-
             }
 
         }
-
     }
 
     _initClient() {
@@ -125,3 +125,5 @@ class Mqtt {
 
 export
 let mqtt = new Mqtt();
+
+export default Mqtt;
