@@ -14,7 +14,6 @@ chai.use(sinonChai);
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 const fakeConfig = {
-    id: 'fakeDeviceId',
     ajax: {
         url: 'fakeURL',
         dataUri: 'http://test-data.example.com',
@@ -36,7 +35,9 @@ describe('DeviceHistory', function() {
             this.requests.push(xhr);
         }.bind(this);
 
-        deviceHistoryInstance = new DeviceHistory(fakeConfig);
+        deviceHistoryInstance = new DeviceHistory({
+            id: 'fakeDeviceId'
+        }, fakeConfig);
     });
 
     describe('#getHistoricalData', function() {

@@ -1,11 +1,16 @@
-import {
-    mqtt
-}
-from '../tools/mqtt';
 import Device from '../entities/Device.js';
 import DeviceHistory from '../entities/history/DeviceHistory.js';
 
 import readingFixture from './fixtures/devices/readings.fixture';
+
+let MQTTMock = {
+    subscribe: function() {},
+    connect: function() {}
+};
+Device.__Rewire__('mqtt', MQTTMock);
+Device.__Rewire__('sharedChannel', {
+    credentials: {}
+});
 
 import chai from 'chai';
 import sinon from 'sinon';
@@ -13,7 +18,6 @@ import sinonChai from 'sinon-chai';
 
 var expect = chai.expect;
 chai.use(sinonChai);
-let mqttSingleton = mqtt;
 let deviceInstance;
 let fakeConfig;
 let fakeDevice;
@@ -199,11 +203,16 @@ describe('Device', function() {
 
         describe('on sucessful connection', function() {
             let sandbox;
+            let connectionCb;
             beforeEach(function() {
                 sandbox = sinon.sandbox.create();
-                sandbox.stub(mqtt, 'connect').returns(new Promise((resolve) => {
+                sandbox.stub(MQTTMock, 'connect').returns(new Promise((resolve) => {
                     resolve();
                 }));
+
+                sandbox.stub(MQTTMock, 'subscribe', function(topic, cb) {
+                    connectionCb = cb;
+                });
 
                 deviceInstance._channelCredentials = {
                     credentials: {
@@ -228,9 +237,7 @@ describe('Device', function() {
                         expect(message).to.deep.equal({ data: 'fake-reading' });
                         done();
                     });
-                    mqttSingleton._topics['fake-topic'].subscribers.forEach(function(sub) {
-                        sub(({ data: 'fake-reading' }));
-                    });
+                    connectionCb({ data: 'fake-reading' });
                 });
 
             });
@@ -250,7 +257,7 @@ describe('Device', function() {
 
         it('create a instance of device history ', function() {
             expect(deviceInstance.history).to.be.instanceof(DeviceHistory);
-        })
+        });
 
         it('should get historical data from device history object', function() {
             deviceInstance.getHistoricalData({
