@@ -7,7 +7,8 @@ export default class DeviceHistory {
         this.deviceId = config.deviceId;
         this.dataUri = config.ajax.dataUri;
         this.ajax = new Ajax({
-            uri: config.ajax.dataUri
+            uri: config.ajax.dataUri,
+            token: config.ajax.token
         });
     }
 
@@ -37,7 +38,7 @@ export default class DeviceHistory {
         queryParams.limit = limit;
 
         return new Promise((resolve, reject) => {
-            this.ajax.get(`${this.dataUri}/history/devices/${this.deviceId}`, true, queryParams).then(function(response) {
+            this.ajax.get(`/history/devices/${this.deviceId}`, true, queryParams).then(function(response) {
                 resolve({
                     points: new DeviceHistoryPoints(response.results),
                     response: response
