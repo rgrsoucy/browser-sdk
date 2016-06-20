@@ -1,10 +1,7 @@
 import Ajax from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
 import DeviceHistory from './history/DeviceHistory';
-import {
-    mqtt
-}
-from '../tools/mqtt';
+import Mqtt from '../tools/mqtt';
 
 export
 default class Device {
@@ -123,6 +120,7 @@ default class Device {
                 password: this._channelCredentials.credentials.password,
                 userName: this._channelCredentials.credentials.user
             };
+            let mqtt = new Mqtt();
             mqtt.subscribe(this._channelCredentials.credentials.topic, connection.event);
 
             return mqtt.connect(options);

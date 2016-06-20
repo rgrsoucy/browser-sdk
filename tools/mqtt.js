@@ -125,3 +125,5 @@ class Mqtt {
 
 export
 let mqtt = new Mqtt();
+
+export default Mqtt;
