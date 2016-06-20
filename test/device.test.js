@@ -32,14 +32,13 @@ describe('Device', function() {
             id: 'fakeDeviceId',
             name: 'fakeDeviceName',
             modelId: 'fakeModel',
-            owner: 'fakeOwner',
-            openToPublic: false,
+            owner: 'fakeOwner'
+
         }
 
         deviceInstance = new Device(fakeDevice, fakeConfig);
 
         this.xhr = sinon.useFakeXMLHttpRequest();
-        // console.log(this.xhr);
         this.requests = [];
 
         this.xhr.onCreate = function(xhr) {
@@ -49,7 +48,6 @@ describe('Device', function() {
     });
 
     describe('#updateDevice', function() {
-        // beforeEach(function() {});
 
         it('should throw an error if no device id given to look up', function() {
             deviceInstance.id = null;
@@ -106,10 +104,6 @@ describe('Device', function() {
                 'Content-Type': 'text/json'
             }, JSON.stringify(patch));
         });
-    });
-
-    describe('#getDeviceState', function() {
-        //does this still exist?
     });
 
     describe('#deleteDevice', function() {
@@ -235,14 +229,12 @@ describe('Device', function() {
                         done();
                     });
                     mqttSingleton._topics['fake-topic'].subscribers.forEach(function(sub) {
-                        console.log(sub);
                         sub(({ data: 'fake-reading' }));
                     });
                 });
 
             });
         });
-
     });
 
     describe('getHistoricalData', function() {
@@ -261,10 +253,14 @@ describe('Device', function() {
         })
 
         it('should get historical data from device history object', function() {
-            deviceInstance.getHistoricalData({ period: '1m' });
+            deviceInstance.getHistoricalData({
+                period: '1m'
+            });
 
             expect(deviceInstance.history.getHistoricalData).to.have.been.calledOnce;
-            expect(deviceInstance.history.getHistoricalData).to.have.been.calledWith({ period: '1m' });
+            expect(deviceInstance.history.getHistoricalData).to.have.been.calledWith({
+                period: '1m'
+            });
         });
     });
 
@@ -310,6 +306,375 @@ describe('Device', function() {
                 }));
             });
         });
+    });
+
+    describe('#getDeviceState', function() {
+
+        let sampleState = {
+            "readings": [{
+                "path": "",
+                "meaning": "",
+                "value": "",
+                "received": 12345
+            }],
+            "version": {
+                "commands": {
+                    "number": 0,
+                    "ts": 12345
+                },
+                "configurations": {
+                    "number": 0,
+                    "ts": 12345
+                },
+                "readings": {
+                    "number": 0,
+                    "ts": 12345
+                },
+                "metadata": {
+                    "number": 0,
+                    "ts": 12345
+                }
+            },
+            "metadata": {},
+            "configurations": [],
+            "commands": []
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.getDeviceState();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing state', function(done) {
+            let response;
+
+            deviceInstance.getDeviceState().then((response) => {
+                expect(response).to.deep.equal(sampleState);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleState));
+        });
+    });
+
+    describe('#getDeviceConfiguration', function() {
+
+        let sampleConfiguration = {
+            "configurations": ['something']
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.getDeviceConfigurations();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing the configurations', function(done) {
+            let response;
+
+            deviceInstance.getDeviceConfigurations().then((response) => {
+                expect(response).to.deep.equal(sampleConfiguration);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleConfiguration));
+        });
+    });
+
+    describe('#setDeviceConfigurations', function() {
+        let schema = {
+            'path': 'somePath',
+            'name': 'someName',
+            'value': 'someValue'
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.setDeviceConfigurations(schema);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should give a body of parameters at all to update', function() {
+            var fn = function() {
+                deviceInstance.setDeviceConfigurations();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should have something in the body', function() {
+            let body = {};
+            var fn = function() {
+                deviceInstance.setDeviceConfigurations(body);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should give relevant parameters to update on a device in the body', function() {
+            let body = {
+                pets: 'unicorn',
+                abilities: 'flying'
+            };
+
+            var fn = function() {
+                deviceInstance.setDeviceConfigurations(body);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should add an item to the configurations array', function() {
+            deviceInstance.configurations[0] = {
+                'path': 'somePath1',
+                'name': 'someName1',
+                'value': 'someValue1'
+            }
+            let response;
+
+            let sampleConfig = [schema];
+            deviceInstance.setDeviceConfigurations(schema).then((response) => {
+                expect(deviceInstance.configurations.length).to.equal(2);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleConfig));
+        });
+
+        it('should have the last item in the config array be the one you just added', function(done) {
+            let response;
+
+            let sampleConfig = [schema];
+            deviceInstance.setDeviceConfigurations(schema).then((response) => {
+                expect(response).to.deep.equal(sampleConfig);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleConfig));
+
+        });
+
+    });
+
+    describe('#getDeviceCommands', function() {
+
+        let sampleCommands = {
+            "commands": ['do it']
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.getDeviceCommands();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing state', function(done) {
+            let response;
+
+            deviceInstance.getDeviceCommands().then((response) => {
+                expect(response).to.deep.equal(sampleCommands);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleCommands));
+        });
+    });
+
+    describe('#setDeviceCommands', function() {
+        let cmd = {
+            'path': 'somePath',
+            'name': 'someName',
+            'value': 'someValue'
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.setDeviceCommands(cmd);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should give a body of parameters at all to set', function() {
+            var fn = function() {
+                deviceInstance.setDeviceCommands();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should have something in the body', function() {
+            let body = {};
+            var fn = function() {
+                deviceInstance.setDeviceCommands(body);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should give relevant parameters to set for the commands in the body', function() {
+            let body = {
+                pets: 'unicorn',
+                abilities: 'flying'
+            };
+
+            var fn = function() {
+                deviceInstance.setDeviceCommands(body);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should add an item to the commands array', function() {
+            deviceInstance.commands[0] = {
+                'path': 'somePath1',
+                'name': 'someName1',
+                'value': 'someValue1'
+            }
+
+            let response;
+
+            let sampleConfig = [cmd];
+            deviceInstance.setDeviceCommands(cmd).then((response) => {
+                expect(deviceInstance.commands.length).to.equal(2);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleConfig));
+        });
+
+        it('should have the last item in the command array be the one you just added', function(done) {
+            let response;
+
+            let sampleConfig = [cmd];
+            deviceInstance.setDeviceCommands(cmd).then((response) => {
+                expect(response).to.deep.equal(sampleConfig);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleConfig));
+
+        });
+
+    });
+
+    describe('#getDeviceMetadata', function() {
+
+        let sampleMetadata = {
+            "metadata": {
+                'data': 'metaaaaaa'
+            }
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.getDeviceMetadata();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should return the correct object describing Metadata', function(done) {
+            let response;
+
+            deviceInstance.getDeviceMetadata().then((response) => {
+                expect(response).to.deep.equal(sampleMetadata);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(sampleMetadata));
+        });
+    });
+
+    describe('#setDeviceMetadata', function() {
+        let meta = {
+            'data': 'metaaaaaa'
+        }
+
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.setDeviceMetadata(meta);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should give a body of metadata at all to update', function() {
+            var fn = function() {
+                deviceInstance.setDeviceMetadata();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should have something in the body', function() {
+            let body = {};
+            var fn = function() {
+                deviceInstance.setDeviceMetadata(body);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should replace the previous metadata with the one you just set', function(done) {
+            let response;
+
+            deviceInstance.metadata = {
+                'data': 'this that or the other thing'
+            };
+
+            deviceInstance.setDeviceMetadata(meta).then((response) => {
+                expect(deviceInstance.metadata).to.deep.equal(meta);
+                done()
+            });
+
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(meta));
+
+        });
+
+    });
+
+    describe('#deleteDeviceMetadata', function() {
+        it('should throw an error if no deviceId given to look up', function() {
+            deviceInstance.id = null;
+            var fn = function() {
+                deviceInstance.deleteDeviceMetadata();
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should delete the metadata ', function(done) {
+            let data = {}
+            deviceInstance.deleteDeviceMetadata(data).then((response) => {
+                expect(response).to.be.defined;
+                done();
+            });
+
+            //this is the api
+            this.requests[0].respond(204, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(data));
+        });
+
     });
 
 });
