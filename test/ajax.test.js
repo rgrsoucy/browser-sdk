@@ -13,13 +13,12 @@ let ajaxInstance;
 
 
 describe('Ajax', function() {
-
+    let options = {
+        tokenType: 'Bearer',
+        token: 'FAKE_TOKEN',
+        uri: null,
+    };
     beforeEach(function() {
-        let options = {
-            tokenType: "Bearer",
-            token: "FAKE_TOKEN",
-            uri: null,
-        }
 
         ajaxInstance = new Ajax(options);
 
@@ -38,8 +37,26 @@ describe('Ajax', function() {
         this.xhr.restore();
     });
 
-    it('should get the current token', function() {
-        expect(ajaxInstance.token).to.equal("FAKE_TOKEN");
+
+    describe('setup', function() {
+        it('should get the current token', function() {
+            expect(ajaxInstance.token).to.equal('FAKE_TOKEN');
+        });
+
+        it('should default protocol to https://', function() {
+            expect(ajaxInstance.protocol).to.equal('https://');
+        });
+
+        it('should be possible to specify another protocol', function () {
+            ajaxInstance = new Ajax(Object.assign({
+                protocol: 'http://' },
+                options));
+            expect(ajaxInstance.protocol).to.equal('http://');
+        });
+
+        it('should default uri to api.relayr.io', function() {
+            expect(ajaxInstance.uri).to.equal('api.relayr.io/');
+        });
     });
 
     describe('get', function() {

@@ -3,7 +3,8 @@ default class Ajax {
     constructor(options) {
         this.tokenType = options.tokenType;
         this.token = options.token;
-        this.uri = options.uri || "https://api.relayr.io/"
+        this.uri = options.uri || "api.relayr.io/"
+        this.protocol = options.protocol || 'https://';
         this.customXHR;
     }
 
@@ -115,7 +116,7 @@ default class Ajax {
 
         xhrObject.open(
             options.type,
-            this.uri + options.url,
+            `${this.protocol}${this.uri}${options.url}`,
             true
         );
 

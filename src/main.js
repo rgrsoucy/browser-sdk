@@ -16,7 +16,8 @@ const config = {
     },
     ajax: {
         uri: 'api.relayr.io',
-        dataUri: 'data-api.relayr.io'
+        dataUri: 'data-api.relayr.io',
+        protocol: 'https://'
     }
 };
 
@@ -38,6 +39,7 @@ default {
 
             if (!oauth2) {
                 oauth2 = new Oauth2({
+                    protocol: config.ajax.protocol,
                     uri: config.ajax.uri,
                     appId: project.id,
                     redirectURI: project.redirectURI,
