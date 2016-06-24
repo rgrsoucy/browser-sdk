@@ -1,26 +1,25 @@
-export
-default class Ajax {
+export default class Ajax {
     constructor(options) {
         this.tokenType = options.tokenType;
         this.token = options.token;
-        this.uri = options.uri || "api.relayr.io/"
+        this.uri = options.uri || 'api.relayr.io/';
         this.protocol = options.protocol || 'https://';
         this.customXHR;
     }
 
-    get(url, opts ={contentType: 'application/json'}) {
+    get(url, opts ={ contentType: 'application/json' }) {
 
         if (!url) {
             throw new Error('Please provide atleast a url');
         }
-        if (typeof(url) !== "string") {
+        if (typeof (url) !== 'string') {
             throw new Error('Please provide a string url');
         }
         url += this._serializeQueryStr(opts.queryObj);
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
-                type: "GET",
+                type: 'GET',
                 url: url,
                 isObject: opts.raw || true,
                 contentType: opts.contentType
@@ -33,38 +32,38 @@ default class Ajax {
     }
 
 
-    post(url, body, opts ={contentType: 'application/json'}) {
+    post(url, body, opts ={ contentType: 'application/json' }) {
         if (!url) throw new Error('Please provide atleast a url');
-        if (typeof(url) !== "string") throw new Error('Please provide a string url');
+        if (typeof (url) !== 'string') throw new Error('Please provide a string url');
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
-                type: "POST",
-                url: url,
-                body: body,
-                isObject: opts.raw || true,
-                contentType: opts.contentType
-            }).then((result) => {
-                resolve(result);
-            }).catch((xhrObject) => {
-                reject(xhrObject);
-            });
-        });
-    }
-
-    patch(url, body, opts ={contentType: 'application/json'}) {
-        if (!url) throw new Error('Please provide atleast a url');
-        if (typeof(url) !== "string") throw new Error('Please provide a string url');
-
-        return new Promise((resolve, reject) => {
-            var xhrObject = this._xhrRequest({
-                type: "PATCH",
+                type: 'POST',
                 url: url,
                 body: body,
                 isObject: opts.raw || true,
                 contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
+            }).catch((xhrObject) => {
+                reject(xhrObject);
+            });
+        });
+    }
+
+    patch(url, body, opts ={ contentType: 'application/json' }) {
+        if (!url) throw new Error('Please provide atleast a url');
+        if (typeof (url) !== 'string') throw new Error('Please provide a string url');
+
+        return new Promise((resolve, reject) => {
+            var xhrObject = this._xhrRequest({
+                type: 'PATCH',
+                url: url,
+                body: body,
+                isObject: opts.raw || true,
+                contentType: opts.contentType
+            }).then((result) => {
+                resolve(result);
 
             }).catch((xhrObject) => {
                 reject(xhrObject);
@@ -72,13 +71,13 @@ default class Ajax {
         });
     }
 
-    delete(url, opts ={contentType: 'application/json'}) {
+    delete(url, opts ={ contentType: 'application/json' }) {
         if (!url) throw new Error('Please provide atleast a url');
-        if (typeof(url) !== "string") throw new Error('Please provide a string url');
+        if (typeof (url) !== 'string') throw new Error('Please provide a string url');
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
-                type: "DELETE",
+                type: 'DELETE',
                 url: url,
                 isObject: opts.raw || true,
                 contentType: opts.contentType
@@ -154,9 +153,6 @@ default class Ajax {
             } else {
                 xhrObject.send();
             }
-
         });
-
-
     }
 }

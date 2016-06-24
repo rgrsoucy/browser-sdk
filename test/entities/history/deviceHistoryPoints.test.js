@@ -3,9 +3,9 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-import DeviceHistoryPoints from '../../../entities/history/DeviceHistoryPoints.js';
+import DeviceHistoryPoints from '../../../src/entities/history/DeviceHistoryPoints.js';
 
-import deviceHistoryFixture from '../../fixtures/history/history';
+import deviceHistoryFixture from '../../fixtures/history';
 
 let expect = chai.expect;
 chai.use(sinonChai);

@@ -1,5 +1,5 @@
 import main from '../src/main';
-import User from '../entities/user';
+import User from '../src/entities/user';
 
 let oauthMock = {
     token: 'fake-token',

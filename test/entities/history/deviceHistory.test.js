@@ -3,10 +3,10 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-import Ajax from '../../../tools/ajax';
-import DeviceHistory from '../../../entities/history/DeviceHistory.js';
+import Ajax from '../../../src/tools/ajax';
+import DeviceHistory from '../../../src/entities/history/DeviceHistory.js';
 
-import DeviceHistoryFixture from '../../fixtures/history/history';
+import DeviceHistoryFixture from '../../fixtures/history';
 
 var expect = chai.expect;
 chai.use(sinonChai);

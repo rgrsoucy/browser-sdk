@@ -1,7 +1,6 @@
 import Ajax from '../tools/ajax.js';
 
-export
-default class Transmitter {
+export default class Transmitter {
   constructor(config) {
     this.transmitterId = config.transmitterId;
     this.secret = config.secret;
@@ -55,6 +54,6 @@ default class Transmitter {
         }).catch((error) => {
           reject(error);
         });
-    })
+    });
   }
 };

@@ -1,8 +1,8 @@
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import chaiPromise from 'chai-as-promised'
-import Connection from '../tools/connection'
+import chaiPromise from 'chai-as-promised';
+import Connection from '../src/tools/connection';
 
 var expect = chai.expect;
 
@@ -13,15 +13,15 @@ chai.use(chaiPromise);
 
 describe('Connection', function() {
 
-    it("Should trigger subscriber callback on event", function(done) {
+    it('Should trigger subscriber callback on event', function(done) {
         let dataCount = 0;
-        let connection = new Connection
+        let connection = new Connection;
         let mockData = {
-            meaning: "temp",
+            meaning: 'temp',
             value: 20
-        }
-        connection.on("data", function(dataStream) {
-            expect(dataStream).to.deep.equal(mockData)
+        };
+        connection.on('data', function(dataStream) {
+            expect(dataStream).to.deep.equal(mockData);
             if (dataCount == 5) {
                 done();
 
@@ -32,24 +32,24 @@ describe('Connection', function() {
 
         function fakeSocket() {
             for (var i = 5; i >= 0; i--) {
-                connection.event(mockData)
+                connection.event(mockData);
             }
         }
 
         fakeSocket();
     });
 
-    it("Should keep a buffer of historical data and flush to subscriber when ready", function(done) {
+    it('Should keep a buffer of historical data and flush to subscriber when ready', function(done) {
         let dataCount = 0;
-        this.timeout(5000)
-        let connection = new Connection
+        this.timeout(5000);
+        let connection = new Connection;
         let mockData = {
-            meaning: "temp",
+            meaning: 'temp',
             value: 20
-        }
+        };
 
         function fakeSocket() {
-            connection.event(mockData)
+            connection.event(mockData);
         }
 
         fakeSocket();
@@ -59,13 +59,13 @@ describe('Connection', function() {
         function fakeProcessingWait() {
             setTimeout(() => {
 
-                connection.on("data", function(dataStream) {
-                    expect(dataStream).to.deep.equal(mockData)
+                connection.on('data', function(dataStream) {
+                    expect(dataStream).to.deep.equal(mockData);
                     done();
 
                 });
 
-            }, 2000)
+            }, 2000);
         }
 
         fakeProcessingWait();

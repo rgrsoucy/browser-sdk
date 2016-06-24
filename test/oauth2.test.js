@@ -1,4 +1,4 @@
-import Oauth2 from '../authorization/oauth2.js';
+import Oauth2 from '../src/authorization/oauth2.js';
 
 import chai from 'chai';
 import sinon from 'sinon';

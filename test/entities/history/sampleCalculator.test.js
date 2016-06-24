@@ -2,7 +2,7 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 
-import sampleCalculator from '../../../entities/history/sampleCalculator.js';
+import sampleCalculator from '../../../src/entities/history/sampleCalculator.js';
 
 var expect = chai.expect;
 chai.use(sinonChai);

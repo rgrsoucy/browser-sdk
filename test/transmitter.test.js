@@ -1,4 +1,4 @@
-import Transmitter from '../entities/Transmitter.js';
+import Transmitter from '../src/entities/Transmitter.js';
 
 import chai from 'chai';
 import sinon from 'sinon';
@@ -78,7 +78,7 @@ describe('Transmitter', function() {
       let patch = {
         owner: 'bob',
         name: 'Im a thing'
-      }
+      };
       let response;
 
 
@@ -106,7 +106,7 @@ describe('Transmitter', function() {
     });
 
     it('should delete the transmitterInstance', function(done) {
-      let data = {}
+      let data = {};
 
       transmitterInstance.deleteTransmitter(data).then((response) => {
         expect(response).to.be.defined;
