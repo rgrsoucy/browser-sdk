@@ -1,21 +1,21 @@
-import Paho from '../vendors/mqttws31.min.js';
+import Paho from '../../vendors/mqttws31.min.js';
 
 class Mqtt {
     constructor(config) {
         var self = this;
 
         this.config = {
-            endpoint: "mqtt.relayr.io",
+            endpoint: 'mqtt.relayr.io',
             port: 443,
             mqttTimeout: 10000
-        }
+        };
 
         if (config) {
             Object.assign(this.config, config);
         }
         this.endpoint = this.config.endpoint;
-        this.port = this.config.port
-        this.clientId = 'JSDK_' + Math.floor((Math.random() * 1000))
+        this.port = this.config.port;
+        this.clientId = 'JSDK_' + Math.floor((Math.random() * 1000));
         this._topics = {};
 
         try {
@@ -26,13 +26,12 @@ class Mqtt {
         }
 
         return this;
-
     }
 
     connect(config) {
-        if (!config) throw Error("You must provide configuration options")
-        if (!config.userName) throw Error("You must provide userName in options")
-        if (!config.password) throw Error("You must provide password in options")
+        if (!config) throw Error('You must provide configuration options');
+        if (!config.userName) throw Error('You must provide userName in options');
+        if (!config.password) throw Error('You must provide password in options');
         return new Promise((resolve, reject) => {
 
             let options = {
@@ -71,8 +70,8 @@ class Mqtt {
 
 
     subscribe(topic, eventCallback) {
-        if (!topic) throw Error("You must provide a topic")
-        if (!eventCallback) throw Error("You must provide a callback for live events")
+        if (!topic) throw Error('You must provide a topic');
+        if (!eventCallback) throw Error('You must provide a callback for live events');
         if (this.client && this.client.isConnected()) this.client.subscribe(topic, 0);
 
         if (this._topics[topic]) {
@@ -82,7 +81,7 @@ class Mqtt {
             this._topics[topic].subscribers = [];
             this._topics[topic].subscribers.push(eventCallback);
         }
-        return this
+        return this;
     }
 
     _onConnectSuccess() {
@@ -92,7 +91,7 @@ class Mqtt {
     }
 
     _onConnectFailure(err) {
-        console.log("onFailure", err)
+        console.log('onFailure', err);
     }
 
     _onConnectionLost() {
@@ -123,7 +122,6 @@ class Mqtt {
 
 }
 
-export
-let mqtt = new Mqtt();
+export let mqtt = new Mqtt();
 
 export default Mqtt;

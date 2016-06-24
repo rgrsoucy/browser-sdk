@@ -1,11 +1,11 @@
-import Oauth2 from '../authorization/oauth2';
-import User from '../entities/User';
-import Device from '../entities/Device';
-import Ajax from '../tools/ajax';
+import Oauth2 from './authorization/oauth2';
+import User from './entities/User';
+import Device from './entities/Device';
+import Ajax from './tools/ajax';
 import {
     mqtt
 }
-from '../tools/mqtt';
+from './tools/mqtt';
 
 export let device = Device;
 
@@ -24,8 +24,7 @@ const config = {
 let currentUser;
 let project;
 let oauth2;
-export
-default {
+export default {
     init: function(p, customConfig) {
         project = p;
 

@@ -1,5 +1,5 @@
-import Device from '../entities/Device.js';
-import DeviceHistory from '../entities/history/DeviceHistory.js';
+import Device from '../src/entities/Device.js';
+import DeviceHistory from '../src/entities/history/DeviceHistory.js';
 
 import readingFixture from './fixtures/devices/readings.fixture';
 
@@ -38,7 +38,7 @@ describe('Device', function() {
             modelId: 'fakeModel',
             owner: 'fakeOwner'
 
-        }
+        };
 
         deviceInstance = new Device(fakeDevice, fakeConfig);
 
@@ -92,7 +92,7 @@ describe('Device', function() {
             let patch = {
                 owner: 'bob',
                 name: 'Im a thing'
-            }
+            };
             let response;
 
             deviceInstance.ajax.customXHR = this.xhr;
@@ -120,7 +120,7 @@ describe('Device', function() {
         });
 
         it('should delete the deviceInstance', function(done) {
-            let data = {}
+            let data = {};
 
             deviceInstance.ajax.customXHR = this.xhr;
             deviceInstance.deleteDevice(data).then((response) => {
@@ -179,21 +179,21 @@ describe('Device', function() {
 
         it('should give back channel credentials', function(done) {
             let credentialsStub = {
-                "channelId": "50a66b82-cb538",
-                "id": "1234",
-                "credentials": {
-                    "user": "2b6:3b383d97-82dc6a",
-                    "password": "vcGqoSr",
-                    "clientId": "502139731",
-                    "topic": "/v1/50a66c96-bac80"
+                channelId: '50a66b82-cb538',
+                id: '1234',
+                credentials: {
+                    user: '2b6:3b383d97-82dc6a',
+                    password: 'vcGqoSr',
+                    clientId: '502139731',
+                    topic: '/v1/50a66c96-bac80'
                 }
-            }
+            };
 
-            deviceInstance.id = "1234"
+            deviceInstance.id = '1234';
 
             deviceInstance.getChannel().then((credentials) => {
                 expect(credentials).to.deep.equal(credentialsStub);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -318,34 +318,34 @@ describe('Device', function() {
     describe('#getDeviceState', function() {
 
         let sampleState = {
-            "readings": [{
-                "path": "",
-                "meaning": "",
-                "value": "",
-                "received": 12345
+            readings: [{
+                path: '',
+                meaning: '',
+                value: '',
+                received: 12345
             }],
-            "version": {
-                "commands": {
-                    "number": 0,
-                    "ts": 12345
+            version: {
+                commands: {
+                    number: 0,
+                    ts: 12345
                 },
-                "configurations": {
-                    "number": 0,
-                    "ts": 12345
+                configurations: {
+                    number: 0,
+                    ts: 12345
                 },
-                "readings": {
-                    "number": 0,
-                    "ts": 12345
+                readings: {
+                    number: 0,
+                    ts: 12345
                 },
-                "metadata": {
-                    "number": 0,
-                    "ts": 12345
+                metadata: {
+                    number: 0,
+                    ts: 12345
                 }
             },
-            "metadata": {},
-            "configurations": [],
-            "commands": []
-        }
+            metadata: {},
+            configurations: [],
+            commands: []
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -360,7 +360,7 @@ describe('Device', function() {
 
             deviceInstance.getDeviceState().then((response) => {
                 expect(response).to.deep.equal(sampleState);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -372,8 +372,8 @@ describe('Device', function() {
     describe('#getDeviceConfiguration', function() {
 
         let sampleConfiguration = {
-            "configurations": ['something']
-        }
+            configurations: ['something']
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -388,7 +388,7 @@ describe('Device', function() {
 
             deviceInstance.getDeviceConfigurations().then((response) => {
                 expect(response).to.deep.equal(sampleConfiguration);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -399,10 +399,10 @@ describe('Device', function() {
 
     describe('#setDeviceConfigurations', function() {
         let schema = {
-            'path': 'somePath',
-            'name': 'someName',
-            'value': 'someValue'
-        }
+            path: 'somePath',
+            name: 'someName',
+            value: 'someValue'
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -441,16 +441,16 @@ describe('Device', function() {
 
         it('should add an item to the configurations array', function() {
             deviceInstance.configurations[0] = {
-                'path': 'somePath1',
-                'name': 'someName1',
-                'value': 'someValue1'
-            }
+                path: 'somePath1',
+                name: 'someName1',
+                value: 'someValue1'
+            };
             let response;
 
             let sampleConfig = [schema];
             deviceInstance.setDeviceConfigurations(schema).then((response) => {
                 expect(deviceInstance.configurations.length).to.equal(2);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -464,7 +464,7 @@ describe('Device', function() {
             let sampleConfig = [schema];
             deviceInstance.setDeviceConfigurations(schema).then((response) => {
                 expect(response).to.deep.equal(sampleConfig);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -478,8 +478,8 @@ describe('Device', function() {
     describe('#getDeviceCommands', function() {
 
         let sampleCommands = {
-            "commands": ['do it']
-        }
+            commands: ['do it']
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -494,7 +494,7 @@ describe('Device', function() {
 
             deviceInstance.getDeviceCommands().then((response) => {
                 expect(response).to.deep.equal(sampleCommands);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -505,10 +505,10 @@ describe('Device', function() {
 
     describe('#setDeviceCommands', function() {
         let cmd = {
-            'path': 'somePath',
-            'name': 'someName',
-            'value': 'someValue'
-        }
+            path: 'somePath',
+            name: 'someName',
+            value: 'someValue'
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -547,17 +547,17 @@ describe('Device', function() {
 
         it('should add an item to the commands array', function() {
             deviceInstance.commands[0] = {
-                'path': 'somePath1',
-                'name': 'someName1',
-                'value': 'someValue1'
-            }
+                path: 'somePath1',
+                name: 'someName1',
+                value: 'someValue1'
+            };
 
             let response;
 
             let sampleConfig = [cmd];
             deviceInstance.setDeviceCommands(cmd).then((response) => {
                 expect(deviceInstance.commands.length).to.equal(2);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -571,7 +571,7 @@ describe('Device', function() {
             let sampleConfig = [cmd];
             deviceInstance.setDeviceCommands(cmd).then((response) => {
                 expect(response).to.deep.equal(sampleConfig);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -585,10 +585,10 @@ describe('Device', function() {
     describe('#getDeviceMetadata', function() {
 
         let sampleMetadata = {
-            "metadata": {
-                'data': 'metaaaaaa'
+            metadata: {
+                data: 'metaaaaaa'
             }
-        }
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -603,7 +603,7 @@ describe('Device', function() {
 
             deviceInstance.getDeviceMetadata().then((response) => {
                 expect(response).to.deep.equal(sampleMetadata);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -614,8 +614,8 @@ describe('Device', function() {
 
     describe('#setDeviceMetadata', function() {
         let meta = {
-            'data': 'metaaaaaa'
-        }
+            data: 'metaaaaaa'
+        };
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
@@ -644,12 +644,12 @@ describe('Device', function() {
             let response;
 
             deviceInstance.metadata = {
-                'data': 'this that or the other thing'
+                data: 'this that or the other thing'
             };
 
             deviceInstance.setDeviceMetadata(meta).then((response) => {
                 expect(deviceInstance.metadata).to.deep.equal(meta);
-                done()
+                done();
             });
 
             this.requests[0].respond(204, {
@@ -670,7 +670,7 @@ describe('Device', function() {
         });
 
         it('should delete the metadata ', function(done) {
-            let data = {}
+            let data = {};
             deviceInstance.deleteDeviceMetadata(data).then((response) => {
                 expect(response).to.be.defined;
                 done();

@@ -1,7 +1,6 @@
-import Ajax from '../tools/ajax.js'
+import Ajax from '../tools/ajax.js';
 
-export
-default class User {
+export default class User {
   constructor(config) {
     this.config = config;
     this.ajax = new Ajax(config.ajax);
@@ -12,9 +11,9 @@ default class User {
       if (this.userInfo) {
         resolve(this.userInfo);
       } else {
-        this.ajax.get("/oauth2/user-info").then((response) => {
+        this.ajax.get('/oauth2/user-info').then((response) => {
           this.userInfo = response;
-          resolve(response)
+          resolve(response);
         }).catch((error) => {
           reject(error);
         });
@@ -27,36 +26,36 @@ default class User {
     return new Promise((resolve, reject) => {
       this.getUserInfo().then(() => {
         this.ajax.get(`/users/${this.userInfo.id}/devices`).then((response) => {
-          resolve(response)
+          resolve(response);
         }).catch((error) => {
           reject(error);
         });
       });
-    })
+    });
   }
 
   getMyGroups() {
     return new Promise((resolve, reject) => {
       this.getUserInfo().then(() => {
         this.ajax.get(`/users/${this.userInfo.id}/groups`).then((response) => {
-          resolve(response)
+          resolve(response);
         }).catch((error) => {
           reject(error);
         });
       });
-    })
+    });
   }
 
   getMyTransmitters() {
     return new Promise((resolve, reject) => {
       this.getUserInfo().then(() => {
         this.ajax.get(`/users/${this.userInfo.id}/transmitters`).then((response) => {
-          resolve(response)
+          resolve(response);
         }).catch((error) => {
           reject(error);
         });
       });
-    })
+    });
   }
 
   _getConfig() {

@@ -1,5 +1,4 @@
-import User from '../entities/User.js';
-
+import User from '../src/entities/User.js';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -14,11 +13,11 @@ describe('User', function() {
     beforeEach(function() {
         fakeConfig = {
             ajax: {
-                url: "http://123",
-                token: "123",
-                tokenType: "Bears"
+                url: 'http://123',
+                token: '123',
+                tokenType: 'Bears'
             }
-        }
+        };
 
         userInstance = new User(fakeConfig);
 
@@ -40,10 +39,10 @@ describe('User', function() {
 
         it('should resolve a promise with user info', function(done) {
             let userStub = {
-                id: "123",
-                email: "john@doe",
-                name: "billy"
-            }
+                id: '123',
+                email: 'john@doe',
+                name: 'billy'
+            };
 
 
             userInstance.getUserInfo().then((userInfo) => {

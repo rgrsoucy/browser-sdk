@@ -1,16 +1,8 @@
-import Model, {
-    cache
-}
-from '../entities/Model.js';
-
+import Model, { cache } from '../src/entities/Model';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-
-import {
-    relayrMockModels
-}
-from './fixtures/models/models.fixture.js';
+import { relayrMockModels } from './fixtures/models/models.fixture.js';
 
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 var expect = chai.expect;
@@ -18,7 +10,7 @@ chai.use(sinonChai);
 
 let modelInstance;
 let fakeConfig;
-console.log(cache.init())
+
 describe('Model', function() {
     beforeEach(function() {
         fakeConfig = {
@@ -69,7 +61,7 @@ describe('Model', function() {
             let firstTime = modelInstance.getAllModels().then((result) => {
 
                 let secondTime = modelInstance.getAllModels().then((result) => {
-                    expect(cache.public.toArray[0]).to.deep.equal(sampleModel.models[0])
+                    expect(cache.public.toArray[0]).to.deep.equal(sampleModel.models[0]);
                     done();
                 });
             });
@@ -87,7 +79,7 @@ describe('Model', function() {
 
             modelInstance.getAllModels().then((result) => {
 
-                expect(cache.public.toDictionary[sampleModel.models[0].id]).to.deep.equal(sampleModel.models[0])
+                expect(cache.public.toDictionary[sampleModel.models[0].id]).to.deep.equal(sampleModel.models[0]);
                 done();
             });
 
@@ -104,9 +96,9 @@ describe('Model', function() {
         it('should retreive a single model even when cache was never created', function(done) {
 
             let sampleModel = relayrMockModels;
-            let modelId = "85dad151-e0e1-407b-9ec8-25f28de92849"
+            let modelId = '85dad151-e0e1-407b-9ec8-25f28de92849';
             modelInstance.getModel(modelId).then((result) => {
-                expect(result.id).to.equal(modelId)
+                expect(result.id).to.equal(modelId);
                 done();
             });
 
@@ -119,17 +111,17 @@ describe('Model', function() {
         it('should return 404 when model is not found', function(done) {
 
             let sampleModel = relayrMockModels;
-            let modelId = "oh.noes.im.a.model.now.:("
+            let modelId = 'oh.noes.im.a.model.now.:(';
             modelInstance.getModel(modelId).then((model) => {
 
-            }).catch((error)=>{
+            }).catch((error)=> {
               expect(error.status).to.equal(404);
               done();
             });
 
             this.requests[0].respond(404, {
                 'Content-Type': 'text/json'
-            }, "Not found");
+            }, 'Not found');
 
         });
     });

@@ -1,7 +1,4 @@
-export
-default
-
-function connection() {
+export default function connection() {
     let self = this;
     this.buffer = [];
     this.event = function(data) {
@@ -10,7 +7,7 @@ function connection() {
         } else {
             self.buffer.push(data);
         }
-    }
+    };
 
     this._flush = () => {
         if (self._dataSubscriber) {
@@ -19,21 +16,20 @@ function connection() {
             }
         }
         return;
-    }
+    };
 
     this.on = function(event, _dataSubscriber) {
         switch (event) {
-            case "data":
+            case 'data':
                 self._dataSubscriber = _dataSubscriber;
                 this._flush();
                 break;
-            case "error":
+            case 'error':
                 break;
-            case "connectionLost":
+            case 'connectionLost':
                 break;
-            case "reconnecting":
+            case 'reconnecting':
                 break;
         }
-    }
-
+    };
 }
