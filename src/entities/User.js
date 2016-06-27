@@ -1,8 +1,7 @@
 import Ajax from '../tools/ajax.js';
 import Device from './Device';
 
-export
-default class User {
+export default class User {
     constructor(config) {
         this.config = config;
         this.ajax = new Ajax(config.ajax);
