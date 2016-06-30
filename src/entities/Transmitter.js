@@ -27,23 +27,23 @@ default class Transmitter {
         });
     }
 
-    updateTransmitter(patch, opts) {
+    updateTransmitter(patchBody, opts) {
         if (!(this.transmitterId)) {
             throw new Error('Provide the transmitterId during instantiation');
-        } else if (!(patch)) {
+        } else if (!(patchBody)) {
             throw new Error('Provide a patch of parameters to update');
-        } else if (!(Object.keys(patch).length)) {
+        } else if (!(Object.keys(patchBody).length)) {
             throw new Error('Provide a patch with some parameters to update');
         }
 
-        for (var x in patch) {
+        for (var x in patchBody) {
             if (!(this.hasOwnProperty(x))) {
                 throw new Error('Provide a patch with relevant parameters to update');
             }
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/transmitters/${this.transmitterId}`, patch, opts)
+            this.ajax.patch(`/transmitters/${this.transmitterId}`, patchBody, opts)
                 .then((response) => {
                     this.transmitterId = response.transmitterId,
                     this.secret = response.secret,
