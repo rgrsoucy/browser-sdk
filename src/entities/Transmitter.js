@@ -43,6 +43,7 @@ default class Transmitter {
         }
 
         return new Promise((resolve, reject) => {
+            console.log('================================', `${this.transmitterId}`);
             this.ajax.patch(`/transmitters/${this.transmitterId}`, patchBody, opts)
                 .then((response) => {
                     this.transmitterId = response.transmitterId,
