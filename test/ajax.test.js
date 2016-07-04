@@ -215,6 +215,14 @@ describe('Ajax', function() {
             this.requests[0].respond(500, {});
         });
 
+        it('should throw an error if the url doesnt have a leading /', function() {
+
+            var fn = function() {
+                ajaxInstance.get('test', true, {});
+            };
+            expect(fn).to.throw(Error);
+        });
+
     });
 
     describe('#patch', function() {
@@ -226,6 +234,14 @@ describe('Ajax', function() {
             expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
                 fakeKey: 'fakeValue'
             }));
+        });
+
+        it('should throw an error if the url doesnt have a leading /', function() {
+
+            var fn = function() {
+                ajaxInstance.get('test', true, {});
+            };
+            expect(fn).to.throw(Error);
         });
     });
 
