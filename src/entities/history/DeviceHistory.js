@@ -71,7 +71,9 @@ export default class DeviceHistory {
                     offset: data.response.offset + data.response.limit
                 }, resolve, reject);
             } else {
-                resolve(points);
+                resolve({
+                    points: points
+                });
             }
         };
 

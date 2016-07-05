@@ -296,8 +296,8 @@ describe('DeviceHistory', function() {
             deviceHistoryInstance.getAllHistoricalData({
                 periode: '1m',
                 onDataReceived: pageListener
-            }).then((points) => {
-                expect(points.get('fake-meaning', 'fake-path').points).to.deep.include.members([{
+            }).then((response) => {
+                expect(response.points.get('fake-meaning', 'fake-path').points).to.deep.include.members([{
                     timestamp: 0,
                     value: 0
                 }, {
