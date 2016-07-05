@@ -8,6 +8,8 @@ global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 let userInstance;
 let fakeConfig;
+let userStub;
+let devicesStub;
 
 describe('User', function() {
     beforeEach(function() {
@@ -56,37 +58,63 @@ describe('User', function() {
             }, JSON.stringify(userStub));
         });
     });
-    //Will enable this after we fix the double promise xhr request issue
-    // describe('#getMyTransmitters', function() {
 
-    //     it('should resolve a promise with transmitter info', function(done) {
-    //         let transmitterStub = [{
-    //             "id": "c30f9ca2-db38-496b-a833-ca67cb4dc3c8",
-    //             "secret": "AOf3Ft47lvDjgKX",
-    //             "owner": "c70faa9f-5eda-49d8-be91-a7e4b1beeca1",
-    //             "name": "Test transmitter",
-    //             "topic": "/v1/396e822e-9d04-40c1-a049-8b95d3fd7e36/",
-    //             "integrationType": "wunderbar2"
-    //         }];
+    describe('#getAllMyDevices', function() {
 
-    //         let userStub = {
-    //             id: "123",
-    //             email: "john@doe",
-    //             name: "billy"
-    //         }
+        beforeEach(function() {
+            userStub = {
+                id: '123',
+                email: 'john@doe',
+                name: 'billy'
+            };
 
+            devicesStub = [{
+                id: 'fakeDeviceId',
+                name: 'fakeDeviceName1',
+                modelId: 'fakeModel',
+                owner: 'fakeOwner'
 
-    //         //  userInstance.userInfo = userStub;
+            }, {
+                id: 'fakeDeviceId2',
+                name: 'fakeDeviceName2',
+                modelId: 'fakeModel',
+                owner: 'fakeOwner'
 
-    //         userInstance.getMyTransmitters().then((result) => {
-    //             //expect(result).to.deep.equal(transmitterStub[0]);
-    //             done();
-    //         });
+            }]
 
+        });
 
-    //         this.requests[0].respond(200, {
-    //             'Content-Type': 'text/json'
-    //         }, JSON.stringify(transmitterStub));
-    //     });
-    // });
+        it('should get all devices', function(done) {
+            userInstance.userInfo = userStub;
+            userInstance.getMyDevices().then((devices) => {
+                expect(devices).to.deep.equal(devicesStub);
+                done();
+            });
+
+            setTimeout(() => {
+                //give some time for the async userInfo cache to take effect
+                this.requests[0].respond(200, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify(devicesStub));
+            }, 0);
+        });
+
+        it('should get all devices as classes', function(done) {
+            userInstance.userInfo = userStub;
+            userInstance.getMyDevices({
+                asClasses: true
+            }).then((devices) => {
+                expect(devices[0]).to.have.property("rawDevice");
+                done();
+            });
+
+            setTimeout(() => {
+                //give some time for the async userInfo cache to take effect
+                this.requests[0].respond(200, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify(devicesStub));
+            }, 0);
+        });
+
+    });
 });
