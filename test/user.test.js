@@ -96,7 +96,7 @@ describe('User', function() {
                 this.requests[0].respond(200, {
                     'Content-Type': 'text/json'
                 }, JSON.stringify(devicesStub));
-            }, 100);
+            }, 1);
         });
 
         it('should get all devices as classes', function(done) {
@@ -113,7 +113,7 @@ describe('User', function() {
                 this.requests[0].respond(200, {
                     'Content-Type': 'text/json'
                 }, JSON.stringify(devicesStub));
-            }, 100);
+            }, 1);
         });
 
     });
