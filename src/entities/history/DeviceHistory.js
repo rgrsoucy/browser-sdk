@@ -46,4 +46,43 @@ export default class DeviceHistory {
             }, reject);
         });
     }
+
+    getAllHistoricalData(opts = {}) {
+        let points;
+
+        let { onDataReceived, periode } = opts;
+        onDataReceived = onDataReceived || function() {};
+
+        let hasMore = function(data) {
+            return data.count > data.limit && (data.count - data.offset) > data.limit;
+        };
+
+        let handleResponse = (data, resolve, reject) => {
+            if(data.points && !points) {
+                points = data.points;
+            } else if (data.response && data.response.results) {
+                points.addPoints(data.response.results);
+            }
+
+            onDataReceived(points);
+
+            if (hasMore(data.response)) {
+                getData({
+                    offset: data.response.offset + data.response.limit
+                }, resolve, reject);
+            } else {
+                resolve(points);
+            }
+        };
+
+        let getData = (opts, resolve, reject) => {
+            this.getHistoricalData(opts).then((data) => {
+                handleResponse(data, resolve, reject);
+            }, reject);
+        };
+
+        return new Promise((resolve, reject) => {
+            getData(opts, resolve, reject);
+        });
+    }
 };

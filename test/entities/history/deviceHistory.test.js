@@ -25,15 +25,18 @@ const fakeConfig = {
 let deviceHistoryInstance;
 
 describe('DeviceHistory', function() {
+    let requestCb = function() {
+    };
     beforeEach(function() {
 
         this.xhr = sinon.useFakeXMLHttpRequest();
 
         this.requests = [];
 
-        this.xhr.onCreate = function(xhr) {
+        this.xhr.onCreate = (xhr) => {
             this.requests.push(xhr);
-        }.bind(this);
+            requestCb(xhr);
+        };
 
         deviceHistoryInstance = new DeviceHistory({
             id: 'fakeDeviceId'
@@ -202,6 +205,119 @@ describe('DeviceHistory', function() {
             });
 
         });
+    });
 
+    describe('#getAllHistoricalData', function() {
+        beforeEach(function() {
+            let count = 0;
+            requestCb = (request) => {
+                //Needs to be done async
+                setTimeout(function() {
+                    request.respond(204, {
+                        'Content-Type': 'application/json'
+                    }, JSON.stringify({
+                        count: 30,
+                        limit: 15,
+                        offset: count * 15,
+                        results: [{
+                            points: [{
+                                timestamp: count,
+                                value: count
+                            }],
+                            meaning: 'fake-meaning',
+                            path: 'fake-path'
+                        }]
+                    }));
+                    count++;
+                }, 0);
+            }
+        });
+
+        it('should get all pages', function(done) {
+            deviceHistoryInstance.getAllHistoricalData({
+                periode: '1m'
+            }).then(() => {
+                expect(this.requests.length).to.equal(2);
+                done();
+            });
+        });
+
+        it('should notify listener on when data is coming in for each page', function(done) {
+            var pageListener = sinon.spy();
+            deviceHistoryInstance.getAllHistoricalData({
+                periode: '1m',
+                onDataReceived: pageListener
+            }).then(() => {
+                expect(pageListener).to.have.been.calledTwice;
+                done();
+            });
+        });
+
+        it('should fail the if one of the pages fails', function(done) {
+            let count = 0;
+            requestCb = (request) => {
+                //Needs to be done async
+                setTimeout(function() {
+                    if (count == 1) {
+                        request.respond(404, {
+                            'Content-Type': 'application/json'
+                        }, JSON.stringify({
+                            message: 'oh noes'
+                        }));
+                        return;
+                    }
+                    request.respond(204, {
+                        'Content-Type': 'application/json'
+                    }, JSON.stringify({
+                        count: 30,
+                        limit: 15,
+                        offset: count * 15,
+                        results: [{
+                            points: [{
+                                timestamp: 1,
+                                value: count
+                            }],
+                            meaning: 'fake-meaning',
+                            path: 'fake-path'
+                        }]
+                    }));
+                    count++;
+                }, 0);
+            }
+
+            deviceHistoryInstance.getAllHistoricalData({}).then(() => {}, (data) => {
+                expect(JSON.parse(data.response).message).to.equal('oh noes');
+                done();
+            });
+        });
+
+        it('should append points for each reading for every new page', function(done) {
+            var pageListener = sinon.spy();
+            deviceHistoryInstance.getAllHistoricalData({
+                periode: '1m',
+                onDataReceived: pageListener
+            }).then((points) => {
+                expect(points.get('fake-meaning', 'fake-path').points).to.deep.include.members([{
+                    timestamp: 0,
+                    value: 0
+                }, {
+                    timestamp: 1,
+                    value: 1
+                }])
+                done();
+            });
+        });
+
+        it('should pass query options', function() {
+            deviceHistoryInstance.getAllHistoricalData({
+                start: new Date(1985, 10, 1),
+                end: new Date(1988, 8, 31),
+                sample: '1d'
+            });
+
+            expect(this.requests[0].url).to.contain('sample=');
+            expect(this.requests[0].url).to.contain('start=');
+            expect(this.requests[0].url).to.contain('end=');
+        })
     });
 });
