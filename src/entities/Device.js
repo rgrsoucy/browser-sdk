@@ -1,12 +1,16 @@
 import Ajax from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
 import DeviceHistory from './history/DeviceHistory';
-import { mqtt } from '../tools/mqtt';
+import {
+    mqtt
+}
+from '../tools/mqtt';
 import Model from './Model';
 
 let sharedChannel = null;
 
-export default class Device {
+export
+default class Device {
     constructor(rawDevice = {}, config) {
         this.rawDevice = rawDevice;
         this.config = config;
@@ -41,7 +45,9 @@ export default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/devices/${this.id}`, patch, { raw: raw })
+            this.ajax.patch(`/devices/${this.id}`, patch, {
+                raw: raw
+            })
                 .then((response) => {
                     this.name = response.name;
                     this.modelId = response.modelId;
@@ -93,7 +99,9 @@ export default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/devices/${this.id}`, patch, { raw: raw })
+            this.ajax.patch(`/devices/${this.id}`, patch, {
+                raw: raw
+            })
                 .then((response) => {
                     resolve(response);
                 }).catch((error) => {
@@ -112,7 +120,7 @@ export default class Device {
                     deviceId: this.id,
                     transport: transport || 'mqtt'
                 };
-                this.ajax.post(`channels`, body)
+                this.ajax.post(`/channels`, body)
                     .then((response) => {
                         this._channelCredentials = response;
                         if (!sharedChannel) {

@@ -1,4 +1,5 @@
-export default class Ajax {
+export
+default class Ajax {
     constructor(options) {
         this.tokenType = options.tokenType;
         this.token = options.token;
@@ -7,12 +8,17 @@ export default class Ajax {
         this.customXHR;
     }
 
-    get(url, opts ={ contentType: 'application/json' }) {
+    get(url, opts = {
+        contentType: 'application/json'
+    }) {
+        if (!(url.charAt(0) === '/')) {
+            throw new Error('Please provide a url with a leading /');
+        }
 
         if (!url) {
             throw new Error('Please provide atleast a url');
         }
-        if (typeof (url) !== 'string') {
+        if (typeof(url) !== 'string') {
             throw new Error('Please provide a string url');
         }
         url += this._serializeQueryStr(opts.queryObj);
@@ -32,9 +38,14 @@ export default class Ajax {
     }
 
 
-    post(url, body, opts ={ contentType: 'application/json' }) {
+    post(url, body, opts = {
+        contentType: 'application/json'
+    }) {
+        if (!url.charAt(0) === '/') {
+            throw new Error('Please provide a url with a leading /');
+        }
         if (!url) throw new Error('Please provide atleast a url');
-        if (typeof (url) !== 'string') throw new Error('Please provide a string url');
+        if (typeof(url) !== 'string') throw new Error('Please provide a string url');
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
@@ -51,9 +62,14 @@ export default class Ajax {
         });
     }
 
-    patch(url, body, opts ={ contentType: 'application/json' }) {
+    patch(url, body, opts = {
+        contentType: 'application/json'
+    }) {
+        if (!url.charAt(0) === '/') {
+            throw new Error('Please provide a url with a leading /');
+        }
         if (!url) throw new Error('Please provide atleast a url');
-        if (typeof (url) !== 'string') throw new Error('Please provide a string url');
+        if (typeof(url) !== 'string') throw new Error('Please provide a string url');
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
@@ -71,9 +87,14 @@ export default class Ajax {
         });
     }
 
-    delete(url, opts ={ contentType: 'application/json' }) {
+    delete(url, opts = {
+        contentType: 'application/json'
+    }) {
+        if (!url.charAt(0) === '/') {
+            throw new Error('Please provide a url with a leading /');
+        }
         if (!url) throw new Error('Please provide atleast a url');
-        if (typeof (url) !== 'string') throw new Error('Please provide a string url');
+        if (typeof(url) !== 'string') throw new Error('Please provide a string url');
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({

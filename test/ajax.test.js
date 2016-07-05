@@ -47,9 +47,10 @@ describe('Ajax', function() {
             expect(ajaxInstance.protocol).to.equal('https://');
         });
 
-        it('should be possible to specify another protocol', function () {
+        it('should be possible to specify another protocol', function() {
             ajaxInstance = new Ajax(Object.assign({
-                protocol: 'http://' },
+                    protocol: 'http://'
+                },
                 options));
             expect(ajaxInstance.protocol).to.equal('http://');
         });
@@ -120,19 +121,25 @@ describe('Ajax', function() {
 
         describe('query parameters', function() {
             it('should create a query params string of query object', function() {
-                ajaxInstance.get('/test', { raw: true, queryObj: {
-                    one: 1,
-                    two: 2,
-                    three: 3
-                } });
+                ajaxInstance.get('/test', {
+                    raw: true,
+                    queryObj: {
+                        one: 1,
+                        two: 2,
+                        three: 3
+                    }
+                });
 
                 expect(this.requests[0].url).to.contain('?one=1&two=2&three=3');
             });
 
             it('should URI encode all query parameters', function() {
-                ajaxInstance.get('/test', { raw: true, queryObj: {
-                    complicated: '-- test *'
-                } });
+                ajaxInstance.get('/test', {
+                    raw: true,
+                    queryObj: {
+                        complicated: '-- test *'
+                    }
+                });
 
                 expect(this.requests[0].url).to.contain('?complicated=--%20test%20*');
             });
@@ -148,6 +155,14 @@ describe('Ajax', function() {
 
                 expect(this.requests[0].url).to.not.contain('?');
             });
+
+            it('should throw an error if the url doesnt have a leading /', function() {
+
+                var fn = function() {
+                    ajaxInstance.get('test', true, {});
+                };
+                expect(fn).to.throw(Error);
+            });
         });
     });
 
@@ -157,7 +172,9 @@ describe('Ajax', function() {
                 fakeKey: 'fakeValue'
             });
 
-            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({ fakeKey: 'fakeValue' }));
+            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
+                fakeKey: 'fakeValue'
+            }));
         });
 
         it('Should throw an error upon server response 4xx', function(done) {
@@ -198,6 +215,14 @@ describe('Ajax', function() {
             this.requests[0].respond(500, {});
         });
 
+        it('should throw an error if the url doesnt have a leading /', function() {
+
+            var fn = function() {
+                ajaxInstance.get('test', true, {});
+            };
+            expect(fn).to.throw(Error);
+        });
+
     });
 
     describe('#patch', function() {
@@ -206,7 +231,17 @@ describe('Ajax', function() {
                 fakeKey: 'fakeValue'
             });
 
-            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({ fakeKey: 'fakeValue' }));
+            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
+                fakeKey: 'fakeValue'
+            }));
+        });
+
+        it('should throw an error if the url doesnt have a leading /', function() {
+
+            var fn = function() {
+                ajaxInstance.get('test', true, {});
+            };
+            expect(fn).to.throw(Error);
         });
     });
 
