@@ -1,13 +1,18 @@
 import Oauth2 from './authorization/oauth2';
 import User from './entities/User';
 import Device from './entities/Device';
+import Group from './entities/Group';
+import Model from './entities/Model';
+import Transmitter from './entities/Transmitter';
 import Ajax from './tools/ajax';
 import {
     mqtt
 }
 from './tools/mqtt';
 
-export let device = Device;
+export {
+    Oauth2, User, Device, Group, Model, Transmitter, Ajax
+};
 
 const config = {
     persistToken: true,
@@ -24,7 +29,8 @@ const config = {
 let currentUser;
 let project;
 let oauth2;
-export default {
+export
+default {
     init: function(p, customConfig) {
         project = p;
 
