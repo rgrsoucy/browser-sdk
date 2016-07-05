@@ -88,7 +88,6 @@ default class Ajax {
             var xhrObject = this._xhrRequest({
                 type: 'DELETE',
                 url: url,
-                isObject: null,
                 contentType: opts.contentType
             }).then((result) => {
                 resolve(result);

@@ -10,14 +10,9 @@ import {
 }
 from './tools/mqtt';
 
-export
-let device = Device;
-export
-let group = Group;
-export
-let model = Model;
-export
-let transmitter = Transmitter;
+export {
+    Oauth2, User, Device, Group, Model, Transmitter, Ajax
+};
 
 const config = {
     persistToken: true,
