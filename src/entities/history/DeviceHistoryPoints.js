@@ -2,19 +2,20 @@ export default class DeviceHistoryPoints {
     constructor(deviceHistory) {
         if (!deviceHistory) { return {}; }
 
-        let devicesPoints = {};
+        this.devicesPoints = {};
+        this.addPoints(deviceHistory);
+    }
 
+    addPoints(deviceHistory) {
         deviceHistory.forEach((res) => {
             var key = this._getKey(res.meaning, res.path);
-            if (devicesPoints[key]) {
-                devicesPoints[key].points = devicesPoints[key].points.concat(res.points);
+            if (this.devicesPoints[key]) {
+                this.devicesPoints[key].points = this.devicesPoints[key].points.concat(res.points);
             } else {
-                devicesPoints[key] = Object.assign({id:res.deviceId}, res);
-                delete devicesPoints[key].deviceId;
+                this.devicesPoints[key] = Object.assign({id:res.deviceId}, res);
+                delete this.devicesPoints[key].deviceId;
             }
         });
-
-        this.devicesPoints = devicesPoints;
     }
 
     _getKey(meaning, path) {
