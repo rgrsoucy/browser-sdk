@@ -1,5 +1,5 @@
 import main, {
-    User, Device, Model, Group, Transmitter
+    User, Device, Model, Group, Transmitter, Ajax
 }
 from '../src/main';
 import DeviceClass from '../src/entities/Device';
@@ -92,4 +92,115 @@ describe('Main', function() {
             expect(oauthMock.logout).to.have.beenCalledOnce;
         });
     });
+
+    describe('#getConfig', function() {
+        beforeEach(function() {
+            main.init({
+                id: 'fake-project-id'
+            });
+            main.authorize();
+        });
+
+        it('should return the current config', function(){
+            let testConfig = {
+                persistToken: true,
+                mqtt: {
+                    endpoint: 'mqtt.relayr.io'
+                },
+                ajax: {
+                    uri: 'api.relayr.io',
+                    dataUri: 'data-api.relayr.io',
+                    protocol: 'https://', 
+                    token: 'fake-token'
+                }
+            };
+
+            expect(main.getConfig()).to.deep.equal(testConfig);
+        });
+    });
+
+    describe('#getCurrentUser', function() {
+        beforeEach(function() {
+            main.init({
+                id: 'fake-project-id'
+            });
+            main.authorize('fake-token');
+        });
+
+        it('should return the current user', function(){
+            let testUser = {
+                "ajax": {
+                  "protocol": "https://",
+                  "token": "fake-token",
+                  "tokenType": "Bearer",
+                  "uri": "api.relayr.io"
+                },
+                "config": {
+                  "ajax": {
+                    "dataUri": "data-api.relayr.io",
+                    "protocol": "https://",
+                    "token": "fake-token",
+                    "uri": "api.relayr.io"
+                  },
+                  "mqtt": {
+                    "endpoint": "mqtt.relayr.io"
+                  },
+                  "persistToken": true
+                }
+            };
+
+            expect(main.getCurrentUser()).to.deep.equal(testUser);
+        });
+    });
+
+    describe('#customAjax', function() {
+        beforeEach(function() {
+            main.init({
+                id: 'fake-project-id'
+            });
+            main.authorize('fake-token');
+        });
+
+        it('should return the custom ajax if one is provided', function(){
+            let differentAjax = {
+                    uri: 'kittens.com',
+                    protocol: 'https://', 
+                    tokenType: 'Bearer', 
+                    token: 'fake-token'
+            };
+
+            let ajaxConfig = {
+                                uri: 'kittens.com',
+                                dataUri: 'data-api.relayr.io',
+                                protocol: 'https://',
+                                token: 'fake-token'
+                            }
+
+            expect(main.customAjax(ajaxConfig)).to.deep.equal(differentAjax);
+        });
+
+        it('should return the standard ajax if none is provided', function(){
+            let differentAjax = {
+                    uri: 'api.relayr.io',
+                    protocol: 'https://', 
+                    token: 'fake-token',
+                    tokenType: 'Bearer'
+            };
+
+            expect(main.customAjax()).to.deep.equal(differentAjax);
+        });
+    });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
