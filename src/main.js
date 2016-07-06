@@ -73,6 +73,10 @@ default {
         return config;
     },
 
+    getCurrentUser: function() {
+        return currentUser;
+    },
+
     customAjax: function(ajaxConfiguration) {
         return new Ajax(ajaxConfiguration || config.ajax);
     }
