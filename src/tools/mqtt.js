@@ -7,7 +7,9 @@ class Mqtt {
         this.config = {
             endpoint: 'mqtt.relayr.io',
             port: 443,
-            mqttTimeout: 10000
+            mqttTimeout: 10000,
+            reconnectLimit: 10,
+            reconnectTimeout: 60000
         };
 
         if (config) {
@@ -48,12 +50,14 @@ class Mqtt {
                     this.isConnecting = false;
                     this._onConnectFailure(err);
                     reject();
-                }
+                },
+
             };
             Object.assign(options, config);
+
             if (this.client) {
                 this.client.onConnectionLost = () => {
-                    this._onConnectionLost();
+                    this._onConnectionLost(options);
                 };
                 this.client.onMessageArrived = (data) => {
                     this._onMessageArrived(data);
@@ -94,8 +98,19 @@ class Mqtt {
         console.log('onFailure', err);
     }
 
-    _onConnectionLost() {
-        console.log('Lost connection');
+    _onConnectionLost(lastConfig) {
+        if (lastConfig) {
+            if (lastConfig._reconnects >= this.config.reconnectLimit) {
+                setTimeout(() => {
+                    lastConfig._reconnects = 0;
+                    this.connect(lastConfig);
+                }, this.config.reconnectTimeout)
+            } else {
+                if (!lastConfig._reconnects) lastConfig._reconnects = 0;
+                lastConfig._reconnects++;
+                this.connect(lastConfig);
+            }
+        }
     }
 
     _onMessageArrived(data) {
@@ -122,6 +137,8 @@ class Mqtt {
 
 }
 
-export let mqtt = new Mqtt();
+export
+let mqtt = new Mqtt();
 
-export default Mqtt;
+export
+default Mqtt;
