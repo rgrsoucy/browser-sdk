@@ -9,6 +9,10 @@ var jsdom = require('mocha-jsdom');
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
+let fakeOptions = {
+    userName: 'bob',
+    password: 'lovesCake123'
+}
 describe('Mqtt', function() {
     jsdom();
 
@@ -23,10 +27,6 @@ describe('Mqtt', function() {
     });
 
     describe('connect', function() {
-        let options = {
-            userName: 'bob',
-            password: 'lovesCake123'
-        };
 
         it('should throw if userName and password are not in options', function() {
             let options = {
@@ -40,17 +40,41 @@ describe('Mqtt', function() {
         });
 
         it('should pass if userName and password are in options', function() {
-            mqtt.connect(options);
+            mqtt.connect(fakeOptions);
 
             expect(mqtt.client.connect.getCall(0).args[0]).to.have.property('userName', 'bob');
             expect(mqtt.client.connect.getCall(0).args[0]).to.have.property('password', 'lovesCake123');
         });
 
         it('should not create a connection if it is already connecting', function() {
-            mqtt.connect(options);
-            mqtt.connect(options);
+            mqtt.connect(fakeOptions);
+            mqtt.connect(fakeOptions);
 
             expect(mqtt.client.connect).to.have.been.calledOnce;
+        });
+    });
+
+
+    describe('lost connection', function() {
+        beforeEach(function() {
+            mqtt.connect(fakeOptions);
+            sinon.spy(mqtt, "connect");
+            sinon.spy(mqtt, "_onConnectionLost");
+        });
+
+        it('should reconnect after lostConnection', function() {
+
+            mqtt.client.onConnectionLost();
+            expect(mqtt._onConnectionLost).to.have.been.calledOnce;
+        });
+
+        it('should reconnect only x amount of times after lostConnection', function() {
+            let largeAmountOfDisconnects = 200;
+            for (var i = 0; i <= 200; i++) {
+                mqtt.client.onConnectionLost();
+            }
+            expect(mqtt.connect).to.have.be.callCount(mqtt.config.reconnectLimit); //Limit is 10 by default
+
         });
     });
 
@@ -106,11 +130,9 @@ describe('Mqtt', function() {
 
         describe('on message arrived', function() {
             beforeEach(function() {
-                mqtt.connect({
-                    userName: 'bob',
-                    password: 'lovesCake123'
-                });
+                mqtt.connect(fakeOptions);
             });
+
             it('should notify the subscriber to that topic', function(done) {
 
                 mqtt.subscribe('fake-topic', function(data) {
