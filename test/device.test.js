@@ -271,6 +271,29 @@ describe('Device', function() {
         });
     });
 
+    describe('getAllHistoricalData', function() {
+        let sandbox;
+        beforeEach(function() {
+            sandbox = sinon.sandbox.create();
+            sandbox.spy(deviceInstance.history, 'getAllHistoricalData');
+        });
+
+        afterEach(function() {
+            sandbox.restore();
+        });
+
+        it('should get historical data from device history object', function() {
+            deviceInstance.getAllHistoricalData({
+                period: '1m'
+            });
+
+            expect(deviceInstance.history.getAllHistoricalData).to.have.been.calledOnce;
+            expect(deviceInstance.history.getAllHistoricalData).to.have.been.calledWith({
+                period: '1m'
+            });
+        });
+    });
+
     describe('#getReadings', function() {
         it('should throw an error if no device Id given to look up', function() {
             deviceInstance.id = null;
