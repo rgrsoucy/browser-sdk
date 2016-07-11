@@ -65,6 +65,10 @@ default class Device {
         return this.history.getHistoricalData(opts);
     }
 
+    getAllHistoricalData(opts) {
+        return this.history.getAllHistoricalData(opts);
+    }
+
     getReadings() {
         if (!(this.id)) {
             throw new Error('Provid a device id');
