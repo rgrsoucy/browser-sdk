@@ -1,6 +1,11 @@
 node {
   env.NVM_DIR=""
-
+  sh 'git log -1 > GIT_LOG'
+  git_log = readFile 'GIT_LOG'
+  if (git_log.contains('Jenkins dist build')) {
+    currentBuild.result = 'ABORTED'
+    return
+  }
   stage 'Checkout'
   checkout scm
 
