@@ -29,7 +29,7 @@ const config = {
 let currentUser;
 let project;
 let oauth2;
-export let main =  {
+let main = {
     init: function(p, customConfig) {
         project = p;
 
@@ -82,4 +82,3 @@ export let main =  {
 };
 
 export default main;
-module.exports = main;
