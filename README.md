@@ -6,7 +6,7 @@ Welcome to the relayr JavaScript SDK. This easy to use JavaScript implementation
 
 ##Requirements
 
-For this implementation of the SDK, we are assuming that you will be transpiling using Babel and packaging using Webpack. Future updates will include the option to just include the SDK in a script tag. 
+For this implementation of the SDK, we are assuming that you will be transpiling using Babel and packaging using Webpack. Future updates will include the option to just include the SDK in a script tag.
 
 ## Implementing the SDK
 
@@ -17,12 +17,12 @@ npm install relayr-browser-sdk
 
 ```
 
-This will include the minified file of the SDK in the node-modules folder of your project, which you can then import in your javascript code, using 
+This will include the minified file of the SDK in the node-modules folder of your project, which you can then import in your javascript code, using
 
 ```
 import relayrSDK from 'relayr-browser-sdk';
 ```
-If you wish to work with the entire repository, you can find the latest version at `https://github.com/relayr/browser-sdk` . 
+If you wish to work with the entire repository, you can find the latest version at `https://github.com/relayr/browser-sdk` .
 
 
 
@@ -48,7 +48,7 @@ Then you can authorize your app to access the data provided by your devices, as 
 ```
 RELAYR.authorize().then((currentUser) => {...}).catch((err) => {...});
 ```
-Because this version of the SDK is based on ES6 Promises, we recommend that you include a .catch statement in your code, so that errors will not fall through unheard. 
+Because this version of the SDK is based on ES6 Promises, we recommend that you include a .catch statement in your code, so that errors will not fall through unheard.
 
 ### Available Methods
 
@@ -65,11 +65,10 @@ npm run build:min:js
 ```
 
 ### Tests
-Tests are available for the SDK, using Mocha, Chai, and the expect assertion library 
+Tests are available for the SDK, using Mocha, Chai, and the expect assertion library
 
 ```
 npm test
 npm run test:watch
 ```
-See here for further details on the [assertion library](https://github.com/mjackson/expect). 
-
+See here for further details on the [assertion library](https://github.com/mjackson/expect).
