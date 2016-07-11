@@ -36,19 +36,27 @@ node {
 
   stage 'Push'
   sh """#!/bin/bash -e
-    git commit -m "Jenkins dist build"
+    NVM_DIR=
+    source ~/.nvm/nvm.sh
+    nvm use 4.4.4
     case ${env.BRANCH_NAME} in
         "master")
             git checkout master
+            npm run build:min:js
+            npm run build:js
             git add -f dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
+            git commit -m "Jenkins dist build"
             git push origin master
             ;;
         "dev")
-            git checkout master
+            git checkout dev
+            npm run build:min:js
+            npm run build:js
             git add -f dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
-            git push origin master
+            git commit -m "Jenkins dist build"
+            git push origin dev
             ;;
     esac
   """
