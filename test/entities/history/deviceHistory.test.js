@@ -59,7 +59,7 @@ describe('DeviceHistory', function() {
         describe('parameters', function() {
             it('should set end as end UNIX ms', function() {
                 deviceHistoryInstance.getHistoricalData({
-                    end: new Date(1985, 9, 26)
+                    end: new Date(1985, 9, 26, 0, 0)
                 });
 
                 expect(this.requests[0].url).to.contain('end=499129200000');
@@ -67,7 +67,7 @@ describe('DeviceHistory', function() {
 
             it('should set start as end UNIX ms', function() {
                 deviceHistoryInstance.getHistoricalData({
-                    start: new Date(1955, 10, 5)
+                    start: new Date(1955, 10, 5, 0, 0)
                 });
 
                 expect(this.requests[0].url).to.contain('start=-446778000000');
@@ -114,7 +114,7 @@ describe('DeviceHistory', function() {
 
             describe('periode', function() {
                 beforeEach(function() {
-                    var startTime = new Date(1955, 10, 5, 12);
+                    var startTime = new Date(1955, 10, 5, 12, 0, 0);
                     this.clock = sinon.useFakeTimers(startTime.getTime());
                 });
 
@@ -127,8 +127,8 @@ describe('DeviceHistory', function() {
                         periode: '1m'
                     });
 
-                    expect(this.requests[0].url).to.contain('start=' + (new Date(1955, 9, 5, 13)).getTime());
-                    expect(this.requests[0].url).to.contain('end=' + (new Date(1955, 10, 5, 12)).getTime());
+                    expect(this.requests[0].url).to.contain('start=' + (new Date(1955, 9, 5, 13, 0, 0)).getTime());
+                    expect(this.requests[0].url).to.contain('end=' + (new Date(1955, 10, 5, 12, 0, 0)).getTime());
                     expect(this.requests[0].url).to.contain('sample=1h');
                 });
 
@@ -137,8 +137,8 @@ describe('DeviceHistory', function() {
                         periode: '1d'
                     });
 
-                    expect(this.requests[0].url).to.contain('start=' + (new Date(1955, 10, 4, 12)).getTime());
-                    expect(this.requests[0].url).to.contain('end=' + (new Date(1955, 10, 5, 12)).getTime());
+                    expect(this.requests[0].url).to.contain('start=' + (new Date(1955, 10, 4, 12, 0, 0)).getTime());
+                    expect(this.requests[0].url).to.contain('end=' + (new Date(1955, 10, 5, 12, 0, 0)).getTime());
                     expect(this.requests[0].url).to.contain('sample=1m');
                 });
             });
@@ -310,8 +310,8 @@ describe('DeviceHistory', function() {
 
         it('should pass query options', function() {
             deviceHistoryInstance.getAllHistoricalData({
-                start: new Date(1985, 10, 1),
-                end: new Date(1988, 8, 31),
+                start: new Date(1985, 10, 1, 0, 0),
+                end: new Date(1988, 8, 31, 0, 0),
                 sample: '1d'
             });
 
