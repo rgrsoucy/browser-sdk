@@ -29,8 +29,7 @@ const config = {
 let currentUser;
 let project;
 let oauth2;
-export
-default {
+export let main =  {
     init: function(p, customConfig) {
         project = p;
 
@@ -82,17 +81,5 @@ default {
     }
 };
 
-// console.log(mqtt)
-
-// const r = new Relayr();
-
-
-// let options = {
-//     password: "vcG1ljmeqoSr",
-//     userName: "297a005c-f11e-4b2a-92d0-1d42fa4400b6:3b383d97-8287-4a95-8bc6-c4cfeb5ddc6a",
-// }
-// console.log(options)
-// mqtt.subscribe("/v1/50a66b82-cbea-452b-9c96-bac80b3a6538", function(sensorData) {
-//     console.log("sensor data", sensorData)
-// });
-// mqtt.connect(options)
+export default main;
+module.exports = main;
