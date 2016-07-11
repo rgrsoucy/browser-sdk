@@ -114,7 +114,7 @@ describe('DeviceHistory', function() {
 
             describe('periode', function() {
                 beforeEach(function() {
-                    var startTime = new Date(1955, 10, 5, 12, 0, 0);
+                    var startTime = new Date('1955-10-05T13:30:00.000Z');
                     this.clock = sinon.useFakeTimers(startTime.getTime());
                 });
 
@@ -127,8 +127,8 @@ describe('DeviceHistory', function() {
                         periode: '1m'
                     });
 
-                    expect(this.requests[0].url).to.contain('start=' + (new Date(1955, 9, 5, 13, 0, 0)).getTime());
-                    expect(this.requests[0].url).to.contain('end=' + (new Date(1955, 10, 5, 12, 0, 0)).getTime());
+                    expect(this.requests[0].url).to.contain('start=' + (new Date('1955-09-05T13:30:00.000Z')).getTime());
+                    expect(this.requests[0].url).to.contain('end=' + (new Date('1955-10-05T13:30:00.000Z')).getTime());
                     expect(this.requests[0].url).to.contain('sample=1h');
                 });
 
@@ -137,8 +137,8 @@ describe('DeviceHistory', function() {
                         periode: '1d'
                     });
 
-                    expect(this.requests[0].url).to.contain('start=' + (new Date(1955, 10, 4, 12, 0, 0)).getTime());
-                    expect(this.requests[0].url).to.contain('end=' + (new Date(1955, 10, 5, 12, 0, 0)).getTime());
+                    expect(this.requests[0].url).to.contain('start=' + (new Date('1955-10-04T13:30:00.000Z')).getTime());
+                    expect(this.requests[0].url).to.contain('end=' + (new Date('1955-10-05T13:30:00.000Z')).getTime());
                     expect(this.requests[0].url).to.contain('sample=1m');
                 });
             });
