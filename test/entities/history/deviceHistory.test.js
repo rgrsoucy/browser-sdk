@@ -59,18 +59,18 @@ describe('DeviceHistory', function() {
         describe('parameters', function() {
             it('should set end as end UNIX ms', function() {
                 deviceHistoryInstance.getHistoricalData({
-                    end: new Date('1985-10-25T12:00:00.000Z')
+                    end: new Date('1985-10-25T13:30:00.000Z')
                 });
 
-                expect(this.requests[0].url).to.contain('end=499089600000');
+                expect(this.requests[0].url).to.contain('end=499095000000');
             });
 
             it('should set start as end UNIX ms', function() {
                 deviceHistoryInstance.getHistoricalData({
-                    start: new Date('1955-11-04T12:00:00.000Z')
+                    start: new Date('1955-11-04T13:30:00.000Z')
                 });
 
-                expect(this.requests[0].url).to.contain('start=-446817600000');
+                expect(this.requests[0].url).to.contain('start=-446812200000');
             });
 
             it('should pass sample time as query parameter', function() {
