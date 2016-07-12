@@ -48,6 +48,7 @@ node {
             ;;
         "dev")
             git checkout dev
+            rm -rf dist
             npm run build:min:js
             npm run build:js
             git add -f dist/relayr-browser-sdk.min.js
