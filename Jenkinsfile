@@ -59,13 +59,31 @@ node {
         "jenkins-setup")
             git checkout jenkins-setup
             git pull
-            npm run build:min:js
             npm run build:js
-            git add -f dist/relayr-browser-sdk.min.js
+            npm run build:min:js
             git add -f dist/relayr-browser-sdk.js
+            git add -f dist/relayr-browser-sdk.min.js
             git commit -m "Jenkins dist build"
             git push origin jenkins-setup
             ;;
     esac
+  """
+
+  stage 'Tag new version'
+  checkout scm
+  sh """#!/bin/bash -e
+      NVM_DIR=
+      source ~/.nvm/nvm.sh
+      nvm use 4.4.4
+      npm install
+      npm run version:increment
+      PACKAGE_VERSION=\$(cat package.json \
+      | grep version \
+      | head -1 \
+      | awk -F: '{ print \$2 }' \
+      | sed 's/[",]//g'
+      | tr -d '[[:space:]]')
+      git tag \$PACKAGE_VERSION
+      git push \$PACKAGE_VERSION
   """
 }
