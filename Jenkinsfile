@@ -6,7 +6,7 @@ node {
   sh 'git log -1 > GIT_LOG'
   git_log = readFile 'GIT_LOG'
   if (git_log.contains('Jenkins dist build')) {
-    currentBuild.result = "Aborted"
+    currentBuild.result = "SUCCESS"
     return;
   }
 
