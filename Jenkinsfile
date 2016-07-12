@@ -3,8 +3,7 @@ node {
   sh 'git log -1 > GIT_LOG'
   git_log = readFile 'GIT_LOG'
   if (git_log.contains('Jenkins dist build')) {
-    currentBuild.result = 'ABORTED'
-    return
+
   }
   stage 'Checkout'
   checkout scm
@@ -62,6 +61,15 @@ node {
             git add -f dist/relayr-browser-sdk.js
             git commit -m "Jenkins dist build"
             git push origin dev
+            ;;
+        "jenkins-setup")
+            git checkout jenkins-setup
+            npm run build:min:js
+            npm run build:js
+            git add -f dist/relayr-browser-sdk.min.js
+            git add -f dist/relayr-browser-sdk.js
+            git commit -m "Jenkins dist build"
+            git push origin jenkins-setup
             ;;
     esac
   """
