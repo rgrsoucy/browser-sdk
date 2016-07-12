@@ -32,6 +32,7 @@ node {
   """
 
   stage 'Build & Push'
+  checkout scm
   sh """#!/bin/bash -e
     NVM_DIR=
     source ~/.nvm/nvm.sh
@@ -56,7 +57,7 @@ node {
             git push origin dev
             ;;
         "jenkins-setup")
-            checkout scm
+
             npm run build:min:js
             npm run build:js
             git add -f dist/relayr-browser-sdk.min.js
