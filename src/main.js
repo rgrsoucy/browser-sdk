@@ -29,8 +29,7 @@ const config = {
 let currentUser;
 let project;
 let oauth2;
-export
-default {
+let main = {
     init: function(p, customConfig) {
         project = p;
 
@@ -81,3 +80,5 @@ default {
         return new Ajax(ajaxConfiguration || config.ajax);
     }
 };
+
+export default main;
