@@ -56,7 +56,6 @@ node {
             git push origin dev
             ;;
         "jenkins-setup")
-            git checkout jenkins-setup
             npm run build:min:js
             npm run build:js
             git add -f dist/relayr-browser-sdk.min.js
