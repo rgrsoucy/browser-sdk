@@ -83,7 +83,7 @@ node {
       | awk -F: '{ print $2 }' \
       | sed 's/[",]//g'
       | tr -d '[[:space:]]')
-      git tag ${PACKAGE_VERSION}
-      git push origin ${PACKAGE_VERSION}
+      git tag $(echo $PACKAGE_VERSION)
+      git push origin $(echo $PACKAGE_VERSION)
   """
 }
