@@ -61,8 +61,10 @@ node {
             git push
             npm run build:js
             npm run build:min:js
+            git status
             git add -f dist/relayr-browser-sdk.js
             git add -f dist/relayr-browser-sdk.min.js
+            git status
             git commit -m "Jenkins dist build"
             git push origin jenkins-setup
             ;;
