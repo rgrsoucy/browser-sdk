@@ -1,537 +1,14 @@
-/******/ (function(modules) { // webpackBootstrap
-/******/ 	var parentHotUpdateCallback = this["webpackHotUpdate"];
-/******/ 	this["webpackHotUpdate"] = 
-/******/ 	function webpackHotUpdateCallback(chunkId, moreModules) { // eslint-disable-line no-unused-vars
-/******/ 		hotAddUpdateChunk(chunkId, moreModules);
-/******/ 		if(parentHotUpdateCallback) parentHotUpdateCallback(chunkId, moreModules);
-/******/ 	}
-/******/ 	
-/******/ 	function hotDownloadUpdateChunk(chunkId) { // eslint-disable-line no-unused-vars
-/******/ 		var head = document.getElementsByTagName("head")[0];
-/******/ 		var script = document.createElement("script");
-/******/ 		script.type = "text/javascript";
-/******/ 		script.charset = "utf-8";
-/******/ 		script.src = __webpack_require__.p + "" + chunkId + "." + hotCurrentHash + ".hot-update.js";
-/******/ 		head.appendChild(script);
-/******/ 	}
-/******/ 	
-/******/ 	function hotDownloadManifest(callback) { // eslint-disable-line no-unused-vars
-/******/ 		if(typeof XMLHttpRequest === "undefined")
-/******/ 			return callback(new Error("No browser support"));
-/******/ 		try {
-/******/ 			var request = new XMLHttpRequest();
-/******/ 			var requestPath = __webpack_require__.p + "" + hotCurrentHash + ".hot-update.json";
-/******/ 			request.open("GET", requestPath, true);
-/******/ 			request.timeout = 10000;
-/******/ 			request.send(null);
-/******/ 		} catch(err) {
-/******/ 			return callback(err);
-/******/ 		}
-/******/ 		request.onreadystatechange = function() {
-/******/ 			if(request.readyState !== 4) return;
-/******/ 			if(request.status === 0) {
-/******/ 				// timeout
-/******/ 				callback(new Error("Manifest request to " + requestPath + " timed out."));
-/******/ 			} else if(request.status === 404) {
-/******/ 				// no update available
-/******/ 				callback();
-/******/ 			} else if(request.status !== 200 && request.status !== 304) {
-/******/ 				// other failure
-/******/ 				callback(new Error("Manifest request to " + requestPath + " failed."));
-/******/ 			} else {
-/******/ 				// success
-/******/ 				try {
-/******/ 					var update = JSON.parse(request.responseText);
-/******/ 				} catch(e) {
-/******/ 					callback(e);
-/******/ 					return;
-/******/ 				}
-/******/ 				callback(null, update);
-/******/ 			}
-/******/ 		};
-/******/ 	}
-
-/******/ 	
-/******/ 	
-/******/ 	// Copied from https://github.com/facebook/react/blob/bef45b0/src/shared/utils/canDefineProperty.js
-/******/ 	var canDefineProperty = false;
-/******/ 	try {
-/******/ 		Object.defineProperty({}, "x", {
-/******/ 			get: function() {}
-/******/ 		});
-/******/ 		canDefineProperty = true;
-/******/ 	} catch(x) {
-/******/ 		// IE will fail on defineProperty
-/******/ 	}
-/******/ 	
-/******/ 	var hotApplyOnUpdate = true;
-/******/ 	var hotCurrentHash = "01a22e2a2fbc2ee8093a"; // eslint-disable-line no-unused-vars
-/******/ 	var hotCurrentModuleData = {};
-/******/ 	var hotCurrentParents = []; // eslint-disable-line no-unused-vars
-/******/ 	
-/******/ 	function hotCreateRequire(moduleId) { // eslint-disable-line no-unused-vars
-/******/ 		var me = installedModules[moduleId];
-/******/ 		if(!me) return __webpack_require__;
-/******/ 		var fn = function(request) {
-/******/ 			if(me.hot.active) {
-/******/ 				if(installedModules[request]) {
-/******/ 					if(installedModules[request].parents.indexOf(moduleId) < 0)
-/******/ 						installedModules[request].parents.push(moduleId);
-/******/ 					if(me.children.indexOf(request) < 0)
-/******/ 						me.children.push(request);
-/******/ 				} else hotCurrentParents = [moduleId];
-/******/ 			} else {
-/******/ 				console.warn("[HMR] unexpected require(" + request + ") from disposed module " + moduleId);
-/******/ 				hotCurrentParents = [];
-/******/ 			}
-/******/ 			return __webpack_require__(request);
-/******/ 		};
-/******/ 		for(var name in __webpack_require__) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(__webpack_require__, name)) {
-/******/ 				if(canDefineProperty) {
-/******/ 					Object.defineProperty(fn, name, (function(name) {
-/******/ 						return {
-/******/ 							configurable: true,
-/******/ 							enumerable: true,
-/******/ 							get: function() {
-/******/ 								return __webpack_require__[name];
-/******/ 							},
-/******/ 							set: function(value) {
-/******/ 								__webpack_require__[name] = value;
-/******/ 							}
-/******/ 						};
-/******/ 					}(name)));
-/******/ 				} else {
-/******/ 					fn[name] = __webpack_require__[name];
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		function ensure(chunkId, callback) {
-/******/ 			if(hotStatus === "ready")
-/******/ 				hotSetStatus("prepare");
-/******/ 			hotChunksLoading++;
-/******/ 			__webpack_require__.e(chunkId, function() {
-/******/ 				try {
-/******/ 					callback.call(null, fn);
-/******/ 				} finally {
-/******/ 					finishChunkLoading();
-/******/ 				}
-/******/ 	
-/******/ 				function finishChunkLoading() {
-/******/ 					hotChunksLoading--;
-/******/ 					if(hotStatus === "prepare") {
-/******/ 						if(!hotWaitingFilesMap[chunkId]) {
-/******/ 							hotEnsureUpdateChunk(chunkId);
-/******/ 						}
-/******/ 						if(hotChunksLoading === 0 && hotWaitingFiles === 0) {
-/******/ 							hotUpdateDownloaded();
-/******/ 						}
-/******/ 					}
-/******/ 				}
-/******/ 			});
-/******/ 		}
-/******/ 		if(canDefineProperty) {
-/******/ 			Object.defineProperty(fn, "e", {
-/******/ 				enumerable: true,
-/******/ 				value: ensure
-/******/ 			});
-/******/ 		} else {
-/******/ 			fn.e = ensure;
-/******/ 		}
-/******/ 		return fn;
-/******/ 	}
-/******/ 	
-/******/ 	function hotCreateModule(moduleId) { // eslint-disable-line no-unused-vars
-/******/ 		var hot = {
-/******/ 			// private stuff
-/******/ 			_acceptedDependencies: {},
-/******/ 			_declinedDependencies: {},
-/******/ 			_selfAccepted: false,
-/******/ 			_selfDeclined: false,
-/******/ 			_disposeHandlers: [],
-/******/ 	
-/******/ 			// Module API
-/******/ 			active: true,
-/******/ 			accept: function(dep, callback) {
-/******/ 				if(typeof dep === "undefined")
-/******/ 					hot._selfAccepted = true;
-/******/ 				else if(typeof dep === "function")
-/******/ 					hot._selfAccepted = dep;
-/******/ 				else if(typeof dep === "object")
-/******/ 					for(var i = 0; i < dep.length; i++)
-/******/ 						hot._acceptedDependencies[dep[i]] = callback;
-/******/ 				else
-/******/ 					hot._acceptedDependencies[dep] = callback;
-/******/ 			},
-/******/ 			decline: function(dep) {
-/******/ 				if(typeof dep === "undefined")
-/******/ 					hot._selfDeclined = true;
-/******/ 				else if(typeof dep === "number")
-/******/ 					hot._declinedDependencies[dep] = true;
-/******/ 				else
-/******/ 					for(var i = 0; i < dep.length; i++)
-/******/ 						hot._declinedDependencies[dep[i]] = true;
-/******/ 			},
-/******/ 			dispose: function(callback) {
-/******/ 				hot._disposeHandlers.push(callback);
-/******/ 			},
-/******/ 			addDisposeHandler: function(callback) {
-/******/ 				hot._disposeHandlers.push(callback);
-/******/ 			},
-/******/ 			removeDisposeHandler: function(callback) {
-/******/ 				var idx = hot._disposeHandlers.indexOf(callback);
-/******/ 				if(idx >= 0) hot._disposeHandlers.splice(idx, 1);
-/******/ 			},
-/******/ 	
-/******/ 			// Management API
-/******/ 			check: hotCheck,
-/******/ 			apply: hotApply,
-/******/ 			status: function(l) {
-/******/ 				if(!l) return hotStatus;
-/******/ 				hotStatusHandlers.push(l);
-/******/ 			},
-/******/ 			addStatusHandler: function(l) {
-/******/ 				hotStatusHandlers.push(l);
-/******/ 			},
-/******/ 			removeStatusHandler: function(l) {
-/******/ 				var idx = hotStatusHandlers.indexOf(l);
-/******/ 				if(idx >= 0) hotStatusHandlers.splice(idx, 1);
-/******/ 			},
-/******/ 	
-/******/ 			//inherit from previous dispose call
-/******/ 			data: hotCurrentModuleData[moduleId]
-/******/ 		};
-/******/ 		return hot;
-/******/ 	}
-/******/ 	
-/******/ 	var hotStatusHandlers = [];
-/******/ 	var hotStatus = "idle";
-/******/ 	
-/******/ 	function hotSetStatus(newStatus) {
-/******/ 		hotStatus = newStatus;
-/******/ 		for(var i = 0; i < hotStatusHandlers.length; i++)
-/******/ 			hotStatusHandlers[i].call(null, newStatus);
-/******/ 	}
-/******/ 	
-/******/ 	// while downloading
-/******/ 	var hotWaitingFiles = 0;
-/******/ 	var hotChunksLoading = 0;
-/******/ 	var hotWaitingFilesMap = {};
-/******/ 	var hotRequestedFilesMap = {};
-/******/ 	var hotAvailibleFilesMap = {};
-/******/ 	var hotCallback;
-/******/ 	
-/******/ 	// The update info
-/******/ 	var hotUpdate, hotUpdateNewHash;
-/******/ 	
-/******/ 	function toModuleId(id) {
-/******/ 		var isNumber = (+id) + "" === id;
-/******/ 		return isNumber ? +id : id;
-/******/ 	}
-/******/ 	
-/******/ 	function hotCheck(apply, callback) {
-/******/ 		if(hotStatus !== "idle") throw new Error("check() is only allowed in idle status");
-/******/ 		if(typeof apply === "function") {
-/******/ 			hotApplyOnUpdate = false;
-/******/ 			callback = apply;
-/******/ 		} else {
-/******/ 			hotApplyOnUpdate = apply;
-/******/ 			callback = callback || function(err) {
-/******/ 				if(err) throw err;
-/******/ 			};
-/******/ 		}
-/******/ 		hotSetStatus("check");
-/******/ 		hotDownloadManifest(function(err, update) {
-/******/ 			if(err) return callback(err);
-/******/ 			if(!update) {
-/******/ 				hotSetStatus("idle");
-/******/ 				callback(null, null);
-/******/ 				return;
-/******/ 			}
-/******/ 	
-/******/ 			hotRequestedFilesMap = {};
-/******/ 			hotAvailibleFilesMap = {};
-/******/ 			hotWaitingFilesMap = {};
-/******/ 			for(var i = 0; i < update.c.length; i++)
-/******/ 				hotAvailibleFilesMap[update.c[i]] = true;
-/******/ 			hotUpdateNewHash = update.h;
-/******/ 	
-/******/ 			hotSetStatus("prepare");
-/******/ 			hotCallback = callback;
-/******/ 			hotUpdate = {};
-/******/ 			var chunkId = 0;
-/******/ 			{ // eslint-disable-line no-lone-blocks
-/******/ 				/*globals chunkId */
-/******/ 				hotEnsureUpdateChunk(chunkId);
-/******/ 			}
-/******/ 			if(hotStatus === "prepare" && hotChunksLoading === 0 && hotWaitingFiles === 0) {
-/******/ 				hotUpdateDownloaded();
-/******/ 			}
-/******/ 		});
-/******/ 	}
-/******/ 	
-/******/ 	function hotAddUpdateChunk(chunkId, moreModules) { // eslint-disable-line no-unused-vars
-/******/ 		if(!hotAvailibleFilesMap[chunkId] || !hotRequestedFilesMap[chunkId])
-/******/ 			return;
-/******/ 		hotRequestedFilesMap[chunkId] = false;
-/******/ 		for(var moduleId in moreModules) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(moreModules, moduleId)) {
-/******/ 				hotUpdate[moduleId] = moreModules[moduleId];
-/******/ 			}
-/******/ 		}
-/******/ 		if(--hotWaitingFiles === 0 && hotChunksLoading === 0) {
-/******/ 			hotUpdateDownloaded();
-/******/ 		}
-/******/ 	}
-/******/ 	
-/******/ 	function hotEnsureUpdateChunk(chunkId) {
-/******/ 		if(!hotAvailibleFilesMap[chunkId]) {
-/******/ 			hotWaitingFilesMap[chunkId] = true;
-/******/ 		} else {
-/******/ 			hotRequestedFilesMap[chunkId] = true;
-/******/ 			hotWaitingFiles++;
-/******/ 			hotDownloadUpdateChunk(chunkId);
-/******/ 		}
-/******/ 	}
-/******/ 	
-/******/ 	function hotUpdateDownloaded() {
-/******/ 		hotSetStatus("ready");
-/******/ 		var callback = hotCallback;
-/******/ 		hotCallback = null;
-/******/ 		if(!callback) return;
-/******/ 		if(hotApplyOnUpdate) {
-/******/ 			hotApply(hotApplyOnUpdate, callback);
-/******/ 		} else {
-/******/ 			var outdatedModules = [];
-/******/ 			for(var id in hotUpdate) {
-/******/ 				if(Object.prototype.hasOwnProperty.call(hotUpdate, id)) {
-/******/ 					outdatedModules.push(toModuleId(id));
-/******/ 				}
-/******/ 			}
-/******/ 			callback(null, outdatedModules);
-/******/ 		}
-/******/ 	}
-/******/ 	
-/******/ 	function hotApply(options, callback) {
-/******/ 		if(hotStatus !== "ready") throw new Error("apply() is only allowed in ready status");
-/******/ 		if(typeof options === "function") {
-/******/ 			callback = options;
-/******/ 			options = {};
-/******/ 		} else if(options && typeof options === "object") {
-/******/ 			callback = callback || function(err) {
-/******/ 				if(err) throw err;
-/******/ 			};
-/******/ 		} else {
-/******/ 			options = {};
-/******/ 			callback = callback || function(err) {
-/******/ 				if(err) throw err;
-/******/ 			};
-/******/ 		}
-/******/ 	
-/******/ 		function getAffectedStuff(module) {
-/******/ 			var outdatedModules = [module];
-/******/ 			var outdatedDependencies = {};
-/******/ 	
-/******/ 			var queue = outdatedModules.slice();
-/******/ 			while(queue.length > 0) {
-/******/ 				var moduleId = queue.pop();
-/******/ 				var module = installedModules[moduleId];
-/******/ 				if(!module || module.hot._selfAccepted)
-/******/ 					continue;
-/******/ 				if(module.hot._selfDeclined) {
-/******/ 					return new Error("Aborted because of self decline: " + moduleId);
-/******/ 				}
-/******/ 				if(moduleId === 0) {
-/******/ 					return;
-/******/ 				}
-/******/ 				for(var i = 0; i < module.parents.length; i++) {
-/******/ 					var parentId = module.parents[i];
-/******/ 					var parent = installedModules[parentId];
-/******/ 					if(parent.hot._declinedDependencies[moduleId]) {
-/******/ 						return new Error("Aborted because of declined dependency: " + moduleId + " in " + parentId);
-/******/ 					}
-/******/ 					if(outdatedModules.indexOf(parentId) >= 0) continue;
-/******/ 					if(parent.hot._acceptedDependencies[moduleId]) {
-/******/ 						if(!outdatedDependencies[parentId])
-/******/ 							outdatedDependencies[parentId] = [];
-/******/ 						addAllToSet(outdatedDependencies[parentId], [moduleId]);
-/******/ 						continue;
-/******/ 					}
-/******/ 					delete outdatedDependencies[parentId];
-/******/ 					outdatedModules.push(parentId);
-/******/ 					queue.push(parentId);
-/******/ 				}
-/******/ 			}
-/******/ 	
-/******/ 			return [outdatedModules, outdatedDependencies];
-/******/ 		}
-/******/ 	
-/******/ 		function addAllToSet(a, b) {
-/******/ 			for(var i = 0; i < b.length; i++) {
-/******/ 				var item = b[i];
-/******/ 				if(a.indexOf(item) < 0)
-/******/ 					a.push(item);
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// at begin all updates modules are outdated
-/******/ 		// the "outdated" status can propagate to parents if they don't accept the children
-/******/ 		var outdatedDependencies = {};
-/******/ 		var outdatedModules = [];
-/******/ 		var appliedUpdate = {};
-/******/ 		for(var id in hotUpdate) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(hotUpdate, id)) {
-/******/ 				var moduleId = toModuleId(id);
-/******/ 				var result = getAffectedStuff(moduleId);
-/******/ 				if(!result) {
-/******/ 					if(options.ignoreUnaccepted)
-/******/ 						continue;
-/******/ 					hotSetStatus("abort");
-/******/ 					return callback(new Error("Aborted because " + moduleId + " is not accepted"));
-/******/ 				}
-/******/ 				if(result instanceof Error) {
-/******/ 					hotSetStatus("abort");
-/******/ 					return callback(result);
-/******/ 				}
-/******/ 				appliedUpdate[moduleId] = hotUpdate[moduleId];
-/******/ 				addAllToSet(outdatedModules, result[0]);
-/******/ 				for(var moduleId in result[1]) {
-/******/ 					if(Object.prototype.hasOwnProperty.call(result[1], moduleId)) {
-/******/ 						if(!outdatedDependencies[moduleId])
-/******/ 							outdatedDependencies[moduleId] = [];
-/******/ 						addAllToSet(outdatedDependencies[moduleId], result[1][moduleId]);
-/******/ 					}
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// Store self accepted outdated modules to require them later by the module system
-/******/ 		var outdatedSelfAcceptedModules = [];
-/******/ 		for(var i = 0; i < outdatedModules.length; i++) {
-/******/ 			var moduleId = outdatedModules[i];
-/******/ 			if(installedModules[moduleId] && installedModules[moduleId].hot._selfAccepted)
-/******/ 				outdatedSelfAcceptedModules.push({
-/******/ 					module: moduleId,
-/******/ 					errorHandler: installedModules[moduleId].hot._selfAccepted
-/******/ 				});
-/******/ 		}
-/******/ 	
-/******/ 		// Now in "dispose" phase
-/******/ 		hotSetStatus("dispose");
-/******/ 		var queue = outdatedModules.slice();
-/******/ 		while(queue.length > 0) {
-/******/ 			var moduleId = queue.pop();
-/******/ 			var module = installedModules[moduleId];
-/******/ 			if(!module) continue;
-/******/ 	
-/******/ 			var data = {};
-/******/ 	
-/******/ 			// Call dispose handlers
-/******/ 			var disposeHandlers = module.hot._disposeHandlers;
-/******/ 			for(var j = 0; j < disposeHandlers.length; j++) {
-/******/ 				var cb = disposeHandlers[j];
-/******/ 				cb(data);
-/******/ 			}
-/******/ 			hotCurrentModuleData[moduleId] = data;
-/******/ 	
-/******/ 			// disable module (this disables requires from this module)
-/******/ 			module.hot.active = false;
-/******/ 	
-/******/ 			// remove module from cache
-/******/ 			delete installedModules[moduleId];
-/******/ 	
-/******/ 			// remove "parents" references from all children
-/******/ 			for(var j = 0; j < module.children.length; j++) {
-/******/ 				var child = installedModules[module.children[j]];
-/******/ 				if(!child) continue;
-/******/ 				var idx = child.parents.indexOf(moduleId);
-/******/ 				if(idx >= 0) {
-/******/ 					child.parents.splice(idx, 1);
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// remove outdated dependency from module children
-/******/ 		for(var moduleId in outdatedDependencies) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(outdatedDependencies, moduleId)) {
-/******/ 				var module = installedModules[moduleId];
-/******/ 				var moduleOutdatedDependencies = outdatedDependencies[moduleId];
-/******/ 				for(var j = 0; j < moduleOutdatedDependencies.length; j++) {
-/******/ 					var dependency = moduleOutdatedDependencies[j];
-/******/ 					var idx = module.children.indexOf(dependency);
-/******/ 					if(idx >= 0) module.children.splice(idx, 1);
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// Not in "apply" phase
-/******/ 		hotSetStatus("apply");
-/******/ 	
-/******/ 		hotCurrentHash = hotUpdateNewHash;
-/******/ 	
-/******/ 		// insert new code
-/******/ 		for(var moduleId in appliedUpdate) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(appliedUpdate, moduleId)) {
-/******/ 				modules[moduleId] = appliedUpdate[moduleId];
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// call accept handlers
-/******/ 		var error = null;
-/******/ 		for(var moduleId in outdatedDependencies) {
-/******/ 			if(Object.prototype.hasOwnProperty.call(outdatedDependencies, moduleId)) {
-/******/ 				var module = installedModules[moduleId];
-/******/ 				var moduleOutdatedDependencies = outdatedDependencies[moduleId];
-/******/ 				var callbacks = [];
-/******/ 				for(var i = 0; i < moduleOutdatedDependencies.length; i++) {
-/******/ 					var dependency = moduleOutdatedDependencies[i];
-/******/ 					var cb = module.hot._acceptedDependencies[dependency];
-/******/ 					if(callbacks.indexOf(cb) >= 0) continue;
-/******/ 					callbacks.push(cb);
-/******/ 				}
-/******/ 				for(var i = 0; i < callbacks.length; i++) {
-/******/ 					var cb = callbacks[i];
-/******/ 					try {
-/******/ 						cb(outdatedDependencies);
-/******/ 					} catch(err) {
-/******/ 						if(!error)
-/******/ 							error = err;
-/******/ 					}
-/******/ 				}
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// Load self accepted modules
-/******/ 		for(var i = 0; i < outdatedSelfAcceptedModules.length; i++) {
-/******/ 			var item = outdatedSelfAcceptedModules[i];
-/******/ 			var moduleId = item.module;
-/******/ 			hotCurrentParents = [moduleId];
-/******/ 			try {
-/******/ 				__webpack_require__(moduleId);
-/******/ 			} catch(err) {
-/******/ 				if(typeof item.errorHandler === "function") {
-/******/ 					try {
-/******/ 						item.errorHandler(err);
-/******/ 					} catch(err) {
-/******/ 						if(!error)
-/******/ 							error = err;
-/******/ 					}
-/******/ 				} else if(!error)
-/******/ 					error = err;
-/******/ 			}
-/******/ 		}
-/******/ 	
-/******/ 		// handle errors in accept handlers and self accepted module load
-/******/ 		if(error) {
-/******/ 			hotSetStatus("fail");
-/******/ 			return callback(error);
-/******/ 		}
-/******/ 	
-/******/ 		hotSetStatus("idle");
-/******/ 		callback(null, outdatedModules);
-/******/ 	}
-
+(function webpackUniversalModuleDefinition(root, factory) {
+	if(typeof exports === 'object' && typeof module === 'object')
+		module.exports = factory();
+	else if(typeof define === 'function' && define.amd)
+		define([], factory);
+	else if(typeof exports === 'object')
+		exports["relayr"] = factory();
+	else
+		root["relayr"] = factory();
+})(this, function() {
+return /******/ (function(modules) { // webpackBootstrap
 /******/ 	// The module cache
 /******/ 	var installedModules = {};
 
@@ -546,14 +23,11 @@
 /******/ 		var module = installedModules[moduleId] = {
 /******/ 			exports: {},
 /******/ 			id: moduleId,
-/******/ 			loaded: false,
-/******/ 			hot: hotCreateModule(moduleId),
-/******/ 			parents: hotCurrentParents,
-/******/ 			children: []
+/******/ 			loaded: false
 /******/ 		};
 
 /******/ 		// Execute the module function
-/******/ 		modules[moduleId].call(module.exports, module, module.exports, hotCreateRequire(moduleId));
+/******/ 		modules[moduleId].call(module.exports, module, module.exports, __webpack_require__);
 
 /******/ 		// Flag the module as loaded
 /******/ 		module.loaded = true;
@@ -570,132 +44,4203 @@
 /******/ 	__webpack_require__.c = installedModules;
 
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/dist/";
-
-/******/ 	// __webpack_hash__
-/******/ 	__webpack_require__.h = function() { return hotCurrentHash; };
+/******/ 	__webpack_require__.p = "";
 
 /******/ 	// Load entry module and return exports
-/******/ 	return hotCreateRequire(0)(0);
+/******/ 	return __webpack_require__(0);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("__webpack_require__(1);\n(function webpackMissingModule() { throw new Error(\"Cannot find module \\\"webpack/hot/only-dev-server\\\"\"); }());\nmodule.exports = __webpack_require__(9);\n\n\n/*****************\n ** WEBPACK FOOTER\n ** multi main\n ** module id = 0\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///multi_main?");
+	module.exports = __webpack_require__(1);
+
 
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("/* WEBPACK VAR INJECTION */(function(__resourceQuery) {var url = __webpack_require__(2);\r\nvar SockJS = __webpack_require__(!(function webpackMissingModule() { var e = new Error(\"Cannot find module \\\"sockjs-client\\\"\"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));\r\nvar stripAnsi = __webpack_require__(!(function webpackMissingModule() { var e = new Error(\"Cannot find module \\\"strip-ansi\\\"\"); e.code = 'MODULE_NOT_FOUND'; throw e; }()));\r\nvar scriptElements = document.getElementsByTagName(\"script\");\r\nvar scriptHost = scriptElements[scriptElements.length-1].getAttribute(\"src\").replace(/\\/[^\\/]+$/, \"\");\r\n\r\n// If this bundle is inlined, use the resource query to get the correct url.\r\n// Else, get the url from the <script> this file was called with.\r\nvar urlParts = url.parse( true ?\r\n\t__resourceQuery.substr(1) :\r\n\t(scriptHost ? scriptHost : \"/\")\r\n);\r\n\r\nvar sock = null;\r\nvar hot = false;\r\nvar initial = true;\r\nvar currentHash = \"\";\r\n\r\nvar onSocketMsg = {\r\n\thot: function() {\r\n\t\thot = true;\r\n\t\tconsole.log(\"[WDS] Hot Module Replacement enabled.\");\r\n\t},\r\n\tinvalid: function() {\r\n\t\tconsole.log(\"[WDS] App updated. Recompiling...\");\r\n\t},\r\n\thash: function(hash) {\r\n\t\tcurrentHash = hash;\r\n\t},\r\n\t\"still-ok\": function() {\r\n\t\tconsole.log(\"[WDS] Nothing changed.\")\r\n\t},\r\n\tok: function() {\r\n\t\tif(initial) return initial = false;\r\n\t\treloadApp();\r\n\t},\r\n\twarnings: function(warnings) {\r\n\t\tconsole.log(\"[WDS] Warnings while compiling.\");\r\n\t\tfor(var i = 0; i < warnings.length; i++)\r\n\t\t\tconsole.warn(stripAnsi(warnings[i]));\r\n\t\tif(initial) return initial = false;\r\n\t\treloadApp();\r\n\t},\r\n\terrors: function(errors) {\r\n\t\tconsole.log(\"[WDS] Errors while compiling.\");\r\n\t\tfor(var i = 0; i < errors.length; i++)\r\n\t\t\tconsole.error(stripAnsi(errors[i]));\r\n\t\tif(initial) return initial = false;\r\n\t\treloadApp();\r\n\t},\r\n\t\"proxy-error\": function(errors) {\r\n\t\tconsole.log(\"[WDS] Proxy error.\");\r\n\t\tfor(var i = 0; i < errors.length; i++)\r\n\t\t\tconsole.error(stripAnsi(errors[i]));\r\n\t\tif(initial) return initial = false;\r\n\t\treloadApp();\r\n\t}\r\n};\r\n\r\nvar newConnection = function() {\r\n\tsock = new SockJS(url.format({\r\n\t\tprotocol: urlParts.protocol,\r\n\t\tauth: urlParts.auth,\r\n\t\thostname: (urlParts.hostname === '0.0.0.0') ? window.location.hostname : urlParts.hostname,\r\n\t\tport: urlParts.port,\r\n\t\tpathname: urlParts.path === '/' ? \"/sockjs-node\" : urlParts.path\r\n\t}));\r\n\r\n\tsock.onclose = function() {\r\n\t\tconsole.error(\"[WDS] Disconnected!\");\r\n\r\n\t\t// Try to reconnect.\r\n\t\tsock = null;\r\n\t\tsetTimeout(function () {\r\n\t\t\tnewConnection();\r\n\t\t}, 2000);\r\n\t};\r\n\r\n\tsock.onmessage = function(e) {\r\n\t\t// This assumes that all data sent via the websocket is JSON.\r\n\t\tvar msg = JSON.parse(e.data);\r\n\t\tonSocketMsg[msg.type](msg.data);\r\n\t};\r\n};\r\n\r\nnewConnection();\r\n\r\nfunction reloadApp() {\r\n\tif(hot) {\r\n\t\tconsole.log(\"[WDS] App hot update...\");\r\n\t\twindow.postMessage(\"webpackHotUpdate\" + currentHash, \"*\");\r\n\t} else {\r\n\t\tconsole.log(\"[WDS] App updated. Reloading...\");\r\n\t\twindow.location.reload();\r\n\t}\r\n}\r\n\n/* WEBPACK VAR INJECTION */}.call(exports, \"?http://localhost:3000\"))\n\n/*****************\n ** WEBPACK FOOTER\n ** (webpack)-dev-server/client?http://localhost:3000\n ** module id = 1\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///(webpack)-dev-server/client?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(3), __webpack_require__(5), __webpack_require__(14), __webpack_require__(12), __webpack_require__(13), __webpack_require__(4), __webpack_require__(10)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('./authorization/oauth2'), require('./entities/User'), require('./entities/Device'), require('./entities/Group'), require('./entities/Model'), require('./entities/Transmitter'), require('./tools/ajax'), require('./tools/mqtt'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.oauth2, global.User, global.Device, global.Group, global.Model, global.Transmitter, global.ajax, global.mqtt);
+	        global.main = mod.exports;
+	    }
+	})(this, function (exports, _oauth, _User, _Device, _Group, _Model, _Transmitter, _ajax, _mqtt) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.Ajax = exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
+
+	    var _oauth2 = _interopRequireDefault(_oauth);
+
+	    var _User2 = _interopRequireDefault(_User);
+
+	    var _Device2 = _interopRequireDefault(_Device);
+
+	    var _Group2 = _interopRequireDefault(_Group);
+
+	    var _Model2 = _interopRequireDefault(_Model);
+
+	    var _Transmitter2 = _interopRequireDefault(_Transmitter);
+
+	    var _ajax2 = _interopRequireDefault(_ajax);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    exports.Oauth2 = _oauth2.default;
+	    exports.User = _User2.default;
+	    exports.Device = _Device2.default;
+	    exports.Group = _Group2.default;
+	    exports.Model = _Model2.default;
+	    exports.Transmitter = _Transmitter2.default;
+	    exports.Ajax = _ajax2.default;
+
+
+	    var config = {
+	        persistToken: true,
+	        mqtt: {
+	            endpoint: 'mqtt.relayr.io'
+	        },
+	        ajax: {
+	            uri: 'api.relayr.io',
+	            dataUri: 'data-api.relayr.io',
+	            protocol: 'https://'
+	        }
+	    };
+
+	    var currentUser = void 0;
+	    var project = void 0;
+	    var oauth2 = void 0;
+	    var main = {
+	        init: function init(p, customConfig) {
+	            _assign__('project', p);
+
+	            if (customConfig) {
+	                Object.assign(_get__('config'), customConfig);
+	            }
+	        },
+
+	        authorize: function authorize(optionalToken) {
+	            return new Promise(function (resolve, reject) {
+
+	                if (!_get__('oauth2')) {
+	                    _assign__('oauth2', new (_get__('Oauth2'))({
+	                        protocol: _get__('config').ajax.protocol,
+	                        uri: _get__('config').ajax.uri,
+	                        appId: _get__('project').id,
+	                        redirectURI: _get__('project').redirectURI,
+	                        persist: _get__('config').persistToken
+	                    }));
+	                }
+	                if (!optionalToken) {
+	                    _get__('oauth2').login();
+
+	                    _get__('config').ajax.token = _get__('oauth2').token;
+	                } else {
+	                    _get__('config').ajax.token = optionalToken;
+	                }
+
+	                _assign__('currentUser', new (_get__('User'))(_get__('config')));
+	                resolve(_get__('currentUser'));
+	            });
+	        },
+
+	        logout: function logout() {
+	            _get__('oauth2').logout();
+	        },
+
+	        getConfig: function getConfig() {
+	            return _get__('config');
+	        },
+
+	        getCurrentUser: function getCurrentUser() {
+	            return _get__('currentUser');
+	        },
+
+	        customAjax: function customAjax(ajaxConfiguration) {
+	            return new (_get__('Ajax'))(ajaxConfiguration || _get__('config').ajax);
+	        }
+	    };
+
+	    exports.default = _get__('main');
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'project':
+	                return project;
+
+	            case 'config':
+	                return config;
+
+	            case 'oauth2':
+	                return oauth2;
+
+	            case 'Oauth2':
+	                return _oauth2.default;
+
+	            case 'currentUser':
+	                return currentUser;
+
+	            case 'User':
+	                return _User2.default;
+
+	            case 'Ajax':
+	                return _ajax2.default;
+
+	            case 'main':
+	                return main;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {
+	            case 'project':
+	                return project = _value;
+
+	            case 'oauth2':
+	                return oauth2 = _value;
+
+	            case 'currentUser':
+	                return currentUser = _value;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof main === 'undefined' ? 'undefined' : _typeof(main);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(main, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(main)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ },
 /* 2 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n  if (true) {\n    !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(3), !(function webpackMissingModule() { var e = new Error(\"Cannot find module \\\"querystring\\\"\"); e.code = 'MODULE_NOT_FOUND'; throw e; }())], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n  } else if (typeof exports !== \"undefined\") {\n    factory(module, exports, require('punycode'), require('querystring'));\n  } else {\n    var mod = {\n      exports: {}\n    };\n    factory(mod, mod.exports, global.punycode, global.querystring);\n    global.url = mod.exports;\n  }\n})(this, function (module, exports, punycode, querystring) {\n  'use strict';\n\n  var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n    return typeof obj;\n  } : function (obj) {\n    return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n  };\n\n  exports.parse = _get__('urlParse');\n  exports.resolve = _get__('urlResolve');\n  exports.resolveObject = _get__('urlResolveObject');\n  exports.format = _get__('urlFormat');\n\n  exports.Url = _get__('Url');\n\n  function Url() {\n    this.protocol = null;\n    this.slashes = null;\n    this.auth = null;\n    this.host = null;\n    this.port = null;\n    this.hostname = null;\n    this.hash = null;\n    this.search = null;\n    this.query = null;\n    this.pathname = null;\n    this.path = null;\n    this.href = null;\n  }\n\n  // Reference: RFC 3986, RFC 1808, RFC 2396\n\n  // define these here so at least they only have to be\n  // compiled once on the first module load.\n  var protocolPattern = /^([a-z0-9.+-]+:)/i,\n      portPattern = /:[0-9]*$/,\n\n\n  // RFC 2396: characters reserved for delimiting URLs.\n  // We actually just auto-escape these.\n  delims = ['<', '>', '\"', '`', ' ', '\\r', '\\n', '\\t'],\n\n\n  // RFC 2396: characters not allowed for various reasons.\n  unwise = ['{', '}', '|', '\\\\', '^', '`'].concat(_get__('delims')),\n\n\n  // Allowed by RFCs, but cause of XSS attacks.  Always escape these.\n  autoEscape = ['\\''].concat(_get__('unwise')),\n\n  // Characters that are never ever allowed in a hostname.\n  // Note that any invalid chars are also handled, but these\n  // are the ones that are *expected* to be seen, so we fast-path\n  // them.\n  nonHostChars = ['%', '/', '?', ';', '#'].concat(_get__('autoEscape')),\n      hostEndingChars = ['/', '?', '#'],\n      hostnameMaxLen = 255,\n      hostnamePartPattern = /^[a-z0-9A-Z_-]{0,63}$/,\n      hostnamePartStart = /^([a-z0-9A-Z_-]{0,63})(.*)$/,\n\n  // protocols that can allow \"unsafe\" and \"unwise\" chars.\n  unsafeProtocol = {\n    'javascript': true,\n    'javascript:': true\n  },\n\n  // protocols that never have a hostname.\n  hostlessProtocol = {\n    'javascript': true,\n    'javascript:': true\n  },\n\n  // protocols that always contain a // bit.\n  slashedProtocol = {\n    'http': true,\n    'https': true,\n    'ftp': true,\n    'gopher': true,\n    'file': true,\n    'http:': true,\n    'https:': true,\n    'ftp:': true,\n    'gopher:': true,\n    'file:': true\n  };\n\n  function urlParse(url, parseQueryString, slashesDenoteHost) {\n    if (url && _get__('isObject')(url) && url instanceof _get__('Url')) return url;\n\n    var u = new (_get__('Url'))();\n    u.parse(url, parseQueryString, slashesDenoteHost);\n    return u;\n  }\n\n  _get__('Url').prototype.parse = function (url, parseQueryString, slashesDenoteHost) {\n    if (!_get__('isString')(url)) {\n      throw new TypeError(\"Parameter 'url' must be a string, not \" + (typeof url === 'undefined' ? 'undefined' : _typeof(url)));\n    }\n\n    var rest = url;\n\n    // trim before proceeding.\n    // This is to support parse stuff like \"  http://foo.com  \\n\"\n    rest = rest.trim();\n\n    var proto = _get__('protocolPattern').exec(rest);\n    if (proto) {\n      proto = proto[0];\n      var lowerProto = proto.toLowerCase();\n      this.protocol = lowerProto;\n      rest = rest.substr(proto.length);\n    }\n\n    // figure out if it's got a host\n    // user@server is *always* interpreted as a hostname, and url\n    // resolution will treat //foo/bar as host=foo,path=bar because that's\n    // how the browser resolves relative URLs.\n    if (slashesDenoteHost || proto || rest.match(/^\\/\\/[^@\\/]+@[^@\\/]+/)) {\n      var slashes = rest.substr(0, 2) === '//';\n      if (slashes && !(proto && _get__('hostlessProtocol')[proto])) {\n        rest = rest.substr(2);\n        this.slashes = true;\n      }\n    }\n\n    if (!_get__('hostlessProtocol')[proto] && (slashes || proto && !_get__('slashedProtocol')[proto])) {\n\n      // there's a hostname.\n      // the first instance of /, ?, ;, or # ends the host.\n      //\n      // If there is an @ in the hostname, then non-host chars *are* allowed\n      // to the left of the last @ sign, unless some host-ending character\n      // comes *before* the @-sign.\n      // URLs are obnoxious.\n      //\n      // ex:\n      // http://a@b@c/ => user:a@b host:c\n      // http://a@b?@c => user:a host:c path:/?@c\n\n      // v0.12 TODO(isaacs): This is not quite how Chrome does things.\n      // Review our test case against browsers more comprehensively.\n\n      // find the first instance of any hostEndingChars\n      var hostEnd = -1;\n      for (var i = 0; i < _get__('hostEndingChars').length; i++) {\n        var hec = rest.indexOf(_get__('hostEndingChars')[i]);\n        if (hec !== -1 && (hostEnd === -1 || hec < hostEnd)) hostEnd = hec;\n      }\n\n      // at this point, either we have an explicit point where the\n      // auth portion cannot go past, or the last @ char is the decider.\n      var auth, atSign;\n      if (hostEnd === -1) {\n        // atSign can be anywhere.\n        atSign = rest.lastIndexOf('@');\n      } else {\n        // atSign must be in auth portion.\n        // http://a@b/c@d => host:b auth:a path:/c@d\n        atSign = rest.lastIndexOf('@', hostEnd);\n      }\n\n      // Now we have a portion which is definitely the auth.\n      // Pull that off.\n      if (atSign !== -1) {\n        auth = rest.slice(0, atSign);\n        rest = rest.slice(atSign + 1);\n        this.auth = decodeURIComponent(auth);\n      }\n\n      // the host is the remaining to the left of the first non-host char\n      hostEnd = -1;\n      for (var i = 0; i < _get__('nonHostChars').length; i++) {\n        var hec = rest.indexOf(_get__('nonHostChars')[i]);\n        if (hec !== -1 && (hostEnd === -1 || hec < hostEnd)) hostEnd = hec;\n      }\n      // if we still have not hit it, then the entire thing is a host.\n      if (hostEnd === -1) hostEnd = rest.length;\n\n      this.host = rest.slice(0, hostEnd);\n      rest = rest.slice(hostEnd);\n\n      // pull out port.\n      this.parseHost();\n\n      // we've indicated that there is a hostname,\n      // so even if it's empty, it has to be present.\n      this.hostname = this.hostname || '';\n\n      // if hostname begins with [ and ends with ]\n      // assume that it's an IPv6 address.\n      var ipv6Hostname = this.hostname[0] === '[' && this.hostname[this.hostname.length - 1] === ']';\n\n      // validate a little.\n      if (!ipv6Hostname) {\n        var hostparts = this.hostname.split(/\\./);\n        for (var i = 0, l = hostparts.length; i < l; i++) {\n          var part = hostparts[i];\n          if (!part) continue;\n          if (!part.match(_get__('hostnamePartPattern'))) {\n            var newpart = '';\n            for (var j = 0, k = part.length; j < k; j++) {\n              if (part.charCodeAt(j) > 127) {\n                // we replace non-ASCII char with a temporary placeholder\n                // we need this to make sure size of hostname is not\n                // broken by replacing non-ASCII by nothing\n                newpart += 'x';\n              } else {\n                newpart += part[j];\n              }\n            }\n            // we test again with ASCII char only\n            if (!newpart.match(_get__('hostnamePartPattern'))) {\n              var validParts = hostparts.slice(0, i);\n              var notHost = hostparts.slice(i + 1);\n              var bit = part.match(_get__('hostnamePartStart'));\n              if (bit) {\n                validParts.push(bit[1]);\n                notHost.unshift(bit[2]);\n              }\n              if (notHost.length) {\n                rest = '/' + notHost.join('.') + rest;\n              }\n              this.hostname = validParts.join('.');\n              break;\n            }\n          }\n        }\n      }\n\n      if (this.hostname.length > _get__('hostnameMaxLen')) {\n        this.hostname = '';\n      } else {\n        // hostnames are always lower case.\n        this.hostname = this.hostname.toLowerCase();\n      }\n\n      if (!ipv6Hostname) {\n        // IDNA Support: Returns a puny coded representation of \"domain\".\n        // It only converts the part of the domain name that\n        // has non ASCII characters. I.e. it dosent matter if\n        // you call it with a domain that already is in ASCII.\n        var domainArray = this.hostname.split('.');\n        var newOut = [];\n        for (var i = 0; i < domainArray.length; ++i) {\n          var s = domainArray[i];\n          newOut.push(s.match(/[^A-Za-z0-9_-]/) ? 'xn--' + _get__('punycode').encode(s) : s);\n        }\n        this.hostname = newOut.join('.');\n      }\n\n      var p = this.port ? ':' + this.port : '';\n      var h = this.hostname || '';\n      this.host = h + p;\n      this.href += this.host;\n\n      // strip [ and ] from the hostname\n      // the host field still retains them, though\n      if (ipv6Hostname) {\n        this.hostname = this.hostname.substr(1, this.hostname.length - 2);\n        if (rest[0] !== '/') {\n          rest = '/' + rest;\n        }\n      }\n    }\n\n    // now rest is set to the post-host stuff.\n    // chop off any delim chars.\n    if (!_get__('unsafeProtocol')[lowerProto]) {\n\n      // First, make 100% sure that any \"autoEscape\" chars get\n      // escaped, even if encodeURIComponent doesn't think they\n      // need to be.\n      for (var i = 0, l = _get__('autoEscape').length; i < l; i++) {\n        var ae = _get__('autoEscape')[i];\n        var esc = encodeURIComponent(ae);\n        if (esc === ae) {\n          esc = escape(ae);\n        }\n        rest = rest.split(ae).join(esc);\n      }\n    }\n\n    // chop off from the tail first.\n    var hash = rest.indexOf('#');\n    if (hash !== -1) {\n      // got a fragment string.\n      this.hash = rest.substr(hash);\n      rest = rest.slice(0, hash);\n    }\n    var qm = rest.indexOf('?');\n    if (qm !== -1) {\n      this.search = rest.substr(qm);\n      this.query = rest.substr(qm + 1);\n      if (parseQueryString) {\n        this.query = _get__('querystring').parse(this.query);\n      }\n      rest = rest.slice(0, qm);\n    } else if (parseQueryString) {\n      // no query string, but parseQueryString still requested\n      this.search = '';\n      this.query = {};\n    }\n    if (rest) this.pathname = rest;\n    if (_get__('slashedProtocol')[lowerProto] && this.hostname && !this.pathname) {\n      this.pathname = '/';\n    }\n\n    //to support http.request\n    if (this.pathname || this.search) {\n      var p = this.pathname || '';\n      var s = this.search || '';\n      this.path = p + s;\n    }\n\n    // finally, reconstruct the href based on what has been validated.\n    this.href = this.format();\n    return this;\n  };\n\n  // format a parsed object into a url string\n  function urlFormat(obj) {\n    // ensure it's an object, and not a string url.\n    // If it's an obj, this is a no-op.\n    // this way, you can call url_format() on strings\n    // to clean up potentially wonky urls.\n    if (_get__('isString')(obj)) obj = _get__('urlParse')(obj);\n    if (!(obj instanceof _get__('Url'))) return _get__('Url').prototype.format.call(obj);\n    return obj.format();\n  }\n\n  _get__('Url').prototype.format = function () {\n    var auth = this.auth || '';\n    if (auth) {\n      auth = encodeURIComponent(auth);\n      auth = auth.replace(/%3A/i, ':');\n      auth += '@';\n    }\n\n    var protocol = this.protocol || '',\n        pathname = this.pathname || '',\n        hash = this.hash || '',\n        host = false,\n        query = '';\n\n    if (this.host) {\n      host = auth + this.host;\n    } else if (this.hostname) {\n      host = auth + (this.hostname.indexOf(':') === -1 ? this.hostname : '[' + this.hostname + ']');\n      if (this.port) {\n        host += ':' + this.port;\n      }\n    }\n\n    if (this.query && _get__('isObject')(this.query) && Object.keys(this.query).length) {\n      query = _get__('querystring').stringify(this.query);\n    }\n\n    var search = this.search || query && '?' + query || '';\n\n    if (protocol && protocol.substr(-1) !== ':') protocol += ':';\n\n    // only the slashedProtocols get the //.  Not mailto:, xmpp:, etc.\n    // unless they had them to begin with.\n    if (this.slashes || (!protocol || _get__('slashedProtocol')[protocol]) && host !== false) {\n      host = '//' + (host || '');\n      if (pathname && pathname.charAt(0) !== '/') pathname = '/' + pathname;\n    } else if (!host) {\n      host = '';\n    }\n\n    if (hash && hash.charAt(0) !== '#') hash = '#' + hash;\n    if (search && search.charAt(0) !== '?') search = '?' + search;\n\n    pathname = pathname.replace(/[?#]/g, function (match) {\n      return encodeURIComponent(match);\n    });\n    search = search.replace('#', '%23');\n\n    return protocol + host + pathname + search + hash;\n  };\n\n  function urlResolve(source, relative) {\n    return _get__('urlParse')(source, false, true).resolve(relative);\n  }\n\n  _get__('Url').prototype.resolve = function (relative) {\n    return this.resolveObject(_get__('urlParse')(relative, false, true)).format();\n  };\n\n  function urlResolveObject(source, relative) {\n    if (!source) return relative;\n    return _get__('urlParse')(source, false, true).resolveObject(relative);\n  }\n\n  _get__('Url').prototype.resolveObject = function (relative) {\n    if (_get__('isString')(relative)) {\n      var rel = new (_get__('Url'))();\n      rel.parse(relative, false, true);\n      relative = rel;\n    }\n\n    var result = new (_get__('Url'))();\n    Object.keys(this).forEach(function (k) {\n      result[k] = this[k];\n    }, this);\n\n    // hash is always overridden, no matter what.\n    // even href=\"\" will remove it.\n    result.hash = relative.hash;\n\n    // if the relative url is empty, then there's nothing left to do here.\n    if (relative.href === '') {\n      result.href = result.format();\n      return result;\n    }\n\n    // hrefs like //foo/bar always cut to the protocol.\n    if (relative.slashes && !relative.protocol) {\n      // take everything except the protocol from relative\n      Object.keys(relative).forEach(function (k) {\n        if (k !== 'protocol') result[k] = relative[k];\n      });\n\n      //urlParse appends trailing / to urls like http://www.example.com\n      if (_get__('slashedProtocol')[result.protocol] && result.hostname && !result.pathname) {\n        result.path = result.pathname = '/';\n      }\n\n      result.href = result.format();\n      return result;\n    }\n\n    if (relative.protocol && relative.protocol !== result.protocol) {\n      // if it's a known url protocol, then changing\n      // the protocol does weird things\n      // first, if it's not file:, then we MUST have a host,\n      // and if there was a path\n      // to begin with, then we MUST have a path.\n      // if it is file:, then the host is dropped,\n      // because that's known to be hostless.\n      // anything else is assumed to be absolute.\n      if (!_get__('slashedProtocol')[relative.protocol]) {\n        Object.keys(relative).forEach(function (k) {\n          result[k] = relative[k];\n        });\n        result.href = result.format();\n        return result;\n      }\n\n      result.protocol = relative.protocol;\n      if (!relative.host && !_get__('hostlessProtocol')[relative.protocol]) {\n        var relPath = (relative.pathname || '').split('/');\n        while (relPath.length && !(relative.host = relPath.shift())) {}\n        if (!relative.host) relative.host = '';\n        if (!relative.hostname) relative.hostname = '';\n        if (relPath[0] !== '') relPath.unshift('');\n        if (relPath.length < 2) relPath.unshift('');\n        result.pathname = relPath.join('/');\n      } else {\n        result.pathname = relative.pathname;\n      }\n      result.search = relative.search;\n      result.query = relative.query;\n      result.host = relative.host || '';\n      result.auth = relative.auth;\n      result.hostname = relative.hostname || relative.host;\n      result.port = relative.port;\n      // to support http.request\n      if (result.pathname || result.search) {\n        var p = result.pathname || '';\n        var s = result.search || '';\n        result.path = p + s;\n      }\n      result.slashes = result.slashes || relative.slashes;\n      result.href = result.format();\n      return result;\n    }\n\n    var isSourceAbs = result.pathname && result.pathname.charAt(0) === '/',\n        isRelAbs = relative.host || relative.pathname && relative.pathname.charAt(0) === '/',\n        mustEndAbs = isRelAbs || isSourceAbs || result.host && relative.pathname,\n        removeAllDots = mustEndAbs,\n        srcPath = result.pathname && result.pathname.split('/') || [],\n        relPath = relative.pathname && relative.pathname.split('/') || [],\n        psychotic = result.protocol && !_get__('slashedProtocol')[result.protocol];\n\n    // if the url is a non-slashed url, then relative\n    // links like ../.. should be able\n    // to crawl up to the hostname, as well.  This is strange.\n    // result.protocol has already been set by now.\n    // Later on, put the first path part into the host field.\n    if (psychotic) {\n      result.hostname = '';\n      result.port = null;\n      if (result.host) {\n        if (srcPath[0] === '') srcPath[0] = result.host;else srcPath.unshift(result.host);\n      }\n      result.host = '';\n      if (relative.protocol) {\n        relative.hostname = null;\n        relative.port = null;\n        if (relative.host) {\n          if (relPath[0] === '') relPath[0] = relative.host;else relPath.unshift(relative.host);\n        }\n        relative.host = null;\n      }\n      mustEndAbs = mustEndAbs && (relPath[0] === '' || srcPath[0] === '');\n    }\n\n    if (isRelAbs) {\n      // it's absolute.\n      result.host = relative.host || relative.host === '' ? relative.host : result.host;\n      result.hostname = relative.hostname || relative.hostname === '' ? relative.hostname : result.hostname;\n      result.search = relative.search;\n      result.query = relative.query;\n      srcPath = relPath;\n      // fall through to the dot-handling below.\n    } else if (relPath.length) {\n      // it's relative\n      // throw away the existing file, and take the new path instead.\n      if (!srcPath) srcPath = [];\n      srcPath.pop();\n      srcPath = srcPath.concat(relPath);\n      result.search = relative.search;\n      result.query = relative.query;\n    } else if (!_get__('isNullOrUndefined')(relative.search)) {\n      // just pull out the search.\n      // like href='?foo'.\n      // Put this after the other two cases because it simplifies the booleans\n      if (psychotic) {\n        result.hostname = result.host = srcPath.shift();\n        //occationaly the auth can get stuck only in host\n        //this especialy happens in cases like\n        //url.resolveObject('mailto:local1@domain1', 'local2@domain2')\n        var authInHost = result.host && result.host.indexOf('@') > 0 ? result.host.split('@') : false;\n        if (authInHost) {\n          result.auth = authInHost.shift();\n          result.host = result.hostname = authInHost.shift();\n        }\n      }\n      result.search = relative.search;\n      result.query = relative.query;\n      //to support http.request\n      if (!_get__('isNull')(result.pathname) || !_get__('isNull')(result.search)) {\n        result.path = (result.pathname ? result.pathname : '') + (result.search ? result.search : '');\n      }\n      result.href = result.format();\n      return result;\n    }\n\n    if (!srcPath.length) {\n      // no path at all.  easy.\n      // we've already handled the other stuff above.\n      result.pathname = null;\n      //to support http.request\n      if (result.search) {\n        result.path = '/' + result.search;\n      } else {\n        result.path = null;\n      }\n      result.href = result.format();\n      return result;\n    }\n\n    // if a url ENDs in . or .., then it must get a trailing slash.\n    // however, if it ends in anything else non-slashy,\n    // then it must NOT get a trailing slash.\n    var last = srcPath.slice(-1)[0];\n    var hasTrailingSlash = (result.host || relative.host) && (last === '.' || last === '..') || last === '';\n\n    // strip single dots, resolve double dots to parent dir\n    // if the path tries to go above the root, `up` ends up > 0\n    var up = 0;\n    for (var i = srcPath.length; i >= 0; i--) {\n      last = srcPath[i];\n      if (last == '.') {\n        srcPath.splice(i, 1);\n      } else if (last === '..') {\n        srcPath.splice(i, 1);\n        up++;\n      } else if (up) {\n        srcPath.splice(i, 1);\n        up--;\n      }\n    }\n\n    // if the path is allowed to go above the root, restore leading ..s\n    if (!mustEndAbs && !removeAllDots) {\n      for (; up--; up) {\n        srcPath.unshift('..');\n      }\n    }\n\n    if (mustEndAbs && srcPath[0] !== '' && (!srcPath[0] || srcPath[0].charAt(0) !== '/')) {\n      srcPath.unshift('');\n    }\n\n    if (hasTrailingSlash && srcPath.join('/').substr(-1) !== '/') {\n      srcPath.push('');\n    }\n\n    var isAbsolute = srcPath[0] === '' || srcPath[0] && srcPath[0].charAt(0) === '/';\n\n    // put the host back\n    if (psychotic) {\n      result.hostname = result.host = isAbsolute ? '' : srcPath.length ? srcPath.shift() : '';\n      //occationaly the auth can get stuck only in host\n      //this especialy happens in cases like\n      //url.resolveObject('mailto:local1@domain1', 'local2@domain2')\n      var authInHost = result.host && result.host.indexOf('@') > 0 ? result.host.split('@') : false;\n      if (authInHost) {\n        result.auth = authInHost.shift();\n        result.host = result.hostname = authInHost.shift();\n      }\n    }\n\n    mustEndAbs = mustEndAbs || result.host && srcPath.length;\n\n    if (mustEndAbs && !isAbsolute) {\n      srcPath.unshift('');\n    }\n\n    if (!srcPath.length) {\n      result.pathname = null;\n      result.path = null;\n    } else {\n      result.pathname = srcPath.join('/');\n    }\n\n    //to support request.http\n    if (!_get__('isNull')(result.pathname) || !_get__('isNull')(result.search)) {\n      result.path = (result.pathname ? result.pathname : '') + (result.search ? result.search : '');\n    }\n    result.auth = relative.auth || result.auth;\n    result.slashes = result.slashes || relative.slashes;\n    result.href = result.format();\n    return result;\n  };\n\n  _get__('Url').prototype.parseHost = function () {\n    var host = this.host;\n    var port = _get__('portPattern').exec(host);\n    if (port) {\n      port = port[0];\n      if (port !== ':') {\n        this.port = port.substr(1);\n      }\n      host = host.substr(0, host.length - port.length);\n    }\n    if (host) this.hostname = host;\n  };\n\n  function isString(arg) {\n    return typeof arg === \"string\";\n  }\n\n  function isObject(arg) {\n    return (typeof arg === 'undefined' ? 'undefined' : _typeof(arg)) === 'object' && arg !== null;\n  }\n\n  function isNull(arg) {\n    return arg === null;\n  }\n  function isNullOrUndefined(arg) {\n    return arg == null;\n  }\n\n  var _RewiredData__ = Object.create(null);\n\n  var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n  var _RewireAPI__ = {};\n\n  (function () {\n    function addPropertyToAPIObject(name, value) {\n      Object.defineProperty(_RewireAPI__, name, {\n        value: value,\n        enumerable: false,\n        configurable: true\n      });\n    }\n\n    addPropertyToAPIObject('__get__', _get__);\n    addPropertyToAPIObject('__GetDependency__', _get__);\n    addPropertyToAPIObject('__Rewire__', _set__);\n    addPropertyToAPIObject('__set__', _set__);\n    addPropertyToAPIObject('__reset__', _reset__);\n    addPropertyToAPIObject('__ResetDependency__', _reset__);\n    addPropertyToAPIObject('__with__', _with__);\n  })();\n\n  function _get__(variableName) {\n    if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n      return _get_original__(variableName);\n    } else {\n      var value = _RewiredData__[variableName];\n\n      if (value === INTENTIONAL_UNDEFINED) {\n        return undefined;\n      } else {\n        return value;\n      }\n    }\n  }\n\n  function _get_original__(variableName) {\n    switch (variableName) {\n      case 'urlParse':\n        return urlParse;\n\n      case 'urlResolve':\n        return urlResolve;\n\n      case 'urlResolveObject':\n        return urlResolveObject;\n\n      case 'urlFormat':\n        return urlFormat;\n\n      case 'Url':\n        return Url;\n\n      case 'delims':\n        return delims;\n\n      case 'unwise':\n        return unwise;\n\n      case 'autoEscape':\n        return autoEscape;\n\n      case 'isObject':\n        return isObject;\n\n      case 'isString':\n        return isString;\n\n      case 'protocolPattern':\n        return protocolPattern;\n\n      case 'hostlessProtocol':\n        return hostlessProtocol;\n\n      case 'slashedProtocol':\n        return slashedProtocol;\n\n      case 'hostEndingChars':\n        return hostEndingChars;\n\n      case 'nonHostChars':\n        return nonHostChars;\n\n      case 'hostnamePartPattern':\n        return hostnamePartPattern;\n\n      case 'hostnamePartStart':\n        return hostnamePartStart;\n\n      case 'hostnameMaxLen':\n        return hostnameMaxLen;\n\n      case 'punycode':\n        return punycode;\n\n      case 'unsafeProtocol':\n        return unsafeProtocol;\n\n      case 'querystring':\n        return querystring;\n\n      case 'isNullOrUndefined':\n        return isNullOrUndefined;\n\n      case 'isNull':\n        return isNull;\n\n      case 'portPattern':\n        return portPattern;\n    }\n\n    return undefined;\n  }\n\n  function _assign__(variableName, value) {\n    if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n      return _set_original__(variableName, value);\n    } else {\n      return _RewiredData__[variableName] = value;\n    }\n  }\n\n  function _set_original__(variableName, _value) {\n    switch (variableName) {}\n\n    return undefined;\n  }\n\n  function _update_operation__(operation, variableName, prefix) {\n    var oldValue = _get__(variableName);\n\n    var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n    _assign__(variableName, newValue);\n\n    return prefix ? newValue : oldValue;\n  }\n\n  function _set__(variableName, value) {\n    if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n      Object.keys(variableName).forEach(function (name) {\n        _RewiredData__[name] = variableName[name];\n      });\n    } else {\n      if (value === undefined) {\n        _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n      } else {\n        _RewiredData__[variableName] = value;\n      }\n\n      return value;\n    }\n  }\n\n  function _reset__(variableName) {\n    delete _RewiredData__[variableName];\n  }\n\n  function _with__(object) {\n    var rewiredVariableNames = Object.keys(object);\n    var previousValues = {};\n\n    function reset() {\n      rewiredVariableNames.forEach(function (variableName) {\n        _RewiredData__[variableName] = previousValues[variableName];\n      });\n    }\n\n    return function (callback) {\n      rewiredVariableNames.forEach(function (variableName) {\n        previousValues[variableName] = _RewiredData__[variableName];\n        _RewiredData__[variableName] = object[variableName];\n      });\n      var result = callback();\n\n      if (!!result && typeof result.then == 'function') {\n        result.then(reset).catch(reset);\n      } else {\n        reset();\n      }\n\n      return result;\n    };\n  }\n\n  var _typeOfOriginalExport = _typeof(module.exports);\n\n  function addNonEnumerableProperty(name, value) {\n    Object.defineProperty(module.exports, name, {\n      value: value,\n      enumerable: false,\n      configurable: true\n    });\n  }\n\n  if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(module.exports)) {\n    addNonEnumerableProperty('__get__', _get__);\n    addNonEnumerableProperty('__GetDependency__', _get__);\n    addNonEnumerableProperty('__Rewire__', _set__);\n    addNonEnumerableProperty('__set__', _set__);\n    addNonEnumerableProperty('__reset__', _reset__);\n    addNonEnumerableProperty('__ResetDependency__', _reset__);\n    addNonEnumerableProperty('__with__', _with__);\n    addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n  }\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** (webpack)/~/node-libs-browser/~/url/url.js\n ** module id = 2\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///(webpack)/~/node-libs-browser/~/url/url.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports);
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports);
+	        global.oauth2 = mod.exports;
+	    }
+	})(this, function (exports) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var TOKEN_KEY = 'relayr_access_token';
+
+	    var Oauth2 = function () {
+	        function Oauth2(options) {
+	            _classCallCheck(this, Oauth2);
+
+	            this.uri = options.uri || 'api.relayr.io';
+	            this.appId = options.appId;
+	            this.redirectURI = options.redirectURI;
+	            this.shouldPersist = options.persist || false;
+	            this.protocol = options.protocol || 'https://';
+	        }
+
+	        _createClass(Oauth2, [{
+	            key: 'login',
+	            value: function login(optUser, ctx) {
+
+	                if (!this.redirectURI) {
+	                    throw Error('OAuth2 a valid redirect uri must be provided on login');
+	                } else if (!this.appId) {
+	                    throw Error('OAuth2 a valid app ID must be provided on login');
+	                }
+
+	                var storedToken = localStorage.getItem(_get__('TOKEN_KEY'));
+
+	                if (this.shouldPersist && storedToken) {
+	                    this.token = storedToken;
+	                    return;
+	                }
+	                try {
+	                    if (this._parseToken(window.location.href)) return;
+	                } catch (e) {}
+
+	                var authURL = {
+	                    client_id: this.appId,
+	                    redirect_uri: this.redirectURI,
+	                    scope: 'access-own-user-info+configure-devices'
+	                };
+
+	                var uri = '' + this.protocol + this.uri + '/oauth2/auth?client_id=' + this.appId + '&redirect_uri=' + this.redirectURI + '&response_type=token&scope=access-own-user-info+configure-devices';
+
+	                this._loginRedirect(uri);
+	            }
+	        }, {
+	            key: '_loginRedirect',
+	            value: function _loginRedirect(uri) {
+	                window.location.assign(uri);
+	            }
+	        }, {
+	            key: '_parseToken',
+	            value: function _parseToken(tokenURL) {
+	                var parts = tokenURL.split('#');
+
+	                if (parts[0] && parts[0].length === 0 || parts[1] && parts[1].length === 0) {
+	                    throw Error('The provided URL is not correctly formatted');
+	                }
+
+	                var queryParams = parts[1].split('&');
+
+	                var authParams = queryParams.reduce(function (accumulator, pair) {
+	                    var tuple = pair.split('=');
+	                    accumulator[tuple[0]] = tuple[1];
+	                    return accumulator;
+	                }, {});
+
+	                if (!authParams.token_type) {
+	                    throw Error('The provided URL does not contain a access token');
+	                }
+
+	                this.token = authParams.token_type + ' ' + authParams.access_token;
+
+	                this.setToken(this.token);
+	                return this.token;
+	            }
+	        }, {
+	            key: 'setToken',
+	            value: function setToken(token) {
+	                localStorage.setItem(_get__('TOKEN_KEY'), this.token);
+	            }
+	        }, {
+	            key: 'logout',
+	            value: function logout() {
+	                localStorage.removeItem(_get__('TOKEN_KEY'));
+	            }
+	        }]);
+
+	        return Oauth2;
+	    }();
+
+	    exports.default = _get__('Oauth2');
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'TOKEN_KEY':
+	                return TOKEN_KEY;
+
+	            case 'Oauth2':
+	                return Oauth2;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Oauth2 === 'undefined' ? 'undefined' : _typeof(Oauth2);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Oauth2, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Oauth2)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ },
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;var __WEBPACK_AMD_DEFINE_RESULT__;/* WEBPACK VAR INJECTION */(function(global) {(function (global, factory) {\n\tif (true) {\n\t\t!(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n\t} else if (typeof exports !== \"undefined\") {\n\t\tfactory(module, exports);\n\t} else {\n\t\tvar mod = {\n\t\t\texports: {}\n\t\t};\n\t\tfactory(mod, mod.exports);\n\t\tglobal.punycode = mod.exports;\n\t}\n})(this, function (module, exports) {\n\t'use strict';\n\n\tvar _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n\t\treturn typeof obj;\n\t} : function (obj) {\n\t\treturn obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n\t};\n\n\t/*! https://mths.be/punycode v1.3.2 by @mathias */\n\t;(function (root) {\n\n\t\t/** Detect free variables */\n\t\tvar freeExports = (typeof exports === 'undefined' ? 'undefined' : _typeof(exports)) == 'object' && exports && !exports.nodeType && exports;\n\t\tvar freeModule = (typeof module === 'undefined' ? 'undefined' : _typeof(module)) == 'object' && module && !module.nodeType && module;\n\t\tvar freeGlobal = (typeof global === 'undefined' ? 'undefined' : _typeof(global)) == 'object' && global;\n\t\tif (freeGlobal.global === freeGlobal || freeGlobal.window === freeGlobal || freeGlobal.self === freeGlobal) {\n\t\t\troot = freeGlobal;\n\t\t}\n\n\t\t/**\n   * The `punycode` object.\n   * @name punycode\n   * @type Object\n   */\n\t\tvar punycode,\n\n\n\t\t/** Highest positive signed 32-bit float value */\n\t\tmaxInt = 2147483647,\n\t\t    // aka. 0x7FFFFFFF or 2^31-1\n\n\t\t/** Bootstring parameters */\n\t\tbase = 36,\n\t\t    tMin = 1,\n\t\t    tMax = 26,\n\t\t    skew = 38,\n\t\t    damp = 700,\n\t\t    initialBias = 72,\n\t\t    initialN = 128,\n\t\t    // 0x80\n\t\tdelimiter = '-',\n\t\t    // '\\x2D'\n\n\t\t/** Regular expressions */\n\t\tregexPunycode = /^xn--/,\n\t\t    regexNonASCII = /[^\\x20-\\x7E]/,\n\t\t    // unprintable ASCII chars + non-ASCII chars\n\t\tregexSeparators = /[\\x2E\\u3002\\uFF0E\\uFF61]/g,\n\t\t    // RFC 3490 separators\n\n\t\t/** Error messages */\n\t\terrors = {\n\t\t\t'overflow': 'Overflow: input needs wider integers to process',\n\t\t\t'not-basic': 'Illegal input >= 0x80 (not a basic code point)',\n\t\t\t'invalid-input': 'Invalid input'\n\t\t},\n\n\n\t\t/** Convenience shortcuts */\n\t\tbaseMinusTMin = base - tMin,\n\t\t    floor = Math.floor,\n\t\t    stringFromCharCode = String.fromCharCode,\n\n\n\t\t/** Temporary variable */\n\t\tkey;\n\n\t\t/*--------------------------------------------------------------------------*/\n\n\t\t/**\n   * A generic error utility function.\n   * @private\n   * @param {String} type The error type.\n   * @returns {Error} Throws a `RangeError` with the applicable error message.\n   */\n\t\tfunction error(type) {\n\t\t\tthrow RangeError(errors[type]);\n\t\t}\n\n\t\t/**\n   * A generic `Array#map` utility function.\n   * @private\n   * @param {Array} array The array to iterate over.\n   * @param {Function} callback The function that gets called for every array\n   * item.\n   * @returns {Array} A new array of values returned by the callback function.\n   */\n\t\tfunction map(array, fn) {\n\t\t\tvar length = array.length;\n\t\t\tvar result = [];\n\t\t\twhile (length--) {\n\t\t\t\tresult[length] = fn(array[length]);\n\t\t\t}\n\t\t\treturn result;\n\t\t}\n\n\t\t/**\n   * A simple `Array#map`-like wrapper to work with domain name strings or email\n   * addresses.\n   * @private\n   * @param {String} domain The domain name or email address.\n   * @param {Function} callback The function that gets called for every\n   * character.\n   * @returns {Array} A new string of characters returned by the callback\n   * function.\n   */\n\t\tfunction mapDomain(string, fn) {\n\t\t\tvar parts = string.split('@');\n\t\t\tvar result = '';\n\t\t\tif (parts.length > 1) {\n\t\t\t\t// In email addresses, only the domain name should be punycoded. Leave\n\t\t\t\t// the local part (i.e. everything up to `@`) intact.\n\t\t\t\tresult = parts[0] + '@';\n\t\t\t\tstring = parts[1];\n\t\t\t}\n\t\t\t// Avoid `split(regex)` for IE8 compatibility. See #17.\n\t\t\tstring = string.replace(regexSeparators, '\\x2E');\n\t\t\tvar labels = string.split('.');\n\t\t\tvar encoded = map(labels, fn).join('.');\n\t\t\treturn result + encoded;\n\t\t}\n\n\t\t/**\n   * Creates an array containing the numeric code points of each Unicode\n   * character in the string. While JavaScript uses UCS-2 internally,\n   * this function will convert a pair of surrogate halves (each of which\n   * UCS-2 exposes as separate characters) into a single code point,\n   * matching UTF-16.\n   * @see `punycode.ucs2.encode`\n   * @see <https://mathiasbynens.be/notes/javascript-encoding>\n   * @memberOf punycode.ucs2\n   * @name decode\n   * @param {String} string The Unicode input string (UCS-2).\n   * @returns {Array} The new array of code points.\n   */\n\t\tfunction ucs2decode(string) {\n\t\t\tvar output = [],\n\t\t\t    counter = 0,\n\t\t\t    length = string.length,\n\t\t\t    value,\n\t\t\t    extra;\n\t\t\twhile (counter < length) {\n\t\t\t\tvalue = string.charCodeAt(counter++);\n\t\t\t\tif (value >= 0xD800 && value <= 0xDBFF && counter < length) {\n\t\t\t\t\t// high surrogate, and there is a next character\n\t\t\t\t\textra = string.charCodeAt(counter++);\n\t\t\t\t\tif ((extra & 0xFC00) == 0xDC00) {\n\t\t\t\t\t\t// low surrogate\n\t\t\t\t\t\toutput.push(((value & 0x3FF) << 10) + (extra & 0x3FF) + 0x10000);\n\t\t\t\t\t} else {\n\t\t\t\t\t\t// unmatched surrogate; only append this code unit, in case the next\n\t\t\t\t\t\t// code unit is the high surrogate of a surrogate pair\n\t\t\t\t\t\toutput.push(value);\n\t\t\t\t\t\tcounter--;\n\t\t\t\t\t}\n\t\t\t\t} else {\n\t\t\t\t\toutput.push(value);\n\t\t\t\t}\n\t\t\t}\n\t\t\treturn output;\n\t\t}\n\n\t\t/**\n   * Creates a string based on an array of numeric code points.\n   * @see `punycode.ucs2.decode`\n   * @memberOf punycode.ucs2\n   * @name encode\n   * @param {Array} codePoints The array of numeric code points.\n   * @returns {String} The new Unicode string (UCS-2).\n   */\n\t\tfunction ucs2encode(array) {\n\t\t\treturn map(array, function (value) {\n\t\t\t\tvar output = '';\n\t\t\t\tif (value > 0xFFFF) {\n\t\t\t\t\tvalue -= 0x10000;\n\t\t\t\t\toutput += stringFromCharCode(value >>> 10 & 0x3FF | 0xD800);\n\t\t\t\t\tvalue = 0xDC00 | value & 0x3FF;\n\t\t\t\t}\n\t\t\t\toutput += stringFromCharCode(value);\n\t\t\t\treturn output;\n\t\t\t}).join('');\n\t\t}\n\n\t\t/**\n   * Converts a basic code point into a digit/integer.\n   * @see `digitToBasic()`\n   * @private\n   * @param {Number} codePoint The basic numeric code point value.\n   * @returns {Number} The numeric value of a basic code point (for use in\n   * representing integers) in the range `0` to `base - 1`, or `base` if\n   * the code point does not represent a value.\n   */\n\t\tfunction basicToDigit(codePoint) {\n\t\t\tif (codePoint - 48 < 10) {\n\t\t\t\treturn codePoint - 22;\n\t\t\t}\n\t\t\tif (codePoint - 65 < 26) {\n\t\t\t\treturn codePoint - 65;\n\t\t\t}\n\t\t\tif (codePoint - 97 < 26) {\n\t\t\t\treturn codePoint - 97;\n\t\t\t}\n\t\t\treturn base;\n\t\t}\n\n\t\t/**\n   * Converts a digit/integer into a basic code point.\n   * @see `basicToDigit()`\n   * @private\n   * @param {Number} digit The numeric value of a basic code point.\n   * @returns {Number} The basic code point whose value (when used for\n   * representing integers) is `digit`, which needs to be in the range\n   * `0` to `base - 1`. If `flag` is non-zero, the uppercase form is\n   * used; else, the lowercase form is used. The behavior is undefined\n   * if `flag` is non-zero and `digit` has no uppercase form.\n   */\n\t\tfunction digitToBasic(digit, flag) {\n\t\t\t//  0..25 map to ASCII a..z or A..Z\n\t\t\t// 26..35 map to ASCII 0..9\n\t\t\treturn digit + 22 + 75 * (digit < 26) - ((flag != 0) << 5);\n\t\t}\n\n\t\t/**\n   * Bias adaptation function as per section 3.4 of RFC 3492.\n   * http://tools.ietf.org/html/rfc3492#section-3.4\n   * @private\n   */\n\t\tfunction adapt(delta, numPoints, firstTime) {\n\t\t\tvar k = 0;\n\t\t\tdelta = firstTime ? floor(delta / damp) : delta >> 1;\n\t\t\tdelta += floor(delta / numPoints);\n\t\t\tfor (; /* no initialization */delta > baseMinusTMin * tMax >> 1; k += base) {\n\t\t\t\tdelta = floor(delta / baseMinusTMin);\n\t\t\t}\n\t\t\treturn floor(k + (baseMinusTMin + 1) * delta / (delta + skew));\n\t\t}\n\n\t\t/**\n   * Converts a Punycode string of ASCII-only symbols to a string of Unicode\n   * symbols.\n   * @memberOf punycode\n   * @param {String} input The Punycode string of ASCII-only symbols.\n   * @returns {String} The resulting string of Unicode symbols.\n   */\n\t\tfunction decode(input) {\n\t\t\t// Don't use UCS-2\n\t\t\tvar output = [],\n\t\t\t    inputLength = input.length,\n\t\t\t    out,\n\t\t\t    i = 0,\n\t\t\t    n = initialN,\n\t\t\t    bias = initialBias,\n\t\t\t    basic,\n\t\t\t    j,\n\t\t\t    index,\n\t\t\t    oldi,\n\t\t\t    w,\n\t\t\t    k,\n\t\t\t    digit,\n\t\t\t    t,\n\n\t\t\t/** Cached calculation results */\n\t\t\tbaseMinusT;\n\n\t\t\t// Handle the basic code points: let `basic` be the number of input code\n\t\t\t// points before the last delimiter, or `0` if there is none, then copy\n\t\t\t// the first basic code points to the output.\n\n\t\t\tbasic = input.lastIndexOf(delimiter);\n\t\t\tif (basic < 0) {\n\t\t\t\tbasic = 0;\n\t\t\t}\n\n\t\t\tfor (j = 0; j < basic; ++j) {\n\t\t\t\t// if it's not a basic code point\n\t\t\t\tif (input.charCodeAt(j) >= 0x80) {\n\t\t\t\t\terror('not-basic');\n\t\t\t\t}\n\t\t\t\toutput.push(input.charCodeAt(j));\n\t\t\t}\n\n\t\t\t// Main decoding loop: start just after the last delimiter if any basic code\n\t\t\t// points were copied; start at the beginning otherwise.\n\n\t\t\tfor (index = basic > 0 ? basic + 1 : 0; index < inputLength;) /* no final expression */{\n\n\t\t\t\t// `index` is the index of the next character to be consumed.\n\t\t\t\t// Decode a generalized variable-length integer into `delta`,\n\t\t\t\t// which gets added to `i`. The overflow checking is easier\n\t\t\t\t// if we increase `i` as we go, then subtract off its starting\n\t\t\t\t// value at the end to obtain `delta`.\n\t\t\t\tfor (oldi = i, w = 1, k = base;; /* no condition */k += base) {\n\n\t\t\t\t\tif (index >= inputLength) {\n\t\t\t\t\t\terror('invalid-input');\n\t\t\t\t\t}\n\n\t\t\t\t\tdigit = basicToDigit(input.charCodeAt(index++));\n\n\t\t\t\t\tif (digit >= base || digit > floor((maxInt - i) / w)) {\n\t\t\t\t\t\terror('overflow');\n\t\t\t\t\t}\n\n\t\t\t\t\ti += digit * w;\n\t\t\t\t\tt = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;\n\n\t\t\t\t\tif (digit < t) {\n\t\t\t\t\t\tbreak;\n\t\t\t\t\t}\n\n\t\t\t\t\tbaseMinusT = base - t;\n\t\t\t\t\tif (w > floor(maxInt / baseMinusT)) {\n\t\t\t\t\t\terror('overflow');\n\t\t\t\t\t}\n\n\t\t\t\t\tw *= baseMinusT;\n\t\t\t\t}\n\n\t\t\t\tout = output.length + 1;\n\t\t\t\tbias = adapt(i - oldi, out, oldi == 0);\n\n\t\t\t\t// `i` was supposed to wrap around from `out` to `0`,\n\t\t\t\t// incrementing `n` each time, so we'll fix that now:\n\t\t\t\tif (floor(i / out) > maxInt - n) {\n\t\t\t\t\terror('overflow');\n\t\t\t\t}\n\n\t\t\t\tn += floor(i / out);\n\t\t\t\ti %= out;\n\n\t\t\t\t// Insert `n` at position `i` of the output\n\t\t\t\toutput.splice(i++, 0, n);\n\t\t\t}\n\n\t\t\treturn ucs2encode(output);\n\t\t}\n\n\t\t/**\n   * Converts a string of Unicode symbols (e.g. a domain name label) to a\n   * Punycode string of ASCII-only symbols.\n   * @memberOf punycode\n   * @param {String} input The string of Unicode symbols.\n   * @returns {String} The resulting Punycode string of ASCII-only symbols.\n   */\n\t\tfunction encode(input) {\n\t\t\tvar n,\n\t\t\t    delta,\n\t\t\t    handledCPCount,\n\t\t\t    basicLength,\n\t\t\t    bias,\n\t\t\t    j,\n\t\t\t    m,\n\t\t\t    q,\n\t\t\t    k,\n\t\t\t    t,\n\t\t\t    currentValue,\n\t\t\t    output = [],\n\n\t\t\t/** `inputLength` will hold the number of code points in `input`. */\n\t\t\tinputLength,\n\n\t\t\t/** Cached calculation results */\n\t\t\thandledCPCountPlusOne,\n\t\t\t    baseMinusT,\n\t\t\t    qMinusT;\n\n\t\t\t// Convert the input in UCS-2 to Unicode\n\t\t\tinput = ucs2decode(input);\n\n\t\t\t// Cache the length\n\t\t\tinputLength = input.length;\n\n\t\t\t// Initialize the state\n\t\t\tn = initialN;\n\t\t\tdelta = 0;\n\t\t\tbias = initialBias;\n\n\t\t\t// Handle the basic code points\n\t\t\tfor (j = 0; j < inputLength; ++j) {\n\t\t\t\tcurrentValue = input[j];\n\t\t\t\tif (currentValue < 0x80) {\n\t\t\t\t\toutput.push(stringFromCharCode(currentValue));\n\t\t\t\t}\n\t\t\t}\n\n\t\t\thandledCPCount = basicLength = output.length;\n\n\t\t\t// `handledCPCount` is the number of code points that have been handled;\n\t\t\t// `basicLength` is the number of basic code points.\n\n\t\t\t// Finish the basic string - if it is not empty - with a delimiter\n\t\t\tif (basicLength) {\n\t\t\t\toutput.push(delimiter);\n\t\t\t}\n\n\t\t\t// Main encoding loop:\n\t\t\twhile (handledCPCount < inputLength) {\n\n\t\t\t\t// All non-basic code points < n have been handled already. Find the next\n\t\t\t\t// larger one:\n\t\t\t\tfor (m = maxInt, j = 0; j < inputLength; ++j) {\n\t\t\t\t\tcurrentValue = input[j];\n\t\t\t\t\tif (currentValue >= n && currentValue < m) {\n\t\t\t\t\t\tm = currentValue;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t// Increase `delta` enough to advance the decoder's <n,i> state to <m,0>,\n\t\t\t\t// but guard against overflow\n\t\t\t\thandledCPCountPlusOne = handledCPCount + 1;\n\t\t\t\tif (m - n > floor((maxInt - delta) / handledCPCountPlusOne)) {\n\t\t\t\t\terror('overflow');\n\t\t\t\t}\n\n\t\t\t\tdelta += (m - n) * handledCPCountPlusOne;\n\t\t\t\tn = m;\n\n\t\t\t\tfor (j = 0; j < inputLength; ++j) {\n\t\t\t\t\tcurrentValue = input[j];\n\n\t\t\t\t\tif (currentValue < n && ++delta > maxInt) {\n\t\t\t\t\t\terror('overflow');\n\t\t\t\t\t}\n\n\t\t\t\t\tif (currentValue == n) {\n\t\t\t\t\t\t// Represent delta as a generalized variable-length integer\n\t\t\t\t\t\tfor (q = delta, k = base;; /* no condition */k += base) {\n\t\t\t\t\t\t\tt = k <= bias ? tMin : k >= bias + tMax ? tMax : k - bias;\n\t\t\t\t\t\t\tif (q < t) {\n\t\t\t\t\t\t\t\tbreak;\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t\tqMinusT = q - t;\n\t\t\t\t\t\t\tbaseMinusT = base - t;\n\t\t\t\t\t\t\toutput.push(stringFromCharCode(digitToBasic(t + qMinusT % baseMinusT, 0)));\n\t\t\t\t\t\t\tq = floor(qMinusT / baseMinusT);\n\t\t\t\t\t\t}\n\n\t\t\t\t\t\toutput.push(stringFromCharCode(digitToBasic(q, 0)));\n\t\t\t\t\t\tbias = adapt(delta, handledCPCountPlusOne, handledCPCount == basicLength);\n\t\t\t\t\t\tdelta = 0;\n\t\t\t\t\t\t++handledCPCount;\n\t\t\t\t\t}\n\t\t\t\t}\n\n\t\t\t\t++delta;\n\t\t\t\t++n;\n\t\t\t}\n\t\t\treturn output.join('');\n\t\t}\n\n\t\t/**\n   * Converts a Punycode string representing a domain name or an email address\n   * to Unicode. Only the Punycoded parts of the input will be converted, i.e.\n   * it doesn't matter if you call it on a string that has already been\n   * converted to Unicode.\n   * @memberOf punycode\n   * @param {String} input The Punycoded domain name or email address to\n   * convert to Unicode.\n   * @returns {String} The Unicode representation of the given Punycode\n   * string.\n   */\n\t\tfunction toUnicode(input) {\n\t\t\treturn mapDomain(input, function (string) {\n\t\t\t\treturn regexPunycode.test(string) ? decode(string.slice(4).toLowerCase()) : string;\n\t\t\t});\n\t\t}\n\n\t\t/**\n   * Converts a Unicode string representing a domain name or an email address to\n   * Punycode. Only the non-ASCII parts of the domain name will be converted,\n   * i.e. it doesn't matter if you call it with a domain that's already in\n   * ASCII.\n   * @memberOf punycode\n   * @param {String} input The domain name or email address to convert, as a\n   * Unicode string.\n   * @returns {String} The Punycode representation of the given domain name or\n   * email address.\n   */\n\t\tfunction toASCII(input) {\n\t\t\treturn mapDomain(input, function (string) {\n\t\t\t\treturn regexNonASCII.test(string) ? 'xn--' + encode(string) : string;\n\t\t\t});\n\t\t}\n\n\t\t/*--------------------------------------------------------------------------*/\n\n\t\t/** Define the public API */\n\t\tpunycode = {\n\t\t\t/**\n    * A string representing the current Punycode.js version number.\n    * @memberOf punycode\n    * @type String\n    */\n\t\t\t'version': '1.3.2',\n\t\t\t/**\n    * An object of methods to convert from JavaScript's internal character\n    * representation (UCS-2) to Unicode code points, and back.\n    * @see <https://mathiasbynens.be/notes/javascript-encoding>\n    * @memberOf punycode\n    * @type Object\n    */\n\t\t\t'ucs2': {\n\t\t\t\t'decode': ucs2decode,\n\t\t\t\t'encode': ucs2encode\n\t\t\t},\n\t\t\t'decode': decode,\n\t\t\t'encode': encode,\n\t\t\t'toASCII': toASCII,\n\t\t\t'toUnicode': toUnicode\n\t\t};\n\n\t\t/** Expose `punycode` */\n\t\t// Some AMD build optimizers, like r.js, check for specific condition patterns\n\t\t// like the following:\n\t\tif (\"function\" == 'function' && _typeof(__webpack_require__(4)) == 'object' && __webpack_require__(4)) {\n\t\t\t!(__WEBPACK_AMD_DEFINE_RESULT__ = function () {\n\t\t\t\treturn punycode;\n\t\t\t}.call(exports, __webpack_require__, exports, module), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n\t\t} else if (freeExports && freeModule) {\n\t\t\tif (module.exports == freeExports) {\n\t\t\t\t// in Node.js or RingoJS v0.8.0+\n\t\t\t\tfreeModule.exports = punycode;\n\t\t\t} else {\n\t\t\t\t// in Narwhal or RingoJS v0.7.0-\n\t\t\t\tfor (key in punycode) {\n\t\t\t\t\tpunycode.hasOwnProperty(key) && (freeExports[key] = punycode[key]);\n\t\t\t\t}\n\t\t\t}\n\t\t} else {\n\t\t\t// in Rhino or a web browser\n\t\t\troot.punycode = punycode;\n\t\t}\n\t})(undefined);\n});\n/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))\n\n/*****************\n ** WEBPACK FOOTER\n ** (webpack)/~/node-libs-browser/~/url/~/punycode/punycode.js\n ** module id = 3\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///(webpack)/~/node-libs-browser/~/url/~/punycode/punycode.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4), __webpack_require__(5)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../tools/ajax.js'), require('./Device'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.ajax, global.Device);
+	        global.User = mod.exports;
+	    }
+	})(this, function (exports, _ajax, _Device) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
+
+	    var _ajax2 = _interopRequireDefault(_ajax);
+
+	    var _Device2 = _interopRequireDefault(_Device);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var User = function () {
+	        function User(config) {
+	            _classCallCheck(this, User);
+
+	            this.config = config;
+	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	        }
+
+	        _createClass(User, [{
+	            key: 'getUserInfo',
+	            value: function getUserInfo() {
+	                var _this = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    if (_this.userInfo) {
+	                        resolve(_this.userInfo);
+	                    } else {
+	                        _this.ajax.get('/oauth2/user-info').then(function (response) {
+	                            _this.userInfo = response;
+	                            resolve(response);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    }
+	                });
+	            }
+	        }, {
+	            key: 'getMyDevices',
+	            value: function getMyDevices() {
+	                var _this2 = this;
+
+	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	                return new Promise(function (resolve, reject) {
+	                    _this2.getUserInfo().then(function () {
+
+	                        _this2.ajax.get('/users/' + _this2.userInfo.id + '/devices').then(function (response) {
+
+	                            if (opts.asClasses) {
+	                                resolve(response.map(function (device) {
+	                                    return new (_get__('Device'))(device, _this2.config);
+	                                }));
+	                            } else {
+	                                resolve(response);
+	                            }
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getMyGroups',
+	            value: function getMyGroups() {
+	                var _this3 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    _this3.getUserInfo().then(function () {
+	                        _this3.ajax.get('/users/' + _this3.userInfo.id + '/groups').then(function (response) {
+	                            resolve(response);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getMyTransmitters',
+	            value: function getMyTransmitters() {
+	                var _this4 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    _this4.getUserInfo().then(function () {
+	                        _this4.ajax.get('/users/' + _this4.userInfo.id + '/transmitters').then(function (response) {
+	                            resolve(response);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    });
+	                });
+	            }
+	        }, {
+	            key: '_getConfig',
+	            value: function _getConfig() {
+	                return this.config;
+	            }
+	        }]);
+
+	        return User;
+	    }();
+
+	    exports.default = User;
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Ajax':
+	                return _ajax2.default;
+
+	            case 'Device':
+	                return _Device2.default;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof User === 'undefined' ? 'undefined' : _typeof(User);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(User, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(User)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ },
 /* 4 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
-	eval("/* WEBPACK VAR INJECTION */(function(__webpack_amd_options__) {module.exports = __webpack_amd_options__;\r\n\n/* WEBPACK VAR INJECTION */}.call(exports, {}))\n\n/*****************\n ** WEBPACK FOOTER\n ** (webpack)/buildin/amd-options.js\n ** module id = 4\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///(webpack)/buildin/amd-options.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(module, exports);
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod, mod.exports);
+	        global.ajax = mod.exports;
+	    }
+	})(this, function (module, exports) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var Ajax = function () {
+	        function Ajax(options) {
+	            _classCallCheck(this, Ajax);
+
+	            this.tokenType = 'Bearer';
+	            this.token = options.token;
+	            this.uri = options.uri || 'api.relayr.io/';
+	            this.protocol = options.protocol || 'https://';
+	            this.customXHR;
+	        }
+
+	        _createClass(Ajax, [{
+	            key: 'get',
+	            value: function get(url) {
+	                var _this = this;
+
+	                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
+	                    contentType: 'application/json'
+	                } : arguments[1];
+
+	                if (!(url.charAt(0) === '/')) {
+	                    throw new Error('Please provide a url with a leading /');
+	                }
+
+	                if (!url) {
+	                    throw new Error('Please provide atleast a url');
+	                }
+	                if (typeof url !== 'string') {
+	                    throw new Error('Please provide a string url');
+	                }
+	                url += this._serializeQueryStr(opts.queryObj);
+
+	                return new Promise(function (resolve, reject) {
+	                    var xhrObject = _this._xhrRequest({
+	                        type: 'GET',
+	                        url: url,
+	                        isObject: opts.raw || true,
+	                        contentType: opts.contentType
+	                    }).then(function (result) {
+	                        resolve(result);
+	                    }).catch(function (xhrObject) {
+	                        reject(xhrObject);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'post',
+	            value: function post(url, body) {
+	                var _this2 = this;
+
+	                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
+	                    contentType: 'application/json'
+	                } : arguments[2];
+
+	                if (!url.charAt(0) === '/') {
+	                    throw new Error('Please provide a url with a leading /');
+	                }
+	                if (!url) throw new Error('Please provide atleast a url');
+	                if (typeof url !== 'string') throw new Error('Please provide a string url');
+
+	                return new Promise(function (resolve, reject) {
+	                    var xhrObject = _this2._xhrRequest({
+	                        type: 'POST',
+	                        url: url,
+	                        body: body,
+	                        isObject: opts.raw || true,
+	                        contentType: opts.contentType
+	                    }).then(function (result) {
+	                        resolve(result);
+	                    }).catch(function (xhrObject) {
+	                        reject(xhrObject);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'patch',
+	            value: function patch(url, body) {
+	                var _this3 = this;
+
+	                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
+	                    contentType: 'application/json'
+	                } : arguments[2];
+
+	                if (!url.charAt(0) === '/') {
+	                    throw new Error('Please provide a url with a leading /');
+	                }
+	                if (!url) throw new Error('Please provide atleast a url');
+	                if (typeof url !== 'string') throw new Error('Please provide a string url');
+
+	                return new Promise(function (resolve, reject) {
+	                    var xhrObject = _this3._xhrRequest({
+	                        type: 'PATCH',
+	                        url: url,
+	                        body: body,
+	                        isObject: opts.raw || true,
+	                        contentType: opts.contentType
+	                    }).then(function (result) {
+	                        resolve(result);
+	                    }).catch(function (xhrObject) {
+	                        reject(xhrObject);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'delete',
+	            value: function _delete(url) {
+	                var _this4 = this;
+
+	                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
+	                    contentType: 'application/json'
+	                } : arguments[1];
+
+	                if (!url.charAt(0) === '/') {
+	                    throw new Error('Please provide a url with a leading /');
+	                }
+	                if (!url) throw new Error('Please provide atleast a url');
+	                if (typeof url !== 'string') throw new Error('Please provide a string url');
+
+	                return new Promise(function (resolve, reject) {
+	                    var xhrObject = _this4._xhrRequest({
+	                        type: 'DELETE',
+	                        url: url,
+	                        contentType: opts.contentType
+	                    }).then(function (result) {
+	                        resolve(result);
+	                    }).catch(function (xhrObject) {
+	                        reject(xhrObject);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: '_serializeQueryStr',
+	            value: function _serializeQueryStr(obj) {
+	                var str = [];
+
+	                if (!obj || Object.keys(obj).length === 0) {
+	                    return '';
+	                }
+
+	                for (var p in obj) {
+	                    if (obj.hasOwnProperty(p)) {
+	                        str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
+	                    }
+	                }
+	                return '?' + str.join('&');
+	            }
+	        }, {
+	            key: '_xhrRequest',
+	            value: function _xhrRequest(options) {
+
+	                var xhrObject = void 0;
+
+	                xhrObject = new XMLHttpRequest();
+
+	                xhrObject.open(options.type, '' + this.protocol + this.uri + options.url, true);
+
+	                xhrObject.setRequestHeader('Authorization', this.token);
+	                xhrObject.setRequestHeader('Content-Type', options.contentType);
+
+	                return new Promise(function (resolve, reject) {
+
+	                    xhrObject.onreadystatechange = function () {
+	                        if (xhrObject.readyState === 4) {
+	                            if (xhrObject.status > 199 && xhrObject.status < 299) {
+	                                //2xx success
+	                                if (options.isObject) {
+
+	                                    resolve(JSON.parse(xhrObject.responseText));
+	                                } else {
+
+	                                    resolve(xhrObject.responseText);
+	                                }
+	                            } else if (xhrObject.status > 399 && xhrObject.status < 499) {
+	                                //4xx client error
+	                                console.log('there seems to be a problem on the client side');
+	                                reject(xhrObject);
+	                            } else if (xhrObject.status > 499) {
+	                                //5xx server error
+	                                console.log('there seems to be a problem on the server side');
+	                                reject(xhrObject);
+	                            }
+	                        }
+	                    };
+
+	                    if (options.body) {
+	                        xhrObject.send(JSON.stringify(options.body));
+	                    } else {
+	                        xhrObject.send();
+	                    }
+	                });
+	            }
+	        }]);
+
+	        return Ajax;
+	    }();
+
+	    exports.default = Ajax;
+	    module.exports = exports['default'];
+	});
 
 /***/ },
-/* 5 */,
-/* 6 */,
-/* 7 */,
-/* 8 */,
+/* 5 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4), __webpack_require__(6), __webpack_require__(7), __webpack_require__(10), __webpack_require__(12)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../tools/ajax.js'), require('../tools/connection.js'), require('./history/DeviceHistory'), require('../tools/mqtt'), require('./Model'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.ajax, global.connection, global.DeviceHistory, global.mqtt, global.Model);
+	        global.Device = mod.exports;
+	    }
+	})(this, function (exports, _ajax, _connection, _DeviceHistory, _mqtt, _Model) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
+
+	    var _ajax2 = _interopRequireDefault(_ajax);
+
+	    var _connection2 = _interopRequireDefault(_connection);
+
+	    var _DeviceHistory2 = _interopRequireDefault(_DeviceHistory);
+
+	    var _Model2 = _interopRequireDefault(_Model);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var sharedChannel = null;
+
+	    var Device = function () {
+	        function Device() {
+	            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var config = arguments[1];
+
+	            _classCallCheck(this, Device);
+
+	            this.rawDevice = rawDevice;
+	            this.config = config;
+
+	            this.id = rawDevice.id;
+	            this.name = rawDevice.name;
+	            this.modelId = rawDevice.modelId;
+	            this.model = new (_get__('Model'))(this.modelId, config);
+	            this.description = rawDevice.description;
+	            this.owner = rawDevice.owner;
+	            this.openToPublic = rawDevice.public;
+	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	            this.history = new (_get__('DeviceHistory'))(rawDevice, config);
+	            this.configurations = [];
+	            this.commands = [];
+	            this.metadata = {};
+	        }
+
+	        _createClass(Device, [{
+	            key: 'updateDevice',
+	            value: function updateDevice(patch, raw) {
+	                var _this = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the device id during instantiation');
+	                } else if (!patch) {
+	                    throw new Error('Provide a patch of parameters to update');
+	                } else if (!Object.keys(patch).length) {
+	                    throw new Error('Provide a patch with some parameters to update');
+	                }
+
+	                for (var x in patch) {
+	                    if (!this.hasOwnProperty(x)) {
+	                        throw new Error('Provide a patch with relevant parameters to update');
+	                    }
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this.ajax.patch('/devices/' + _this.id, patch, {
+	                        raw: raw
+	                    }).then(function (response) {
+	                        _this.name = response.name;
+	                        _this.modelId = response.modelId;
+	                        _this.owner = response.owner;
+	                        _this.openToPublic = response.public;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getHistoricalData',
+	            value: function getHistoricalData(opts) {
+	                return this.history.getHistoricalData(opts);
+	            }
+	        }, {
+	            key: 'getAllHistoricalData',
+	            value: function getAllHistoricalData(opts) {
+	                return this.history.getAllHistoricalData(opts);
+	            }
+	        }, {
+	            key: 'getReadings',
+	            value: function getReadings() {
+	                if (!this.id) {
+	                    throw new Error('Provid a device id');
+	                }
+	                return this.ajax.get('/devices/' + this.id + '/readings');
+	            }
+	        }, {
+	            key: 'deleteDevice',
+	            value: function deleteDevice(raw) {
+	                var _this2 = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the device id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this2.ajax.delete('/devices/' + _this2.id).then(function (response) {
+	                        //right now the object hangs around, but on the cloud it is gone
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'sendCommand',
+	            value: function sendCommand(command, raw) {
+	                var _this3 = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the device id during instantiation');
+	                } else if (!command) {
+	                    throw new Error('Provide a command');
+	                }
+	                //path, name, value
+	                else if (!command.path && !command.name && !command.value) {
+	                        throw new Error('Provide a properly formatted command');
+	                    }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this3.ajax.patch('/devices/' + _this3.id, patch, {
+	                        raw: raw
+	                    }).then(function (response) {
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getChannel',
+	            value: function getChannel(transport) {
+	                var _this4 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    if (_this4._channelCredentials) {
+	                        resolve(_this4._channelCredentials);
+	                    } else {
+
+	                        var body = {
+	                            deviceId: _this4.id,
+	                            transport: transport || 'mqtt'
+	                        };
+	                        _this4.ajax.post('/channels', body).then(function (response) {
+	                            _this4._channelCredentials = response;
+	                            if (!_get__('sharedChannel')) {
+	                                _assign__('sharedChannel', _this4._channelCredentials);
+	                            }
+	                            resolve(response);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    }
+	                });
+	            }
+	        }, {
+	            key: 'connect',
+	            value: function connect() {
+	                var transport = arguments.length <= 0 || arguments[0] === undefined ? 'mqtt' : arguments[0];
+
+	                var connection = new (_get__('Connection'))();
+	                var getChannel = this.getChannel();
+
+	                var subscribeMqtt = function subscribeMqtt(newChannelCredentials) {
+	                    var options = {
+	                        password: _get__('sharedChannel').credentials.password,
+	                        userName: _get__('sharedChannel').credentials.user
+	                    };
+
+	                    _get__('mqtt').subscribe(newChannelCredentials.credentials.topic, connection.event);
+	                    return _get__('mqtt').connect(options);
+	                };
+
+	                return new Promise(function (resolve, reject) {
+	                    getChannel.then(subscribeMqtt).then(function () {
+	                        resolve(connection);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getDeviceState',
+	            value: function getDeviceState() {
+	                var _this5 = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the device id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this5.ajax.get('/devices/' + _this5.id + '/state').then(function (response) {
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getDeviceConfigurations',
+	            value: function getDeviceConfigurations() {
+	                var _this6 = this;
+
+	                // api/devices/deviceId/configurations
+	                if (!this.id) {
+	                    throw new Error('Provide the device id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this6.ajax.get('/devices/' + _this6.id + '/configurations').then(function (response) {
+	                        _this6.configurations = response;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'setDeviceConfigurations',
+	            value: function setDeviceConfigurations(schema) {
+	                var _this7 = this;
+
+	                // api/devices/deviceId/configurations
+	                //POST
+	                if (!this.id) {
+	                    throw new Error('Provide the userId during instantiation');
+	                } else if (!schema) {
+	                    throw new Error('Provide a schema of parameters to set');
+	                } else if (!Object.keys(schema).length) {
+	                    throw new Error('Provide a schema with some parameters to set');
+	                }
+	                if (!(schema.path && schema.name && schema.value)) {
+	                    throw new Error('Provide a schema with path, name, and value');
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this7.ajax.post('/devices/' + _this7.id + '/configurations', schema).then(function (response) {
+	                        _this7.configurations.push(response);
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getDeviceCommands',
+	            value: function getDeviceCommands() {
+	                var _this8 = this;
+
+	                // api/devices/deviceId/commands
+	                if (!this.id) {
+	                    throw new Error('Provide the deviceId during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this8.ajax.get('/devices/' + _this8.id + '/commands').then(function (response) {
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'setDeviceCommands',
+	            value: function setDeviceCommands(schema) {
+	                var _this9 = this;
+
+	                // api/devices/deviceId/commands
+	                //POST
+	                if (!this.id) {
+	                    throw new Error('Provide the userId during instantiation');
+	                } else if (!schema) {
+	                    throw new Error('Provide a schema of parameters to set');
+	                } else if (!Object.keys(schema).length) {
+	                    throw new Error('Provide a schema with some parameters to set');
+	                }
+	                if (!(schema.path && schema.name && schema.value)) {
+	                    throw new Error('Provide a schema with path, name, and value');
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this9.ajax.post('/devices/' + _this9.id + '/commands', schema).then(function (response) {
+	                        _this9.commands.push(response);
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getDeviceMetadata',
+	            value: function getDeviceMetadata() {
+	                var _this10 = this;
+
+	                // api/devices/deviceId/metadata
+	                if (!this.id) {
+	                    throw new Error('Provide the deviceId during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this10.ajax.get('/devices/' + _this10.id + '/metadata').then(function (response) {
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'setDeviceMetadata',
+	            value: function setDeviceMetadata(schema) {
+	                var _this11 = this;
+
+	                // api/devices/deviceId/metadata
+	                //POST
+	                if (!this.id) {
+	                    throw new Error('Provide the userId during instantiation');
+	                } else if (!schema) {
+	                    throw new Error('Provide a schema of parameters to set');
+	                } else if (!Object.keys(schema).length) {
+	                    throw new Error('Provide a schema with some parameters to set');
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this11.ajax.post('/devices/' + _this11.id + '/metadata', schema).then(function (response) {
+	                        _this11.metadata = response;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'deleteDeviceMetadata',
+	            value: function deleteDeviceMetadata() {
+	                var _this12 = this;
+
+	                // api/devices/deviceId/metadata
+	                //DELETE
+	                if (!this.id) {
+	                    throw new Error('Provide the userId during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this12.ajax.delete('/devices/' + _this12.id + '/metadata').then(function (response) {
+	                        //right now the object hangs around, but on the cloud it is gone
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }]);
+
+	        return Device;
+	    }();
+
+	    exports.default = Device;
+	    ;
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Model':
+	                return _Model2.default;
+
+	            case 'Ajax':
+	                return _ajax2.default;
+
+	            case 'DeviceHistory':
+	                return _DeviceHistory2.default;
+
+	            case 'sharedChannel':
+	                return sharedChannel;
+
+	            case 'Connection':
+	                return _connection2.default;
+
+	            case 'mqtt':
+	                return _mqtt.mqtt;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {
+	            case 'sharedChannel':
+	                return sharedChannel = _value;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Device === 'undefined' ? 'undefined' : _typeof(Device);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Device, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Device)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
+
+/***/ },
+/* 6 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(module, exports);
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod, mod.exports);
+	        global.connection = mod.exports;
+	    }
+	})(this, function (module, exports) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.default = connection;
+	    function connection() {
+	        var self = this;
+	        this.buffer = [];
+	        this.event = function (data) {
+	            if (self._dataSubscriber) {
+	                self._dataSubscriber(data);
+	            } else {
+	                self.buffer.push(data);
+	            }
+	        };
+
+	        this._flush = function () {
+	            if (self._dataSubscriber) {
+	                for (var i = self.buffer.length - 1; i >= 0; i--) {
+	                    self._dataSubscriber(self.buffer[i]) && self.buffer.splice(i, 1);
+	                }
+	            }
+	            return;
+	        };
+
+	        this.on = function (event, _dataSubscriber) {
+	            switch (event) {
+	                case 'data':
+	                    self._dataSubscriber = _dataSubscriber;
+	                    this._flush();
+	                    break;
+	                case 'error':
+	                    break;
+	                case 'connectionLost':
+	                    break;
+	                case 'reconnecting':
+	                    break;
+	            }
+	        };
+	    }
+	    module.exports = exports['default'];
+	});
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4), __webpack_require__(8), __webpack_require__(9)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../../tools/ajax.js'), require('./sampleCalculator'), require('./DeviceHistoryPoints'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.ajax, global.sampleCalculator, global.DeviceHistoryPoints);
+	        global.DeviceHistory = mod.exports;
+	    }
+	})(this, function (exports, _ajax, _sampleCalculator, _DeviceHistoryPoints) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
+
+	    var _ajax2 = _interopRequireDefault(_ajax);
+
+	    var _sampleCalculator2 = _interopRequireDefault(_sampleCalculator);
+
+	    var _DeviceHistoryPoints2 = _interopRequireDefault(_DeviceHistoryPoints);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var DeviceHistory = function () {
+	        function DeviceHistory() {
+	            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var config = arguments[1];
+
+	            _classCallCheck(this, DeviceHistory);
+
+	            this.id = rawDevice.id;
+	            this.dataUri = config.ajax.dataUri;
+	            this.ajax = new (_get__('Ajax'))({
+	                uri: config.ajax.dataUri,
+	                token: config.ajax.token
+	            });
+	        }
+
+	        _createClass(DeviceHistory, [{
+	            key: 'getHistoricalData',
+	            value: function getHistoricalData() {
+	                var _this = this;
+
+	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	                var _opts$limit = opts.limit;
+	                var limit = _opts$limit === undefined ? 1000 : _opts$limit;
+	                var _opts$offset = opts.offset;
+	                var offset = _opts$offset === undefined ? 0 : _opts$offset;
+	                var end = opts.end;
+	                var start = opts.start;
+	                var sample = opts.sample;
+	                var periode = opts.periode;
+
+	                var queryParams = {};
+
+	                if (periode && periode.length > 0) {
+	                    var sampleObj = _get__('sampleCalculator')(periode);
+	                    sample = sampleObj.sampleSize;
+	                    start = sampleObj.start;
+	                    end = sampleObj.end;
+	                }
+
+	                if (sample !== undefined) {
+	                    queryParams.sample = sample;
+	                }
+
+	                if (end) {
+	                    queryParams.end = end.getTime();
+	                }
+	                if (start) {
+	                    queryParams.start = start.getTime();
+	                }
+
+	                queryParams.offset = offset;
+	                queryParams.limit = limit;
+
+	                return new Promise(function (resolve, reject) {
+	                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {
+	                        resolve({
+	                            points: new (_get__('DeviceHistoryPoints'))(response.results),
+	                            response: response
+	                        });
+	                    }, reject);
+	                });
+	            }
+	        }, {
+	            key: 'getAllHistoricalData',
+	            value: function getAllHistoricalData() {
+	                var _this2 = this;
+
+	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	                var points = void 0;
+
+	                var onDataReceived = opts.onDataReceived;
+	                var periode = opts.periode;
+
+	                onDataReceived = onDataReceived || function () {};
+
+	                var hasMore = function hasMore(data) {
+	                    return data.count > data.limit && data.count - data.offset > data.limit;
+	                };
+
+	                var handleResponse = function handleResponse(data, resolve, reject) {
+	                    if (data.points && !points) {
+	                        points = data.points;
+	                    } else if (data.response && data.response.results) {
+	                        points.addPoints(data.response.results);
+	                    }
+
+	                    onDataReceived(points);
+
+	                    if (hasMore(data.response)) {
+	                        getData({
+	                            offset: data.response.offset + data.response.limit
+	                        }, resolve, reject);
+	                    } else {
+	                        resolve({
+	                            points: points
+	                        });
+	                    }
+	                };
+
+	                var getData = function getData(opts, resolve, reject) {
+	                    _this2.getHistoricalData(opts).then(function (data) {
+	                        handleResponse(data, resolve, reject);
+	                    }, reject);
+	                };
+
+	                return new Promise(function (resolve, reject) {
+	                    getData(opts, resolve, reject);
+	                });
+	            }
+	        }]);
+
+	        return DeviceHistory;
+	    }();
+
+	    exports.default = DeviceHistory;
+	    ;
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Ajax':
+	                return _ajax2.default;
+
+	            case 'sampleCalculator':
+	                return _sampleCalculator2.default;
+
+	            case 'DeviceHistoryPoints':
+	                return _DeviceHistoryPoints2.default;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof DeviceHistory === 'undefined' ? 'undefined' : _typeof(DeviceHistory);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(DeviceHistory, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(DeviceHistory)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports);
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports);
+	        global.sampleCalculator = mod.exports;
+	    }
+	})(this, function (exports) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    var oneHourMs = 1000 * 3600;
+	    var daysInMonth = function daysInMonth() {
+	        var d = new Date();
+	        d.setDate(0);
+	        return d.getDate();
+	    };
+
+	    function calculateTimeframe(timeframeStr) {
+	        var obj = {
+	            end: new Date()
+	        };
+	        var startDate = new Date();
+	        var sampleSize = null;
+	        switch (timeframeStr) {
+	            case '1h':
+	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs'));
+	                sampleSize = '1m';
+	                break;
+	            case '5h':
+	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 5);
+	                sampleSize = '1m';
+	                break;
+	            case '1d':
+	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24);
+	                sampleSize = '1m';
+	                break;
+	            case '1w':
+	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24 * 7);
+	                sampleSize = '1h';
+	                break;
+	            case '1m':
+	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24 * _get__('daysInMonth')());
+	                sampleSize = '1h';
+	                break;
+	            case '1y':
+	                startDate.setFullYear(obj.end.getFullYear() - 1);
+	                sampleSize = '1h';
+	                break;
+	        };
+	        obj.start = startDate;
+	        obj.sampleSize = sampleSize;
+
+	        return obj;
+	    };
+
+	    exports.default = _get__('calculateTimeframe');
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'oneHourMs':
+	                return oneHourMs;
+
+	            case 'daysInMonth':
+	                return daysInMonth;
+
+	            case 'calculateTimeframe':
+	                return calculateTimeframe;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof calculateTimeframe === 'undefined' ? 'undefined' : _typeof(calculateTimeframe);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(calculateTimeframe, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(calculateTimeframe)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
+
+/***/ },
 /* 9 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(10), __webpack_require__(11), __webpack_require__(13), __webpack_require__(22), __webpack_require__(20), __webpack_require__(21), __webpack_require__(12), __webpack_require__(18)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('./authorization/oauth2'), require('./entities/User'), require('./entities/Device'), require('./entities/Group'), require('./entities/Model'), require('./entities/Transmitter'), require('./tools/ajax'), require('./tools/mqtt'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.oauth2, global.User, global.Device, global.Group, global.Model, global.Transmitter, global.ajax, global.mqtt);\n        global.main = mod.exports;\n    }\n})(this, function (exports, _oauth, _User, _Device, _Group, _Model, _Transmitter, _ajax, _mqtt) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.Ajax = exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;\n\n    var _oauth2 = _interopRequireDefault(_oauth);\n\n    var _User2 = _interopRequireDefault(_User);\n\n    var _Device2 = _interopRequireDefault(_Device);\n\n    var _Group2 = _interopRequireDefault(_Group);\n\n    var _Model2 = _interopRequireDefault(_Model);\n\n    var _Transmitter2 = _interopRequireDefault(_Transmitter);\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    exports.Oauth2 = _oauth2.default;\n    exports.User = _User2.default;\n    exports.Device = _Device2.default;\n    exports.Group = _Group2.default;\n    exports.Model = _Model2.default;\n    exports.Transmitter = _Transmitter2.default;\n    exports.Ajax = _ajax2.default;\n\n\n    var config = {\n        persistToken: true,\n        mqtt: {\n            endpoint: 'mqtt.relayr.io'\n        },\n        ajax: {\n            uri: 'api.relayr.io',\n            dataUri: 'data-api.relayr.io',\n            protocol: 'https://'\n        }\n    };\n\n    var currentUser = void 0;\n    var project = void 0;\n    var oauth2 = void 0;\n    var main = {\n        init: function init(p, customConfig) {\n            _assign__('project', p);\n\n            if (customConfig) {\n                Object.assign(_get__('config'), customConfig);\n            }\n        },\n\n        authorize: function authorize(optionalToken) {\n            return new Promise(function (resolve, reject) {\n\n                if (!_get__('oauth2')) {\n                    _assign__('oauth2', new (_get__('Oauth2'))({\n                        protocol: _get__('config').ajax.protocol,\n                        uri: _get__('config').ajax.uri,\n                        appId: _get__('project').id,\n                        redirectURI: _get__('project').redirectURI,\n                        persist: _get__('config').persistToken\n                    }));\n                }\n                if (!optionalToken) {\n                    _get__('oauth2').login();\n\n                    _get__('config').ajax.token = _get__('oauth2').token;\n                } else {\n                    _get__('config').ajax.token = optionalToken;\n                }\n\n                _assign__('currentUser', new (_get__('User'))(_get__('config')));\n                resolve(_get__('currentUser'));\n            });\n        },\n\n        logout: function logout() {\n            _get__('oauth2').logout();\n        },\n\n        getConfig: function getConfig() {\n            return _get__('config');\n        },\n\n        getCurrentUser: function getCurrentUser() {\n            return _get__('currentUser');\n        },\n\n        customAjax: function customAjax(ajaxConfiguration) {\n            return new (_get__('Ajax'))(ajaxConfiguration || _get__('config').ajax);\n        }\n    };\n\n    exports.default = _get__('main');\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'project':\n                return project;\n\n            case 'config':\n                return config;\n\n            case 'oauth2':\n                return oauth2;\n\n            case 'Oauth2':\n                return _oauth2.default;\n\n            case 'currentUser':\n                return currentUser;\n\n            case 'User':\n                return _User2.default;\n\n            case 'Ajax':\n                return _ajax2.default;\n\n            case 'main':\n                return main;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {\n            case 'project':\n                return project = _value;\n\n            case 'oauth2':\n                return oauth2 = _value;\n\n            case 'currentUser':\n                return currentUser = _value;\n        }\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof main === 'undefined' ? 'undefined' : _typeof(main);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(main, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(main)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/main.js\n ** module id = 9\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/main.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(module, exports);
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod, mod.exports);
+	        global.DeviceHistoryPoints = mod.exports;
+	    }
+	})(this, function (module, exports) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var DeviceHistoryPoints = function () {
+	        function DeviceHistoryPoints(deviceHistory) {
+	            _classCallCheck(this, DeviceHistoryPoints);
+
+	            if (!deviceHistory) {
+	                return {};
+	            }
+
+	            this.devicesPoints = {};
+	            this.addPoints(deviceHistory);
+	        }
+
+	        _createClass(DeviceHistoryPoints, [{
+	            key: 'addPoints',
+	            value: function addPoints(deviceHistory) {
+	                var _this = this;
+
+	                deviceHistory.forEach(function (res) {
+	                    var key = _this._getKey(res.meaning, res.path);
+	                    if (_this.devicesPoints[key]) {
+	                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);
+	                    } else {
+	                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);
+	                        delete _this.devicesPoints[key].deviceId;
+	                    }
+	                });
+	            }
+	        }, {
+	            key: '_getKey',
+	            value: function _getKey(meaning, path) {
+	                if (!path || path === 'null') {
+	                    return meaning;
+	                }
+
+	                if (!meaning || meaning === 'null') {
+	                    return path;
+	                }
+	                return meaning + '-' + path;
+	            }
+	        }, {
+	            key: 'get',
+	            value: function get(meaning, path) {
+	                return this.devicesPoints[this._getKey(meaning, path)];
+	            }
+	        }]);
+
+	        return DeviceHistoryPoints;
+	    }();
+
+	    exports.default = DeviceHistoryPoints;
+	    module.exports = exports['default'];
+	});
 
 /***/ },
 /* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports);\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports);\n        global.oauth2 = mod.exports;\n    }\n})(this, function (exports) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var TOKEN_KEY = 'relayr_access_token';\n\n    var Oauth2 = function () {\n        function Oauth2(options) {\n            _classCallCheck(this, Oauth2);\n\n            this.uri = options.uri || 'api.relayr.io';\n            this.appId = options.appId;\n            this.redirectURI = options.redirectURI;\n            this.shouldPersist = options.persist || false;\n            this.protocol = options.protocol || 'https://';\n        }\n\n        _createClass(Oauth2, [{\n            key: 'login',\n            value: function login(optUser, ctx) {\n\n                if (!this.redirectURI) {\n                    throw Error('OAuth2 a valid redirect uri must be provided on login');\n                } else if (!this.appId) {\n                    throw Error('OAuth2 a valid app ID must be provided on login');\n                }\n\n                var storedToken = localStorage.getItem(_get__('TOKEN_KEY'));\n\n                if (this.shouldPersist && storedToken) {\n                    this.token = storedToken;\n                    return;\n                }\n                try {\n                    if (this._parseToken(window.location.href)) return;\n                } catch (e) {}\n\n                var authURL = {\n                    client_id: this.appId,\n                    redirect_uri: this.redirectURI,\n                    scope: 'access-own-user-info+configure-devices'\n                };\n\n                var uri = '' + this.protocol + this.uri + '/oauth2/auth?client_id=' + this.appId + '&redirect_uri=' + this.redirectURI + '&response_type=token&scope=access-own-user-info+configure-devices';\n\n                this._loginRedirect(uri);\n            }\n        }, {\n            key: '_loginRedirect',\n            value: function _loginRedirect(uri) {\n                window.location.assign(uri);\n            }\n        }, {\n            key: '_parseToken',\n            value: function _parseToken(tokenURL) {\n                var parts = tokenURL.split('#');\n\n                if (parts[0] && parts[0].length === 0 || parts[1] && parts[1].length === 0) {\n                    throw Error('The provided URL is not correctly formatted');\n                }\n\n                var queryParams = parts[1].split('&');\n\n                var authParams = queryParams.reduce(function (accumulator, pair) {\n                    var tuple = pair.split('=');\n                    accumulator[tuple[0]] = tuple[1];\n                    return accumulator;\n                }, {});\n\n                if (!authParams.token_type) {\n                    throw Error('The provided URL does not contain a access token');\n                }\n\n                this.token = authParams.token_type + ' ' + authParams.access_token;\n\n                this.setToken(this.token);\n                return this.token;\n            }\n        }, {\n            key: 'setToken',\n            value: function setToken(token) {\n                localStorage.setItem(_get__('TOKEN_KEY'), this.token);\n            }\n        }, {\n            key: 'logout',\n            value: function logout() {\n                localStorage.removeItem(_get__('TOKEN_KEY'));\n            }\n        }]);\n\n        return Oauth2;\n    }();\n\n    exports.default = _get__('Oauth2');\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'TOKEN_KEY':\n                return TOKEN_KEY;\n\n            case 'Oauth2':\n                return Oauth2;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof Oauth2 === 'undefined' ? 'undefined' : _typeof(Oauth2);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(Oauth2, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Oauth2)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/authorization/oauth2.js\n ** module id = 10\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/authorization/oauth2.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(11)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../../vendors/mqttws31.min.js'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.mqttws31Min);
+	        global.mqtt = mod.exports;
+	    }
+	})(this, function (exports, _mqttws31Min) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.mqtt = undefined;
+
+	    var _mqttws31Min2 = _interopRequireDefault(_mqttws31Min);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var Mqtt = function () {
+	        function Mqtt(config) {
+	            _classCallCheck(this, Mqtt);
+
+	            var self = this;
+
+	            this.config = {
+	                endpoint: 'mqtt.relayr.io',
+	                port: 443,
+	                mqttTimeout: 10000,
+	                reconnectLimit: 10,
+	                reconnectTimeout: 60000
+	            };
+
+	            if (config) {
+	                Object.assign(this.config, config);
+	            }
+	            this.endpoint = this.config.endpoint;
+	            this.port = this.config.port;
+	            this.clientId = 'JSDK_' + Math.floor(Math.random() * 1000);
+	            this._topics = {};
+
+	            try {
+	                this.paho = new (_get__('Paho'))();
+	                this._initClient();
+	            } catch (e) {
+	                //Caught when window is not present
+	            }
+
+	            return this;
+	        }
+
+	        _createClass(Mqtt, [{
+	            key: 'connect',
+	            value: function connect(config) {
+	                var _this = this;
+
+	                if (!config) throw Error('You must provide configuration options');
+	                if (!config.userName) throw Error('You must provide userName in options');
+	                if (!config.password) throw Error('You must provide password in options');
+	                return new Promise(function (resolve, reject) {
+
+	                    var options = {
+	                        timeout: 30,
+	                        keepAliveInterval: 10,
+	                        cleanSession: true,
+	                        useSSL: true,
+	                        onSuccess: function onSuccess() {
+	                            _this.isConnecting = false;
+	                            _this._onConnectSuccess();
+	                            resolve();
+	                        },
+	                        onFailure: function onFailure(err) {
+	                            _this.isConnecting = false;
+	                            _this._onConnectFailure(err);
+	                            reject();
+	                        }
+
+	                    };
+	                    Object.assign(options, config);
+
+	                    if (_this.client) {
+	                        _this.client.onConnectionLost = function () {
+	                            _this._onConnectionLost(options);
+	                        };
+	                        _this.client.onMessageArrived = function (data) {
+	                            _this._onMessageArrived(data);
+	                        };
+
+	                        if (!_this.isConnecting) {
+	                            _this.client.connect(options);
+	                            _this.isConnecting = true;
+	                        }
+	                    }
+	                    resolve();
+	                });
+	            }
+	        }, {
+	            key: 'subscribe',
+	            value: function subscribe(topic, eventCallback) {
+	                if (!topic) throw Error('You must provide a topic');
+	                if (!eventCallback) throw Error('You must provide a callback for live events');
+	                if (this.client && this.client.isConnected()) this.client.subscribe(topic, 0);
+
+	                if (this._topics[topic]) {
+	                    this._topics[topic].subscribers.push(eventCallback);
+	                } else {
+	                    this._topics[topic] = {};
+	                    this._topics[topic].subscribers = [];
+	                    this._topics[topic].subscribers.push(eventCallback);
+	                }
+	                return this;
+	            }
+	        }, {
+	            key: '_onConnectSuccess',
+	            value: function _onConnectSuccess() {
+	                for (var topic in this._topics) {
+	                    this.client.subscribe(topic, 0);
+	                }
+	            }
+	        }, {
+	            key: '_onConnectFailure',
+	            value: function _onConnectFailure(err) {
+	                console.log('onFailure', err);
+	            }
+	        }, {
+	            key: '_onConnectionLost',
+	            value: function _onConnectionLost(lastConfig) {
+	                var _this2 = this;
+
+	                if (lastConfig) {
+	                    if (lastConfig._reconnects >= this.config.reconnectLimit) {
+	                        setTimeout(function () {
+	                            lastConfig._reconnects = 0;
+	                            _this2.connect(lastConfig);
+	                        }, this.config.reconnectTimeout);
+	                    } else {
+	                        if (!lastConfig._reconnects) lastConfig._reconnects = 0;
+	                        lastConfig._reconnects++;
+	                        this.connect(lastConfig);
+	                    }
+	                }
+	            }
+	        }, {
+	            key: '_onMessageArrived',
+	            value: function _onMessageArrived(data) {
+	                var dataTopic = data._getDestinationName();
+	                var incomingData = data._getPayloadString();
+	                incomingData = JSON.parse(data._getPayloadString());
+
+	                var subscribers = this._topics[dataTopic] ? this._topics[dataTopic].subscribers : null;
+	                if (subscribers) {
+	                    for (var i = subscribers.length - 1; i >= 0; i--) {
+	                        var subscriber = subscribers[i];
+	                        if (subscriber) {
+	                            subscriber(incomingData);
+	                        }
+	                    }
+	                }
+	            }
+	        }, {
+	            key: '_initClient',
+	            value: function _initClient() {
+	                this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);
+	                return this;
+	            }
+	        }]);
+
+	        return Mqtt;
+	    }();
+
+	    var mqtt = exports.mqtt = new (_get__('Mqtt'))();
+
+	    exports.default = _get__('Mqtt');
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Paho':
+	                return _mqttws31Min2.default;
+
+	            case 'Mqtt':
+	                return Mqtt;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Mqtt === 'undefined' ? 'undefined' : _typeof(Mqtt);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Mqtt, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Mqtt)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ },
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(12), __webpack_require__(13)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../tools/ajax.js'), require('./Device'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.ajax, global.Device);\n        global.User = mod.exports;\n    }\n})(this, function (exports, _ajax, _Device) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    var _Device2 = _interopRequireDefault(_Device);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var User = function () {\n        function User(config) {\n            _classCallCheck(this, User);\n\n            this.config = config;\n            this.ajax = new (_get__('Ajax'))(config.ajax);\n        }\n\n        _createClass(User, [{\n            key: 'getUserInfo',\n            value: function getUserInfo() {\n                var _this = this;\n\n                return new Promise(function (resolve, reject) {\n                    if (_this.userInfo) {\n                        resolve(_this.userInfo);\n                    } else {\n                        _this.ajax.get('/oauth2/user-info').then(function (response) {\n                            _this.userInfo = response;\n                            resolve(response);\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    }\n                });\n            }\n        }, {\n            key: 'getMyDevices',\n            value: function getMyDevices() {\n                var _this2 = this;\n\n                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];\n\n                return new Promise(function (resolve, reject) {\n                    _this2.getUserInfo().then(function () {\n\n                        _this2.ajax.get('/users/' + _this2.userInfo.id + '/devices').then(function (response) {\n\n                            if (opts.asClasses) {\n                                resolve(response.map(function (device) {\n                                    return new (_get__('Device'))(device, _this2.config);\n                                }));\n                            } else {\n                                resolve(response);\n                            }\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    });\n                });\n            }\n        }, {\n            key: 'getMyGroups',\n            value: function getMyGroups() {\n                var _this3 = this;\n\n                return new Promise(function (resolve, reject) {\n                    _this3.getUserInfo().then(function () {\n                        _this3.ajax.get('/users/' + _this3.userInfo.id + '/groups').then(function (response) {\n                            resolve(response);\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    });\n                });\n            }\n        }, {\n            key: 'getMyTransmitters',\n            value: function getMyTransmitters() {\n                var _this4 = this;\n\n                return new Promise(function (resolve, reject) {\n                    _this4.getUserInfo().then(function () {\n                        _this4.ajax.get('/users/' + _this4.userInfo.id + '/transmitters').then(function (response) {\n                            resolve(response);\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    });\n                });\n            }\n        }, {\n            key: '_getConfig',\n            value: function _getConfig() {\n                return this.config;\n            }\n        }]);\n\n        return User;\n    }();\n\n    exports.default = User;\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'Ajax':\n                return _ajax2.default;\n\n            case 'Device':\n                return _Device2.default;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof User === 'undefined' ? 'undefined' : _typeof(User);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(User, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(User)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/User.js\n ** module id = 11\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/User.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(global,factory){if(true){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));}else if(typeof exports!=="undefined"){factory(exports);}else{var mod={exports:{}};factory(mod.exports);global.mqttws31Min=mod.exports;}})(this,function(exports){"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var Paho=function Paho(){_classCallCheck(this,Paho);//var window = {};
+	var _Paho={};_Paho.MQTT=function(global){// Private variables below, these are only visible inside the function closure
+	// which is used to define the module.
+	var version="@VERSION@";var buildLevel="@BUILDLEVEL@";/**
+	             * Unique message type identifiers, with associated
+	             * associated integer values.
+	             * @private
+	             */var MESSAGE_TYPE={CONNECT:1,CONNACK:2,PUBLISH:3,PUBACK:4,PUBREC:5,PUBREL:6,PUBCOMP:7,SUBSCRIBE:8,SUBACK:9,UNSUBSCRIBE:10,UNSUBACK:11,PINGREQ:12,PINGRESP:13,DISCONNECT:14};// Collection of utility methods used to simplify module code
+	// and promote the DRY pattern.
+	/**
+	             * Validate an object's parameter names to ensure they
+	             * match a list of expected variables name for this option
+	             * type. Used to ensure option object passed into the API don't
+	             * contain erroneous parameters.
+	             * @param {Object} obj - User options object
+	             * @param {Object} keys - valid keys and types that may exist in obj.
+	             * @throws {Error} Invalid option parameter found.
+	             * @private
+	             */var validate=function validate(obj,keys){for(var key in obj){if(obj.hasOwnProperty(key)){if(keys.hasOwnProperty(key)){if(_typeof(obj[key])!==keys[key])throw new Error(format(ERROR.INVALID_TYPE,[_typeof(obj[key]),key]));}else{var errorStr="Unknown property, "+key+". Valid properties are:";for(var key in keys){if(keys.hasOwnProperty(key))errorStr=errorStr+" "+key;}throw new Error(errorStr);}}}};/**
+	             * Return a new function which runs the user function bound
+	             * to a fixed scope.
+	             * @param {function} User function
+	             * @param {object} Function scope
+	             * @return {function} User function bound to another scope
+	             * @private
+	             */var scope=function scope(f,_scope){return function(){return f.apply(_scope,arguments);};};/**
+	             * Unique message type identifiers, with associated
+	             * associated integer values.
+	             * @private
+	             */var ERROR={OK:{code:0,text:"AMQJSC0000I OK."},CONNECT_TIMEOUT:{code:1,text:"AMQJSC0001E Connect timed out."},SUBSCRIBE_TIMEOUT:{code:2,text:"AMQJS0002E Subscribe timed out."},UNSUBSCRIBE_TIMEOUT:{code:3,text:"AMQJS0003E Unsubscribe timed out."},PING_TIMEOUT:{code:4,text:"AMQJS0004E Ping timed out."},INTERNAL_ERROR:{code:5,text:"AMQJS0005E Internal error. Error Message: {0}, Stack trace: {1}"},CONNACK_RETURNCODE:{code:6,text:"AMQJS0006E Bad Connack return code:{0} {1}."},SOCKET_ERROR:{code:7,text:"AMQJS0007E Socket error:{0}."},SOCKET_CLOSE:{code:8,text:"AMQJS0008I Socket closed."},MALFORMED_UTF:{code:9,text:"AMQJS0009E Malformed UTF data:{0} {1} {2}."},UNSUPPORTED:{code:10,text:"AMQJS0010E {0} is not supported by this browser."},INVALID_STATE:{code:11,text:"AMQJS0011E Invalid state {0}."},INVALID_TYPE:{code:12,text:"AMQJS0012E Invalid type {0} for {1}."},INVALID_ARGUMENT:{code:13,text:"AMQJS0013E Invalid argument {0} for {1}."},UNSUPPORTED_OPERATION:{code:14,text:"AMQJS0014E Unsupported operation."},INVALID_STORED_DATA:{code:15,text:"AMQJS0015E Invalid data in local storage key={0} value={1}."},INVALID_MQTT_MESSAGE_TYPE:{code:16,text:"AMQJS0016E Invalid MQTT message type {0}."},MALFORMED_UNICODE:{code:17,text:"AMQJS0017E Malformed Unicode string:{0} {1}."}};/** CONNACK RC Meaning. */var CONNACK_RC={0:"Connection Accepted",1:"Connection Refused: unacceptable protocol version",2:"Connection Refused: identifier rejected",3:"Connection Refused: server unavailable",4:"Connection Refused: bad user name or password",5:"Connection Refused: not authorized"};/**
+	             * Format an error message text.
+	             * @private
+	             * @param {error} ERROR.KEY value above.
+	             * @param {substitutions} [array] substituted into the text.
+	             * @return the text with the substitutions made.
+	             */var format=function format(error,substitutions){var text=error.text;if(substitutions){var field,start;for(var i=0;i<substitutions.length;i++){field="{"+i+"}";start=text.indexOf(field);if(start>0){var part1=text.substring(0,start);var part2=text.substring(start+field.length);text=part1+substitutions[i]+part2;}}}return text;};//MQTT protocol and version          6    M    Q    I    s    d    p    3
+	var MqttProtoIdentifierv3=[0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03];//MQTT proto/version for 311         4    M    Q    T    T    4
+	var MqttProtoIdentifierv4=[0x00,0x04,0x4d,0x51,0x54,0x54,0x04];/**
+	             * Construct an MQTT wire protocol message.
+	             * @param type MQTT packet type.
+	             * @param options optional wire message attributes.
+	             *
+	             * Optional properties
+	             *
+	             * messageIdentifier: message ID in the range [0..65535]
+	             * payloadMessage:	Application Message - PUBLISH only
+	             * connectStrings:	array of 0 or more Strings to be put into the CONNECT payload
+	             * topics:			array of strings (SUBSCRIBE, UNSUBSCRIBE)
+	             * requestQoS:		array of QoS values [0..2]
+	             *
+	             * "Flag" properties
+	             * cleanSession:	true if present / false if absent (CONNECT)
+	             * willMessage:  	true if present / false if absent (CONNECT)
+	             * isRetained:		true if present / false if absent (CONNECT)
+	             * userName:		true if present / false if absent (CONNECT)
+	             * password:		true if present / false if absent (CONNECT)
+	             * keepAliveInterval:	integer [0..65535]  (CONNECT)
+	             *
+	             * @private
+	             * @ignore
+	             */var WireMessage=function WireMessage(type,options){this.type=type;for(var name in options){if(options.hasOwnProperty(name)){this[name]=options[name];}}};WireMessage.prototype.encode=function(){// Compute the first byte of the fixed header
+	var first=(this.type&0x0f)<<4;/*
+	                 * Now calculate the length of the variable header + payload by adding up the lengths
+	                 * of all the component parts
+	                 */var remLength=0;var topicStrLength=new Array();var destinationNameLength=0;// if the message contains a messageIdentifier then we need two bytes for that
+	if(this.messageIdentifier!=undefined)remLength+=2;switch(this.type){// If this a Connect then we need to include 12 bytes for its header
+	case MESSAGE_TYPE.CONNECT:switch(this.mqttVersion){case 3:remLength+=MqttProtoIdentifierv3.length+3;break;case 4:remLength+=MqttProtoIdentifierv4.length+3;break;}remLength+=UTF8Length(this.clientId)+2;if(this.willMessage!=undefined){remLength+=UTF8Length(this.willMessage.destinationName)+2;// Will message is always a string, sent as UTF-8 characters with a preceding length.
+	var willMessagePayloadBytes=this.willMessage.payloadBytes;if(!(willMessagePayloadBytes instanceof Uint8Array))willMessagePayloadBytes=new Uint8Array(payloadBytes);remLength+=willMessagePayloadBytes.byteLength+2;}if(this.userName!=undefined)remLength+=UTF8Length(this.userName)+2;if(this.password!=undefined)remLength+=UTF8Length(this.password)+2;break;// Subscribe, Unsubscribe can both contain topic strings
+	case MESSAGE_TYPE.SUBSCRIBE:first|=0x02;// Qos = 1;
+	for(var i=0;i<this.topics.length;i++){topicStrLength[i]=UTF8Length(this.topics[i]);remLength+=topicStrLength[i]+2;}remLength+=this.requestedQos.length;// 1 byte for each topic's Qos
+	// QoS on Subscribe only
+	break;case MESSAGE_TYPE.UNSUBSCRIBE:first|=0x02;// Qos = 1;
+	for(var i=0;i<this.topics.length;i++){topicStrLength[i]=UTF8Length(this.topics[i]);remLength+=topicStrLength[i]+2;}break;case MESSAGE_TYPE.PUBREL:first|=0x02;// Qos = 1;
+	break;case MESSAGE_TYPE.PUBLISH:if(this.payloadMessage.duplicate)first|=0x08;first=first|=this.payloadMessage.qos<<1;if(this.payloadMessage.retained)first|=0x01;destinationNameLength=UTF8Length(this.payloadMessage.destinationName);remLength+=destinationNameLength+2;var payloadBytes=this.payloadMessage.payloadBytes;remLength+=payloadBytes.byteLength;if(payloadBytes instanceof ArrayBuffer)payloadBytes=new Uint8Array(payloadBytes);else if(!(payloadBytes instanceof Uint8Array))payloadBytes=new Uint8Array(payloadBytes.buffer);break;case MESSAGE_TYPE.DISCONNECT:break;default:;}// Now we can allocate a buffer for the message
+	var mbi=encodeMBI(remLength);// Convert the length to MQTT MBI format
+	var pos=mbi.length+1;// Offset of start of variable header
+	var buffer=new ArrayBuffer(remLength+pos);var byteStream=new Uint8Array(buffer);// view it as a sequence of bytes
+	//Write the fixed header into the buffer
+	byteStream[0]=first;byteStream.set(mbi,1);// If this is a PUBLISH then the variable header starts with a topic
+	if(this.type==MESSAGE_TYPE.PUBLISH)pos=writeString(this.payloadMessage.destinationName,destinationNameLength,byteStream,pos);// If this is a CONNECT then the variable header contains the protocol name/version, flags and keepalive time
+	else if(this.type==MESSAGE_TYPE.CONNECT){switch(this.mqttVersion){case 3:byteStream.set(MqttProtoIdentifierv3,pos);pos+=MqttProtoIdentifierv3.length;break;case 4:byteStream.set(MqttProtoIdentifierv4,pos);pos+=MqttProtoIdentifierv4.length;break;}var connectFlags=0;if(this.cleanSession)connectFlags=0x02;if(this.willMessage!=undefined){connectFlags|=0x04;connectFlags|=this.willMessage.qos<<3;if(this.willMessage.retained){connectFlags|=0x20;}}if(this.userName!=undefined)connectFlags|=0x80;if(this.password!=undefined)connectFlags|=0x40;byteStream[pos++]=connectFlags;pos=writeUint16(this.keepAliveInterval,byteStream,pos);}// Output the messageIdentifier - if there is one
+	if(this.messageIdentifier!=undefined)pos=writeUint16(this.messageIdentifier,byteStream,pos);switch(this.type){case MESSAGE_TYPE.CONNECT:pos=writeString(this.clientId,UTF8Length(this.clientId),byteStream,pos);if(this.willMessage!=undefined){pos=writeString(this.willMessage.destinationName,UTF8Length(this.willMessage.destinationName),byteStream,pos);pos=writeUint16(willMessagePayloadBytes.byteLength,byteStream,pos);byteStream.set(willMessagePayloadBytes,pos);pos+=willMessagePayloadBytes.byteLength;}if(this.userName!=undefined)pos=writeString(this.userName,UTF8Length(this.userName),byteStream,pos);if(this.password!=undefined)pos=writeString(this.password,UTF8Length(this.password),byteStream,pos);break;case MESSAGE_TYPE.PUBLISH:// PUBLISH has a text or binary payload, if text do not add a 2 byte length field, just the UTF characters.
+	byteStream.set(payloadBytes,pos);break;//    	    case MESSAGE_TYPE.PUBREC:
+	//    	    case MESSAGE_TYPE.PUBREL:
+	//    	    case MESSAGE_TYPE.PUBCOMP:
+	//    	    	break;
+	case MESSAGE_TYPE.SUBSCRIBE:// SUBSCRIBE has a list of topic strings and request QoS
+	for(var i=0;i<this.topics.length;i++){pos=writeString(this.topics[i],topicStrLength[i],byteStream,pos);byteStream[pos++]=this.requestedQos[i];}break;case MESSAGE_TYPE.UNSUBSCRIBE:// UNSUBSCRIBE has a list of topic strings
+	for(var i=0;i<this.topics.length;i++){pos=writeString(this.topics[i],topicStrLength[i],byteStream,pos);}break;default:// Do nothing.
+	}return buffer;};function decodeMessage(input,pos){var startingPos=pos;var first=input[pos];var type=first>>4;var messageInfo=first&=0x0f;pos+=1;// Decode the remaining length (MBI format)
+	var digit;var remLength=0;var multiplier=1;do{if(pos==input.length){return[null,startingPos];}digit=input[pos++];remLength+=(digit&0x7F)*multiplier;multiplier*=128;}while((digit&0x80)!=0);var endPos=pos+remLength;if(endPos>input.length){return[null,startingPos];}var wireMessage=new WireMessage(type);switch(type){case MESSAGE_TYPE.CONNACK:var connectAcknowledgeFlags=input[pos++];if(connectAcknowledgeFlags&0x01)wireMessage.sessionPresent=true;wireMessage.returnCode=input[pos++];break;case MESSAGE_TYPE.PUBLISH:var qos=messageInfo>>1&0x03;var len=readUint16(input,pos);pos+=2;var topicName=parseUTF8(input,pos,len);pos+=len;// If QoS 1 or 2 there will be a messageIdentifier
+	if(qos>0){wireMessage.messageIdentifier=readUint16(input,pos);pos+=2;}var message=new _Paho.MQTT.Message(input.subarray(pos,endPos));if((messageInfo&0x01)==0x01)message.retained=true;if((messageInfo&0x08)==0x08)message.duplicate=true;message.qos=qos;message.destinationName=topicName;wireMessage.payloadMessage=message;break;case MESSAGE_TYPE.PUBACK:case MESSAGE_TYPE.PUBREC:case MESSAGE_TYPE.PUBREL:case MESSAGE_TYPE.PUBCOMP:case MESSAGE_TYPE.UNSUBACK:wireMessage.messageIdentifier=readUint16(input,pos);break;case MESSAGE_TYPE.SUBACK:wireMessage.messageIdentifier=readUint16(input,pos);pos+=2;wireMessage.returnCode=input.subarray(pos,endPos);break;default:;}return[wireMessage,endPos];}function writeUint16(input,buffer,offset){buffer[offset++]=input>>8;//MSB
+	buffer[offset++]=input%256;//LSB
+	return offset;}function writeString(input,utf8Length,buffer,offset){offset=writeUint16(utf8Length,buffer,offset);stringToUTF8(input,buffer,offset);return offset+utf8Length;}function readUint16(buffer,offset){return 256*buffer[offset]+buffer[offset+1];}/**
+	             * Encodes an MQTT Multi-Byte Integer
+	             * @private
+	             */function encodeMBI(number){var output=new Array(1);var numBytes=0;do{var digit=number%128;number=number>>7;if(number>0){digit|=0x80;}output[numBytes++]=digit;}while(number>0&&numBytes<4);return output;}/**
+	             * Takes a String and calculates its length in bytes when encoded in UTF8.
+	             * @private
+	             */function UTF8Length(input){var output=0;for(var i=0;i<input.length;i++){var charCode=input.charCodeAt(i);if(charCode>0x7FF){// Surrogate pair means its a 4 byte character
+	if(0xD800<=charCode&&charCode<=0xDBFF){i++;output++;}output+=3;}else if(charCode>0x7F)output+=2;else output++;}return output;}/**
+	             * Takes a String and writes it into an array as UTF8 encoded bytes.
+	             * @private
+	             */function stringToUTF8(input,output,start){var pos=start;for(var i=0;i<input.length;i++){var charCode=input.charCodeAt(i);// Check for a surrogate pair.
+	if(0xD800<=charCode&&charCode<=0xDBFF){var lowCharCode=input.charCodeAt(++i);if(isNaN(lowCharCode)){throw new Error(format(ERROR.MALFORMED_UNICODE,[charCode,lowCharCode]));}charCode=(charCode-0xD800<<10)+(lowCharCode-0xDC00)+0x10000;}if(charCode<=0x7F){output[pos++]=charCode;}else if(charCode<=0x7FF){output[pos++]=charCode>>6&0x1F|0xC0;output[pos++]=charCode&0x3F|0x80;}else if(charCode<=0xFFFF){output[pos++]=charCode>>12&0x0F|0xE0;output[pos++]=charCode>>6&0x3F|0x80;output[pos++]=charCode&0x3F|0x80;}else{output[pos++]=charCode>>18&0x07|0xF0;output[pos++]=charCode>>12&0x3F|0x80;output[pos++]=charCode>>6&0x3F|0x80;output[pos++]=charCode&0x3F|0x80;};}return output;}function parseUTF8(input,offset,length){var output="";var utf16;var pos=offset;while(pos<offset+length){var byte1=input[pos++];if(byte1<128)utf16=byte1;else{var byte2=input[pos++]-128;if(byte2<0)throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),""]));if(byte1<0xE0)// 2 byte character
+	utf16=64*(byte1-0xC0)+byte2;else{var byte3=input[pos++]-128;if(byte3<0)throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),byte3.toString(16)]));if(byte1<0xF0)// 3 byte character
+	utf16=4096*(byte1-0xE0)+64*byte2+byte3;else{var byte4=input[pos++]-128;if(byte4<0)throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),byte3.toString(16),byte4.toString(16)]));if(byte1<0xF8)// 4 byte character
+	utf16=262144*(byte1-0xF0)+4096*byte2+64*byte3+byte4;else// longer encodings are not supported
+	throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),byte3.toString(16),byte4.toString(16)]));}}}if(utf16>0xFFFF)// 4 byte character - express as a surrogate pair
+	{utf16-=0x10000;output+=String.fromCharCode(0xD800+(utf16>>10));// lead character
+	utf16=0xDC00+(utf16&0x3FF);// trail character
+	}output+=String.fromCharCode(utf16);}return output;}/**
+	             * Repeat keepalive requests, monitor responses.
+	             * @ignore
+	             */var Pinger=function Pinger(client,window,keepAliveInterval){this._client=client;this._window=window;this._keepAliveInterval=keepAliveInterval*1000;this.isReset=false;var pingReq=new WireMessage(MESSAGE_TYPE.PINGREQ).encode();var doTimeout=function doTimeout(pinger){return function(){return doPing.apply(pinger);};};/** @ignore */var doPing=function doPing(){if(!this.isReset){this._client._trace("Pinger.doPing","Timed out");this._client._disconnected(ERROR.PING_TIMEOUT.code,format(ERROR.PING_TIMEOUT));}else{this.isReset=false;this._client._trace("Pinger.doPing","send PINGREQ");this._client.socket.send(pingReq);this.timeout=this._window.setTimeout(doTimeout(this),this._keepAliveInterval);}};this.reset=function(){this.isReset=true;this._window.clearTimeout(this.timeout);if(this._keepAliveInterval>0)this.timeout=setTimeout(doTimeout(this),this._keepAliveInterval);};this.cancel=function(){this._window.clearTimeout(this.timeout);};};/**
+	             * Monitor request completion.
+	             * @ignore
+	             */var Timeout=function Timeout(client,window,timeoutSeconds,action,args){this._window=window;if(!timeoutSeconds)timeoutSeconds=30;var doTimeout=function doTimeout(action,client,args){return function(){return action.apply(client,args);};};this.timeout=setTimeout(doTimeout(action,client,args),timeoutSeconds*1000);this.cancel=function(){this._window.clearTimeout(this.timeout);};};/*
+	             * Internal implementation of the Websockets MQTT V3.1 client.
+	             *
+	             * @name Paho.MQTT.ClientImpl @constructor
+	             * @param {String} host the DNS nameof the webSocket host.
+	             * @param {Number} port the port number for that host.
+	             * @param {String} clientId the MQ client identifier.
+	             */var ClientImpl=function ClientImpl(uri,host,port,path,clientId){// Check dependencies are satisfied in this browser.
+	if(!("WebSocket"in global&&global["WebSocket"]!==null)){throw new Error(format(ERROR.UNSUPPORTED,["WebSocket"]));}if(!("localStorage"in global&&global["localStorage"]!==null)){throw new Error(format(ERROR.UNSUPPORTED,["localStorage"]));}if(!("ArrayBuffer"in global&&global["ArrayBuffer"]!==null)){throw new Error(format(ERROR.UNSUPPORTED,["ArrayBuffer"]));}this._trace("Paho.MQTT.Client",uri,host,port,path,clientId);this.host=host;this.port=port;this.path=path;this.uri=uri;this.clientId=clientId;// Local storagekeys are qualified with the following string.
+	// The conditional inclusion of path in the key is for backward
+	// compatibility to when the path was not configurable and assumed to
+	// be /mqtt
+	this._localKey=host+":"+port+(path!="/mqtt"?":"+path:"")+":"+clientId+":";// Create private instance-only message queue
+	// Internal queue of messages to be sent, in sending order.
+	this._msg_queue=[];// Messages we have sent and are expecting a response for, indexed by their respective message ids.
+	this._sentMessages={};// Messages we have received and acknowleged and are expecting a confirm message for
+	// indexed by their respective message ids.
+	this._receivedMessages={};// Internal list of callbacks to be executed when messages
+	// have been successfully sent over web socket, e.g. disconnect
+	// when it doesn't have to wait for ACK, just message is dispatched.
+	this._notify_msg_sent={};// Unique identifier for SEND messages, incrementing
+	// counter as messages are sent.
+	this._message_identifier=1;// Used to determine the transmission sequence of stored sent messages.
+	this._sequence=0;// Load the local state, if any, from the saved version, only restore state relevant to this client.
+	for(var key in localStorage){if(key.indexOf("Sent:"+this._localKey)==0||key.indexOf("Received:"+this._localKey)==0)this.restore(key);}};// Messaging Client public instance members.
+	ClientImpl.prototype.host;ClientImpl.prototype.port;ClientImpl.prototype.path;ClientImpl.prototype.uri;ClientImpl.prototype.clientId;// Messaging Client private instance members.
+	ClientImpl.prototype.socket;/* true once we have received an acknowledgement to a CONNECT packet. */ClientImpl.prototype.connected=false;/* The largest message identifier allowed, may not be larger than 2**16 but
+	             * if set smaller reduces the maximum number of outbound messages allowed.
+	             */ClientImpl.prototype.maxMessageIdentifier=65536;ClientImpl.prototype.connectOptions;ClientImpl.prototype.hostIndex;ClientImpl.prototype.onConnectionLost;ClientImpl.prototype.onMessageDelivered;ClientImpl.prototype.onMessageArrived;ClientImpl.prototype.traceFunction;ClientImpl.prototype._msg_queue=null;ClientImpl.prototype._connectTimeout;/* The sendPinger monitors how long we allow before we send data to prove to the server that we are alive. */ClientImpl.prototype.sendPinger=null;/* The receivePinger monitors how long we allow before we require evidence that the server is alive. */ClientImpl.prototype.receivePinger=null;ClientImpl.prototype.receiveBuffer=null;ClientImpl.prototype._traceBuffer=null;ClientImpl.prototype._MAX_TRACE_ENTRIES=100;ClientImpl.prototype.connect=function(connectOptions){var connectOptionsMasked=this._traceMask(connectOptions,"password");this._trace("Client.connect",connectOptionsMasked,this.socket,this.connected);if(this.connected)throw new Error(format(ERROR.INVALID_STATE,["already connected"]));if(this.socket)throw new Error(format(ERROR.INVALID_STATE,["already connected"]));this.connectOptions=connectOptions;if(connectOptions.uris){this.hostIndex=0;this._doConnect(connectOptions.uris[0]);}else{this._doConnect(this.uri);}};ClientImpl.prototype.subscribe=function(filter,subscribeOptions){this._trace("Client.subscribe",filter,subscribeOptions);if(!this.connected)throw new Error(format(ERROR.INVALID_STATE,["not connected"]));var wireMessage=new WireMessage(MESSAGE_TYPE.SUBSCRIBE);wireMessage.topics=[filter];if(subscribeOptions.qos!=undefined)wireMessage.requestedQos=[subscribeOptions.qos];else wireMessage.requestedQos=[0];if(subscribeOptions.onSuccess){wireMessage.onSuccess=function(grantedQos){subscribeOptions.onSuccess({invocationContext:subscribeOptions.invocationContext,grantedQos:grantedQos});};}if(subscribeOptions.onFailure){wireMessage.onFailure=function(errorCode){subscribeOptions.onFailure({invocationContext:subscribeOptions.invocationContext,errorCode:errorCode});};}if(subscribeOptions.timeout){wireMessage.timeOut=new Timeout(this,window,subscribeOptions.timeout,subscribeOptions.onFailure,[{invocationContext:subscribeOptions.invocationContext,errorCode:ERROR.SUBSCRIBE_TIMEOUT.code,errorMessage:format(ERROR.SUBSCRIBE_TIMEOUT)}]);}// All subscriptions return a SUBACK.
+	this._requires_ack(wireMessage);this._schedule_message(wireMessage);};/** @ignore */ClientImpl.prototype.unsubscribe=function(filter,unsubscribeOptions){this._trace("Client.unsubscribe",filter,unsubscribeOptions);if(!this.connected)throw new Error(format(ERROR.INVALID_STATE,["not connected"]));var wireMessage=new WireMessage(MESSAGE_TYPE.UNSUBSCRIBE);wireMessage.topics=[filter];if(unsubscribeOptions.onSuccess){wireMessage.callback=function(){unsubscribeOptions.onSuccess({invocationContext:unsubscribeOptions.invocationContext});};}if(unsubscribeOptions.timeout){wireMessage.timeOut=new Timeout(this,window,unsubscribeOptions.timeout,unsubscribeOptions.onFailure,[{invocationContext:unsubscribeOptions.invocationContext,errorCode:ERROR.UNSUBSCRIBE_TIMEOUT.code,errorMessage:format(ERROR.UNSUBSCRIBE_TIMEOUT)}]);}// All unsubscribes return a SUBACK.
+	this._requires_ack(wireMessage);this._schedule_message(wireMessage);};ClientImpl.prototype.send=function(message){this._trace("Client.send",message);if(!this.connected)throw new Error(format(ERROR.INVALID_STATE,["not connected"]));wireMessage=new WireMessage(MESSAGE_TYPE.PUBLISH);wireMessage.payloadMessage=message;if(message.qos>0)this._requires_ack(wireMessage);else if(this.onMessageDelivered)this._notify_msg_sent[wireMessage]=this.onMessageDelivered(wireMessage.payloadMessage);this._schedule_message(wireMessage);};ClientImpl.prototype.disconnect=function(){this._trace("Client.disconnect");if(!this.socket)throw new Error(format(ERROR.INVALID_STATE,["not connecting or connected"]));wireMessage=new WireMessage(MESSAGE_TYPE.DISCONNECT);// Run the disconnected call back as soon as the message has been sent,
+	// in case of a failure later on in the disconnect processing.
+	// as a consequence, the _disconected call back may be run several times.
+	this._notify_msg_sent[wireMessage]=scope(this._disconnected,this);this._schedule_message(wireMessage);};ClientImpl.prototype.getTraceLog=function(){if(this._traceBuffer!==null){this._trace("Client.getTraceLog",new Date());this._trace("Client.getTraceLog in flight messages",this._sentMessages.length);for(var key in this._sentMessages){this._trace("_sentMessages ",key,this._sentMessages[key]);}for(var key in this._receivedMessages){this._trace("_receivedMessages ",key,this._receivedMessages[key]);}return this._traceBuffer;}};ClientImpl.prototype.startTrace=function(){if(this._traceBuffer===null){this._traceBuffer=[];}this._trace("Client.startTrace",new Date(),version);};ClientImpl.prototype.stopTrace=function(){delete this._traceBuffer;};ClientImpl.prototype._doConnect=function(wsurl){// When the socket is open, this client will send the CONNECT WireMessage using the saved parameters.
+	if(this.connectOptions.useSSL){var uriParts=wsurl.split(":");uriParts[0]="wss";wsurl=uriParts.join(":");}this.connected=false;if(this.connectOptions.mqttVersion<4){this.socket=new WebSocket(wsurl,["mqttv3.1"]);}else{this.socket=new WebSocket(wsurl,["mqtt"]);}this.socket.binaryType='arraybuffer';this.socket.onopen=scope(this._on_socket_open,this);this.socket.onmessage=scope(this._on_socket_message,this);this.socket.onerror=scope(this._on_socket_error,this);this.socket.onclose=scope(this._on_socket_close,this);this.sendPinger=new Pinger(this,window,this.connectOptions.keepAliveInterval);this.receivePinger=new Pinger(this,window,this.connectOptions.keepAliveInterval);this._connectTimeout=new Timeout(this,window,this.connectOptions.timeout,this._disconnected,[ERROR.CONNECT_TIMEOUT.code,format(ERROR.CONNECT_TIMEOUT)]);};// Schedule a new message to be sent over the WebSockets
+	// connection. CONNECT messages cause WebSocket connection
+	// to be started. All other messages are queued internally
+	// until this has happened. When WS connection starts, process
+	// all outstanding messages.
+	ClientImpl.prototype._schedule_message=function(message){this._msg_queue.push(message);// Process outstanding messages in the queue if we have an  open socket, and have received CONNACK.
+	if(this.connected){this._process_queue();}};ClientImpl.prototype.store=function(prefix,wireMessage){var storedMessage={type:wireMessage.type,messageIdentifier:wireMessage.messageIdentifier,version:1};switch(wireMessage.type){case MESSAGE_TYPE.PUBLISH:if(wireMessage.pubRecReceived)storedMessage.pubRecReceived=true;// Convert the payload to a hex string.
+	storedMessage.payloadMessage={};var hex="";var messageBytes=wireMessage.payloadMessage.payloadBytes;for(var i=0;i<messageBytes.length;i++){if(messageBytes[i]<=0xF)hex=hex+"0"+messageBytes[i].toString(16);else hex=hex+messageBytes[i].toString(16);}storedMessage.payloadMessage.payloadHex=hex;storedMessage.payloadMessage.qos=wireMessage.payloadMessage.qos;storedMessage.payloadMessage.destinationName=wireMessage.payloadMessage.destinationName;if(wireMessage.payloadMessage.duplicate)storedMessage.payloadMessage.duplicate=true;if(wireMessage.payloadMessage.retained)storedMessage.payloadMessage.retained=true;// Add a sequence number to sent messages.
+	if(prefix.indexOf("Sent:")==0){if(wireMessage.sequence===undefined)wireMessage.sequence=++this._sequence;storedMessage.sequence=wireMessage.sequence;}break;default:throw Error(format(ERROR.INVALID_STORED_DATA,[key,storedMessage]));}localStorage.setItem(prefix+this._localKey+wireMessage.messageIdentifier,JSON.stringify(storedMessage));};ClientImpl.prototype.restore=function(key){var value=localStorage.getItem(key);var storedMessage=JSON.parse(value);var wireMessage=new WireMessage(storedMessage.type,storedMessage);switch(storedMessage.type){case MESSAGE_TYPE.PUBLISH:// Replace the payload message with a Message object.
+	var hex=storedMessage.payloadMessage.payloadHex;var buffer=new ArrayBuffer(hex.length/2);var byteStream=new Uint8Array(buffer);var i=0;while(hex.length>=2){var x=parseInt(hex.substring(0,2),16);hex=hex.substring(2,hex.length);byteStream[i++]=x;}var payloadMessage=new _Paho.MQTT.Message(byteStream);payloadMessage.qos=storedMessage.payloadMessage.qos;payloadMessage.destinationName=storedMessage.payloadMessage.destinationName;if(storedMessage.payloadMessage.duplicate)payloadMessage.duplicate=true;if(storedMessage.payloadMessage.retained)payloadMessage.retained=true;wireMessage.payloadMessage=payloadMessage;break;default:throw Error(format(ERROR.INVALID_STORED_DATA,[key,value]));}if(key.indexOf("Sent:"+this._localKey)==0){wireMessage.payloadMessage.duplicate=true;this._sentMessages[wireMessage.messageIdentifier]=wireMessage;}else if(key.indexOf("Received:"+this._localKey)==0){this._receivedMessages[wireMessage.messageIdentifier]=wireMessage;}};ClientImpl.prototype._process_queue=function(){var message=null;// Process messages in order they were added
+	var fifo=this._msg_queue.reverse();// Send all queued messages down socket connection
+	while(message=fifo.pop()){this._socket_send(message);// Notify listeners that message was successfully sent
+	if(this._notify_msg_sent[message]){this._notify_msg_sent[message]();delete this._notify_msg_sent[message];}}};/**
+	             * Expect an ACK response for this message. Add message to the set of in progress
+	             * messages and set an unused identifier in this message.
+	             * @ignore
+	             */ClientImpl.prototype._requires_ack=function(wireMessage){var messageCount=Object.keys(this._sentMessages).length;if(messageCount>this.maxMessageIdentifier)throw Error("Too many messages:"+messageCount);while(this._sentMessages[this._message_identifier]!==undefined){this._message_identifier++;}wireMessage.messageIdentifier=this._message_identifier;this._sentMessages[wireMessage.messageIdentifier]=wireMessage;if(wireMessage.type===MESSAGE_TYPE.PUBLISH){this.store("Sent:",wireMessage);}if(this._message_identifier===this.maxMessageIdentifier){this._message_identifier=1;}};/**
+	             * Called when the underlying websocket has been opened.
+	             * @ignore
+	             */ClientImpl.prototype._on_socket_open=function(){// Create the CONNECT message object.
+	var wireMessage=new WireMessage(MESSAGE_TYPE.CONNECT,this.connectOptions);wireMessage.clientId=this.clientId;this._socket_send(wireMessage);};/**
+	             * Called when the underlying websocket has received a complete packet.
+	             * @ignore
+	             */ClientImpl.prototype._on_socket_message=function(event){this._trace("Client._on_socket_message",event.data);// Reset the receive ping timer, we now have evidence the server is alive.
+	this.receivePinger.reset();var messages=this._deframeMessages(event.data);for(var i=0;i<messages.length;i+=1){this._handleMessage(messages[i]);}};ClientImpl.prototype._deframeMessages=function(data){var byteArray=new Uint8Array(data);if(this.receiveBuffer){var newData=new Uint8Array(this.receiveBuffer.length+byteArray.length);newData.set(this.receiveBuffer);newData.set(byteArray,this.receiveBuffer.length);byteArray=newData;delete this.receiveBuffer;}try{var offset=0;var messages=[];while(offset<byteArray.length){var result=decodeMessage(byteArray,offset);var wireMessage=result[0];offset=result[1];if(wireMessage!==null){messages.push(wireMessage);}else{break;}}if(offset<byteArray.length){this.receiveBuffer=byteArray.subarray(offset);}}catch(error){this._disconnected(ERROR.INTERNAL_ERROR.code,format(ERROR.INTERNAL_ERROR,[error.message,error.stack.toString()]));return;}return messages;};ClientImpl.prototype._handleMessage=function(wireMessage){this._trace("Client._handleMessage",wireMessage);switch(wireMessage.type){case MESSAGE_TYPE.CONNACK:this._connectTimeout.cancel();// If we have started using clean session then clear up the local state.
+	if(this.connectOptions.cleanSession){for(var key in this._sentMessages){var sentMessage=this._sentMessages[key];localStorage.removeItem("Sent:"+this._localKey+sentMessage.messageIdentifier);}this._sentMessages={};for(var key in this._receivedMessages){var receivedMessage=this._receivedMessages[key];localStorage.removeItem("Received:"+this._localKey+receivedMessage.messageIdentifier);}this._receivedMessages={};}// Client connected and ready for business.
+	if(wireMessage.returnCode===0){this.connected=true;// Jump to the end of the list of uris and stop looking for a good host.
+	if(this.connectOptions.uris)this.hostIndex=this.connectOptions.uris.length;}else{this._disconnected(ERROR.CONNACK_RETURNCODE.code,format(ERROR.CONNACK_RETURNCODE,[wireMessage.returnCode,CONNACK_RC[wireMessage.returnCode]]));break;}// Resend messages.
+	var sequencedMessages=new Array();for(var msgId in this._sentMessages){if(this._sentMessages.hasOwnProperty(msgId))sequencedMessages.push(this._sentMessages[msgId]);}// Sort sentMessages into the original sent order.
+	var sequencedMessages=sequencedMessages.sort(function(a,b){return a.sequence-b.sequence;});for(var i=0,len=sequencedMessages.length;i<len;i++){var sentMessage=sequencedMessages[i];if(sentMessage.type==MESSAGE_TYPE.PUBLISH&&sentMessage.pubRecReceived){var pubRelMessage=new WireMessage(MESSAGE_TYPE.PUBREL,{messageIdentifier:sentMessage.messageIdentifier});this._schedule_message(pubRelMessage);}else{this._schedule_message(sentMessage);};}// Execute the connectOptions.onSuccess callback if there is one.
+	if(this.connectOptions.onSuccess){this.connectOptions.onSuccess({invocationContext:this.connectOptions.invocationContext});}// Process all queued messages now that the connection is established.
+	this._process_queue();break;case MESSAGE_TYPE.PUBLISH:this._receivePublish(wireMessage);break;case MESSAGE_TYPE.PUBACK:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];// If this is a re flow of a PUBACK after we have restarted receivedMessage will not exist.
+	if(sentMessage){delete this._sentMessages[wireMessage.messageIdentifier];localStorage.removeItem("Sent:"+this._localKey+wireMessage.messageIdentifier);if(this.onMessageDelivered)this.onMessageDelivered(sentMessage.payloadMessage);}break;case MESSAGE_TYPE.PUBREC:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];// If this is a re flow of a PUBREC after we have restarted receivedMessage will not exist.
+	if(sentMessage){sentMessage.pubRecReceived=true;var pubRelMessage=new WireMessage(MESSAGE_TYPE.PUBREL,{messageIdentifier:wireMessage.messageIdentifier});this.store("Sent:",sentMessage);this._schedule_message(pubRelMessage);}break;case MESSAGE_TYPE.PUBREL:var receivedMessage=this._receivedMessages[wireMessage.messageIdentifier];localStorage.removeItem("Received:"+this._localKey+wireMessage.messageIdentifier);// If this is a re flow of a PUBREL after we have restarted receivedMessage will not exist.
+	if(receivedMessage){this._receiveMessage(receivedMessage);delete this._receivedMessages[wireMessage.messageIdentifier];}// Always flow PubComp, we may have previously flowed PubComp but the server lost it and restarted.
+	var pubCompMessage=new WireMessage(MESSAGE_TYPE.PUBCOMP,{messageIdentifier:wireMessage.messageIdentifier});this._schedule_message(pubCompMessage);break;case MESSAGE_TYPE.PUBCOMP:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];delete this._sentMessages[wireMessage.messageIdentifier];localStorage.removeItem("Sent:"+this._localKey+wireMessage.messageIdentifier);if(this.onMessageDelivered)this.onMessageDelivered(sentMessage.payloadMessage);break;case MESSAGE_TYPE.SUBACK:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];if(sentMessage){if(sentMessage.timeOut)sentMessage.timeOut.cancel();wireMessage.returnCode.indexOf=Array.prototype.indexOf;if(wireMessage.returnCode.indexOf(0x80)!==-1){if(sentMessage.onFailure){sentMessage.onFailure(wireMessage.returnCode);}}else if(sentMessage.onSuccess){sentMessage.onSuccess(wireMessage.returnCode);}delete this._sentMessages[wireMessage.messageIdentifier];}break;case MESSAGE_TYPE.UNSUBACK:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];if(sentMessage){if(sentMessage.timeOut)sentMessage.timeOut.cancel();if(sentMessage.callback){sentMessage.callback();}delete this._sentMessages[wireMessage.messageIdentifier];}break;case MESSAGE_TYPE.PINGRESP:/* The sendPinger or receivePinger may have sent a ping, the receivePinger has already been reset. */this.sendPinger.reset();break;case MESSAGE_TYPE.DISCONNECT:// Clients do not expect to receive disconnect packets.
+	this._disconnected(ERROR.INVALID_MQTT_MESSAGE_TYPE.code,format(ERROR.INVALID_MQTT_MESSAGE_TYPE,[wireMessage.type]));break;default:this._disconnected(ERROR.INVALID_MQTT_MESSAGE_TYPE.code,format(ERROR.INVALID_MQTT_MESSAGE_TYPE,[wireMessage.type]));};};/** @ignore */ClientImpl.prototype._on_socket_error=function(error){this._disconnected(ERROR.SOCKET_ERROR.code,format(ERROR.SOCKET_ERROR,[error.data]));};/** @ignore */ClientImpl.prototype._on_socket_close=function(){this._disconnected(ERROR.SOCKET_CLOSE.code,format(ERROR.SOCKET_CLOSE));};/** @ignore */ClientImpl.prototype._socket_send=function(wireMessage){if(wireMessage.type==1){var wireMessageMasked=this._traceMask(wireMessage,"password");this._trace("Client._socket_send",wireMessageMasked);}else this._trace("Client._socket_send",wireMessage);this.socket.send(wireMessage.encode());/* We have proved to the server we are alive. */this.sendPinger.reset();};/** @ignore */ClientImpl.prototype._receivePublish=function(wireMessage){switch(wireMessage.payloadMessage.qos){case"undefined":case 0:this._receiveMessage(wireMessage);break;case 1:var pubAckMessage=new WireMessage(MESSAGE_TYPE.PUBACK,{messageIdentifier:wireMessage.messageIdentifier});this._schedule_message(pubAckMessage);this._receiveMessage(wireMessage);break;case 2:this._receivedMessages[wireMessage.messageIdentifier]=wireMessage;this.store("Received:",wireMessage);var pubRecMessage=new WireMessage(MESSAGE_TYPE.PUBREC,{messageIdentifier:wireMessage.messageIdentifier});this._schedule_message(pubRecMessage);break;default:throw Error("Invaild qos="+wireMmessage.payloadMessage.qos);};};/** @ignore */ClientImpl.prototype._receiveMessage=function(wireMessage){if(this.onMessageArrived){this.onMessageArrived(wireMessage.payloadMessage);}};/**
+	             * Client has disconnected either at its own request or because the server
+	             * or network disconnected it. Remove all non-durable state.
+	             * @param {errorCode} [number] the error number.
+	             * @param {errorText} [string] the error text.
+	             * @ignore
+	             */ClientImpl.prototype._disconnected=function(errorCode,errorText){this._trace("Client._disconnected",errorCode,errorText);this.sendPinger.cancel();this.receivePinger.cancel();if(this._connectTimeout)this._connectTimeout.cancel();// Clear message buffers.
+	this._msg_queue=[];this._notify_msg_sent={};if(this.socket){// Cancel all socket callbacks so that they cannot be driven again by this socket.
+	this.socket.onopen=null;this.socket.onmessage=null;this.socket.onerror=null;this.socket.onclose=null;if(this.socket.readyState===1)this.socket.close();delete this.socket;}if(this.connectOptions.uris&&this.hostIndex<this.connectOptions.uris.length-1){// Try the next host.
+	this.hostIndex++;this._doConnect(this.connectOptions.uris[this.hostIndex]);}else{if(errorCode===undefined){errorCode=ERROR.OK.code;errorText=format(ERROR.OK);}// Run any application callbacks last as they may attempt to reconnect and hence create a new socket.
+	if(this.connected){this.connected=false;// Execute the connectionLostCallback if there is one, and we were connected.
+	if(this.onConnectionLost)this.onConnectionLost({errorCode:errorCode,errorMessage:errorText});}else{// Otherwise we never had a connection, so indicate that the connect has failed.
+	if(this.connectOptions.mqttVersion===4&&this.connectOptions.mqttVersionExplicit===false){this._trace("Failed to connect V4, dropping back to V3");this.connectOptions.mqttVersion=3;if(this.connectOptions.uris){this.hostIndex=0;this._doConnect(this.connectOptions.uris[0]);}else{this._doConnect(this.uri);}}else if(this.connectOptions.onFailure){this.connectOptions.onFailure({invocationContext:this.connectOptions.invocationContext,errorCode:errorCode,errorMessage:errorText});}}}};/** @ignore */ClientImpl.prototype._trace=function(){// Pass trace message back to client's callback function
+	if(this.traceFunction){for(var i in arguments){if(typeof arguments[i]!=="undefined")arguments[i]=JSON.stringify(arguments[i]);}var record=Array.prototype.slice.call(arguments).join("");this.traceFunction({severity:"Debug",message:record});}//buffer style trace
+	if(this._traceBuffer!==null){for(var i=0,max=arguments.length;i<max;i++){if(this._traceBuffer.length==this._MAX_TRACE_ENTRIES){this._traceBuffer.shift();}if(i===0)this._traceBuffer.push(arguments[i]);else if(typeof arguments[i]==="undefined")this._traceBuffer.push(arguments[i]);else this._traceBuffer.push("  "+JSON.stringify(arguments[i]));};};};/** @ignore */ClientImpl.prototype._traceMask=function(traceObject,masked){var traceObjectMasked={};for(var attr in traceObject){if(traceObject.hasOwnProperty(attr)){if(attr==masked)traceObjectMasked[attr]="******";else traceObjectMasked[attr]=traceObject[attr];}}return traceObjectMasked;};// ------------------------------------------------------------------------
+	// Public Programming interface.
+	// ------------------------------------------------------------------------
+	/**
+	             * The JavaScript application communicates to the server using a {@link Paho.MQTT.Client} object.
+	             * <p>
+	             * Most applications will create just one Client object and then call its connect() method,
+	             * however applications can create more than one Client object if they wish.
+	             * In this case the combination of host, port and clientId attributes must be different for each Client object.
+	             * <p>
+	             * The send, subscribe and unsubscribe methods are implemented as asynchronous JavaScript methods
+	             * (even though the underlying protocol exchange might be synchronous in nature).
+	             * This means they signal their completion by calling back to the application,
+	             * via Success or Failure callback functions provided by the application on the method in question.
+	             * Such callbacks are called at most once per method invocation and do not persist beyond the lifetime
+	             * of the script that made the invocation.
+	             * <p>
+	             * In contrast there are some callback functions, most notably <i>onMessageArrived</i>,
+	             * that are defined on the {@link Paho.MQTT.Client} object.
+	             * These may get called multiple times, and aren't directly related to specific method invocations made by the client.
+	             *
+	             * @name Paho.MQTT.Client
+	             *
+	             * @constructor
+	             *
+	             * @param {string} host - the address of the messaging server, as a fully qualified WebSocket URI, as a DNS name or dotted decimal IP address.
+	             * @param {number} port - the port number to connect to - only required if host is not a URI
+	             * @param {string} path - the path on the host to connect to - only used if host is not a URI. Default: '/mqtt'.
+	             * @param {string} clientId - the Messaging client identifier, between 1 and 23 characters in length.
+	             *
+	             * @property {string} host - <i>read only</i> the server's DNS hostname or dotted decimal IP address.
+	             * @property {number} port - <i>read only</i> the server's port.
+	             * @property {string} path - <i>read only</i> the server's path.
+	             * @property {string} clientId - <i>read only</i> used when connecting to the server.
+	             * @property {function} onConnectionLost - called when a connection has been lost.
+	             *                            after a connect() method has succeeded.
+	             *                            Establish the call back used when a connection has been lost. The connection may be
+	             *                            lost because the client initiates a disconnect or because the server or network
+	             *                            cause the client to be disconnected. The disconnect call back may be called without
+	             *                            the connectionComplete call back being invoked if, for example the client fails to
+	             *                            connect.
+	             *                            A single response object parameter is passed to the onConnectionLost callback containing the following fields:
+	             *                            <ol>
+	             *                            <li>errorCode
+	             *                            <li>errorMessage
+	             *                            </ol>
+	             * @property {function} onMessageDelivered called when a message has been delivered.
+	             *                            All processing that this Client will ever do has been completed. So, for example,
+	             *                            in the case of a Qos=2 message sent by this client, the PubComp flow has been received from the server
+	             *                            and the message has been removed from persistent storage before this callback is invoked.
+	             *                            Parameters passed to the onMessageDelivered callback are:
+	             *                            <ol>
+	             *                            <li>{@link Paho.MQTT.Message} that was delivered.
+	             *                            </ol>
+	             * @property {function} onMessageArrived called when a message has arrived in this Paho.MQTT.client.
+	             *                            Parameters passed to the onMessageArrived callback are:
+	             *                            <ol>
+	             *                            <li>{@link Paho.MQTT.Message} that has arrived.
+	             *                            </ol>
+	             */var Client=function Client(host,port,path,clientId){var uri;if(typeof host!=="string")throw new Error(format(ERROR.INVALID_TYPE,[typeof host==="undefined"?"undefined":_typeof(host),"host"]));if(arguments.length==2){// host: must be full ws:// uri
+	// port: clientId
+	clientId=port;uri=host;var match=uri.match(/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/);if(match){host=match[4]||match[2];port=parseInt(match[7]);path=match[8];}else{throw new Error(format(ERROR.INVALID_ARGUMENT,[host,"host"]));}}else{if(arguments.length==3){clientId=path;path="/mqtt";}if(typeof port!=="number"||port<0)throw new Error(format(ERROR.INVALID_TYPE,[typeof port==="undefined"?"undefined":_typeof(port),"port"]));if(typeof path!=="string")throw new Error(format(ERROR.INVALID_TYPE,[typeof path==="undefined"?"undefined":_typeof(path),"path"]));var ipv6AddSBracket=host.indexOf(":")!=-1&&host.slice(0,1)!="["&&host.slice(-1)!="]";uri="ws://"+(ipv6AddSBracket?"["+host+"]":host)+":"+port+path;}var clientIdLength=0;for(var i=0;i<clientId.length;i++){var charCode=clientId.charCodeAt(i);if(0xD800<=charCode&&charCode<=0xDBFF){i++;// Surrogate pair.
+	}clientIdLength++;}if(typeof clientId!=="string"||clientIdLength>65535)throw new Error(format(ERROR.INVALID_ARGUMENT,[clientId,"clientId"]));var client=new ClientImpl(uri,host,port,path,clientId);this._getHost=function(){return host;};this._setHost=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getPort=function(){return port;};this._setPort=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getPath=function(){return path;};this._setPath=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getURI=function(){return uri;};this._setURI=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getClientId=function(){return client.clientId;};this._setClientId=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getOnConnectionLost=function(){return client.onConnectionLost;};this._setOnConnectionLost=function(newOnConnectionLost){if(typeof newOnConnectionLost==="function")client.onConnectionLost=newOnConnectionLost;else throw new Error(format(ERROR.INVALID_TYPE,[typeof newOnConnectionLost==="undefined"?"undefined":_typeof(newOnConnectionLost),"onConnectionLost"]));};this._getOnMessageDelivered=function(){return client.onMessageDelivered;};this._setOnMessageDelivered=function(newOnMessageDelivered){if(typeof newOnMessageDelivered==="function")client.onMessageDelivered=newOnMessageDelivered;else throw new Error(format(ERROR.INVALID_TYPE,[typeof newOnMessageDelivered==="undefined"?"undefined":_typeof(newOnMessageDelivered),"onMessageDelivered"]));};this._getOnMessageArrived=function(){return client.onMessageArrived;};this._setOnMessageArrived=function(newOnMessageArrived){if(typeof newOnMessageArrived==="function")client.onMessageArrived=newOnMessageArrived;else throw new Error(format(ERROR.INVALID_TYPE,[typeof newOnMessageArrived==="undefined"?"undefined":_typeof(newOnMessageArrived),"onMessageArrived"]));};this._getTrace=function(){return client.traceFunction;};this._setTrace=function(trace){if(typeof trace==="function"){client.traceFunction=trace;}else{throw new Error(format(ERROR.INVALID_TYPE,[typeof trace==="undefined"?"undefined":_typeof(trace),"onTrace"]));}};/**
+	                 * Connect this Messaging client to its server.
+	                 *
+	                 * @name Paho.MQTT.Client#connect
+	                 * @function
+	                 * @param {Object} connectOptions - attributes used with the connection.
+	                 * @param {number} connectOptions.timeout - If the connect has not succeeded within this
+	                 *                    number of seconds, it is deemed to have failed.
+	                 *                    The default is 30 seconds.
+	                 * @param {string} connectOptions.userName - Authentication username for this connection.
+	                 * @param {string} connectOptions.password - Authentication password for this connection.
+	                 * @param {Paho.MQTT.Message} connectOptions.willMessage - sent by the server when the client
+	                 *                    disconnects abnormally.
+	                 * @param {Number} connectOptions.keepAliveInterval - the server disconnects this client if
+	                 *                    there is no activity for this number of seconds.
+	                 *                    The default value of 60 seconds is assumed if not set.
+	                 * @param {boolean} connectOptions.cleanSession - if true(default) the client and server
+	                 *                    persistent state is deleted on successful connect.
+	                 * @param {boolean} connectOptions.useSSL - if present and true, use an SSL Websocket connection.
+	                 * @param {object} connectOptions.invocationContext - passed to the onSuccess callback or onFailure callback.
+	                 * @param {function} connectOptions.onSuccess - called when the connect acknowledgement
+	                 *                    has been received from the server.
+	                 * A single response object parameter is passed to the onSuccess callback containing the following fields:
+	                 * <ol>
+	                 * <li>invocationContext as passed in to the onSuccess method in the connectOptions.
+	                 * </ol>
+	                 * @config {function} [onFailure] called when the connect request has failed or timed out.
+	                 * A single response object parameter is passed to the onFailure callback containing the following fields:
+	                 * <ol>
+	                 * <li>invocationContext as passed in to the onFailure method in the connectOptions.
+	                 * <li>errorCode a number indicating the nature of the error.
+	                 * <li>errorMessage text describing the error.
+	                 * </ol>
+	                 * @config {Array} [hosts] If present this contains either a set of hostnames or fully qualified
+	                 * WebSocket URIs (ws://example.com:1883/mqtt), that are tried in order in place
+	                 * of the host and port paramater on the construtor. The hosts are tried one at at time in order until
+	                 * one of then succeeds.
+	                 * @config {Array} [ports] If present the set of ports matching the hosts. If hosts contains URIs, this property
+	                 * is not used.
+	                 * @throws {InvalidState} if the client is not in disconnected state. The client must have received connectionLost
+	                 * or disconnected before calling connect for a second or subsequent time.
+	                 */this.connect=function(connectOptions){connectOptions=connectOptions||{};validate(connectOptions,{timeout:"number",userName:"string",password:"string",willMessage:"object",keepAliveInterval:"number",cleanSession:"boolean",useSSL:"boolean",invocationContext:"object",onSuccess:"function",onFailure:"function",hosts:"object",ports:"object",mqttVersion:"number"});// If no keep alive interval is set, assume 60 seconds.
+	if(connectOptions.keepAliveInterval===undefined)connectOptions.keepAliveInterval=60;if(connectOptions.mqttVersion>4||connectOptions.mqttVersion<3){throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.mqttVersion,"connectOptions.mqttVersion"]));}if(connectOptions.mqttVersion===undefined){connectOptions.mqttVersionExplicit=false;connectOptions.mqttVersion=4;}else{connectOptions.mqttVersionExplicit=true;}//Check that if password is set, so is username
+	if(connectOptions.password===undefined&&connectOptions.userName!==undefined)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.password,"connectOptions.password"]));if(connectOptions.willMessage){if(!(connectOptions.willMessage instanceof Message))throw new Error(format(ERROR.INVALID_TYPE,[connectOptions.willMessage,"connectOptions.willMessage"]));// The will message must have a payload that can be represented as a string.
+	// Cause the willMessage to throw an exception if this is not the case.
+	connectOptions.willMessage.stringPayload;if(typeof connectOptions.willMessage.destinationName==="undefined")throw new Error(format(ERROR.INVALID_TYPE,[_typeof(connectOptions.willMessage.destinationName),"connectOptions.willMessage.destinationName"]));}if(typeof connectOptions.cleanSession==="undefined")connectOptions.cleanSession=true;if(connectOptions.hosts){if(!(connectOptions.hosts instanceof Array))throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts,"connectOptions.hosts"]));if(connectOptions.hosts.length<1)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts,"connectOptions.hosts"]));var usingURIs=false;for(var i=0;i<connectOptions.hosts.length;i++){if(typeof connectOptions.hosts[i]!=="string")throw new Error(format(ERROR.INVALID_TYPE,[_typeof(connectOptions.hosts[i]),"connectOptions.hosts["+i+"]"]));if(/^(wss?):\/\/((\[(.+)\])|([^\/]+?))(:(\d+))?(\/.*)$/.test(connectOptions.hosts[i])){if(i==0){usingURIs=true;}else if(!usingURIs){throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts[i],"connectOptions.hosts["+i+"]"]));}}else if(usingURIs){throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts[i],"connectOptions.hosts["+i+"]"]));}}if(!usingURIs){if(!connectOptions.ports)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.ports,"connectOptions.ports"]));if(!(connectOptions.ports instanceof Array))throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.ports,"connectOptions.ports"]));if(connectOptions.hosts.length!=connectOptions.ports.length)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.ports,"connectOptions.ports"]));connectOptions.uris=[];for(var i=0;i<connectOptions.hosts.length;i++){if(typeof connectOptions.ports[i]!=="number"||connectOptions.ports[i]<0)throw new Error(format(ERROR.INVALID_TYPE,[_typeof(connectOptions.ports[i]),"connectOptions.ports["+i+"]"]));var host=connectOptions.hosts[i];var port=connectOptions.ports[i];var ipv6=host.indexOf(":")!=-1;uri="ws://"+(ipv6?"["+host+"]":host)+":"+port+path;connectOptions.uris.push(uri);}}else{connectOptions.uris=connectOptions.hosts;}}client.connect(connectOptions);};/**
+	                 * Subscribe for messages, request receipt of a copy of messages sent to the destinations described by the filter.
+	                 *
+	                 * @name Paho.MQTT.Client#subscribe
+	                 * @function
+	                 * @param {string} filter describing the destinations to receive messages from.
+	                 * <br>
+	                 * @param {object} subscribeOptions - used to control the subscription
+	                 *
+	                 * @param {number} subscribeOptions.qos - the maiximum qos of any publications sent
+	                 *                                  as a result of making this subscription.
+	                 * @param {object} subscribeOptions.invocationContext - passed to the onSuccess callback
+	                 *                                  or onFailure callback.
+	                 * @param {function} subscribeOptions.onSuccess - called when the subscribe acknowledgement
+	                 *                                  has been received from the server.
+	                 *                                  A single response object parameter is passed to the onSuccess callback containing the following fields:
+	                 *                                  <ol>
+	                 *                                  <li>invocationContext if set in the subscribeOptions.
+	                 *                                  </ol>
+	                 * @param {function} subscribeOptions.onFailure - called when the subscribe request has failed or timed out.
+	                 *                                  A single response object parameter is passed to the onFailure callback containing the following fields:
+	                 *                                  <ol>
+	                 *                                  <li>invocationContext - if set in the subscribeOptions.
+	                 *                                  <li>errorCode - a number indicating the nature of the error.
+	                 *                                  <li>errorMessage - text describing the error.
+	                 *                                  </ol>
+	                 * @param {number} subscribeOptions.timeout - which, if present, determines the number of
+	                 *                                  seconds after which the onFailure calback is called.
+	                 *                                  The presence of a timeout does not prevent the onSuccess
+	                 *                                  callback from being called when the subscribe completes.
+	                 * @throws {InvalidState} if the client is not in connected state.
+	                 */this.subscribe=function(filter,subscribeOptions){if(typeof filter!=="string")throw new Error("Invalid argument:"+filter);subscribeOptions=subscribeOptions||{};validate(subscribeOptions,{qos:"number",invocationContext:"object",onSuccess:"function",onFailure:"function",timeout:"number"});if(subscribeOptions.timeout&&!subscribeOptions.onFailure)throw new Error("subscribeOptions.timeout specified with no onFailure callback.");if(typeof subscribeOptions.qos!=="undefined"&&!(subscribeOptions.qos===0||subscribeOptions.qos===1||subscribeOptions.qos===2))throw new Error(format(ERROR.INVALID_ARGUMENT,[subscribeOptions.qos,"subscribeOptions.qos"]));client.subscribe(filter,subscribeOptions);};/**
+			 * Unsubscribe for messages, stop receiving messages sent to destinations described by the filter.
+			 *
+			 * @name Paho.MQTT.Client#unsubscribe
+			 * @function
+			 * @param {string} filter - describing the destinations to receive messages from.
+			 * @param {object} unsubscribeOptions - used to control the subscription
+			 * @param {object} unsubscribeOptions.invocationContext - passed to the onSuccess callback
+			                                      or onFailure callback.
+			 * @param {function} unsubscribeOptions.onSuccess - called when the unsubscribe acknowledgement has been received from the server.
+			 *                                    A single response object parameter is passed to the
+			 *                                    onSuccess callback containing the following fields:
+			 *                                    <ol>
+			 *                                    <li>invocationContext - if set in the unsubscribeOptions.
+			 *                                    </ol>
+			 * @param {function} unsubscribeOptions.onFailure called when the unsubscribe request has failed or timed out.
+			 *                                    A single response object parameter is passed to the onFailure callback containing the following fields:
+			 *                                    <ol>
+			 *                                    <li>invocationContext - if set in the unsubscribeOptions.
+			 *                                    <li>errorCode - a number indicating the nature of the error.
+			 *                                    <li>errorMessage - text describing the error.
+			 *                                    </ol>
+			 * @param {number} unsubscribeOptions.timeout - which, if present, determines the number of seconds
+			 *                                    after which the onFailure callback is called. The presence of
+			 *                                    a timeout does not prevent the onSuccess callback from being
+			 *                                    called when the unsubscribe completes
+			 * @throws {InvalidState} if the client is not in connected state.
+			 */this.unsubscribe=function(filter,unsubscribeOptions){if(typeof filter!=="string")throw new Error("Invalid argument:"+filter);unsubscribeOptions=unsubscribeOptions||{};validate(unsubscribeOptions,{invocationContext:"object",onSuccess:"function",onFailure:"function",timeout:"number"});if(unsubscribeOptions.timeout&&!unsubscribeOptions.onFailure)throw new Error("unsubscribeOptions.timeout specified with no onFailure callback.");client.unsubscribe(filter,unsubscribeOptions);};/**
+	                 * Send a message to the consumers of the destination in the Message.
+	                 *
+	                 * @name Paho.MQTT.Client#send
+	                 * @function
+	                 * @param {string|Paho.MQTT.Message} topic - <b>mandatory</b> The name of the destination to which the message is to be sent.
+	                 * 					   - If it is the only parameter, used as Paho.MQTT.Message object.
+	                 * @param {String|ArrayBuffer} payload - The message data to be sent.
+	                 * @param {number} qos The Quality of Service used to deliver the message.
+	                 * 		<dl>
+	                 * 			<dt>0 Best effort (default).
+	                 *     			<dt>1 At least once.
+	                 *     			<dt>2 Exactly once.
+	                 * 		</dl>
+	                 * @param {Boolean} retained If true, the message is to be retained by the server and delivered
+	                 *                     to both current and future subscriptions.
+	                 *                     If false the server only delivers the message to current subscribers, this is the default for new Messages.
+	                 *                     A received message has the retained boolean set to true if the message was published
+	                 *                     with the retained boolean set to true
+	                 *                     and the subscrption was made after the message has been published.
+	                 * @throws {InvalidState} if the client is not connected.
+	                 */this.send=function(topic,payload,qos,retained){var message;if(arguments.length==0){throw new Error("Invalid argument."+"length");}else if(arguments.length==1){if(!(topic instanceof Message)&&typeof topic!=="string")throw new Error("Invalid argument:"+(typeof topic==="undefined"?"undefined":_typeof(topic)));message=topic;if(typeof message.destinationName==="undefined")throw new Error(format(ERROR.INVALID_ARGUMENT,[message.destinationName,"Message.destinationName"]));client.send(message);}else{//parameter checking in Message object
+	message=new Message(payload);message.destinationName=topic;if(arguments.length>=3)message.qos=qos;if(arguments.length>=4)message.retained=retained;client.send(message);}};/**
+	                 * Normal disconnect of this Messaging client from its server.
+	                 *
+	                 * @name Paho.MQTT.Client#disconnect
+	                 * @function
+	                 * @throws {InvalidState} if the client is already disconnected.
+	                 */this.disconnect=function(){client.disconnect();};/**
+	                 * Get the contents of the trace log.
+	                 *
+	                 * @name Paho.MQTT.Client#getTraceLog
+	                 * @function
+	                 * @return {Object[]} tracebuffer containing the time ordered trace records.
+	                 */this.getTraceLog=function(){return client.getTraceLog();};/**
+	                 * Start tracing.
+	                 *
+	                 * @name Paho.MQTT.Client#startTrace
+	                 * @function
+	                 */this.startTrace=function(){client.startTrace();};/**
+	                 * Stop tracing.
+	                 *
+	                 * @name Paho.MQTT.Client#stopTrace
+	                 * @function
+	                 */this.stopTrace=function(){client.stopTrace();};this.isConnected=function(){return client.connected;};};Client.prototype={get host(){return this._getHost();},set host(newHost){this._setHost(newHost);},get port(){return this._getPort();},set port(newPort){this._setPort(newPort);},get path(){return this._getPath();},set path(newPath){this._setPath(newPath);},get clientId(){return this._getClientId();},set clientId(newClientId){this._setClientId(newClientId);},get onConnectionLost(){return this._getOnConnectionLost();},set onConnectionLost(newOnConnectionLost){this._setOnConnectionLost(newOnConnectionLost);},get onMessageDelivered(){return this._getOnMessageDelivered();},set onMessageDelivered(newOnMessageDelivered){this._setOnMessageDelivered(newOnMessageDelivered);},get onMessageArrived(){return this._getOnMessageArrived();},set onMessageArrived(newOnMessageArrived){this._setOnMessageArrived(newOnMessageArrived);},get trace(){return this._getTrace();},set trace(newTraceFunction){this._setTrace(newTraceFunction);}};/**
+	             * An application message, sent or received.
+	             * <p>
+	             * All attributes may be null, which implies the default values.
+	             *
+	             * @name Paho.MQTT.Message
+	             * @constructor
+	             * @param {String|ArrayBuffer} payload The message data to be sent.
+	             * <p>
+	             * @property {string} payloadString <i>read only</i> The payload as a string if the payload consists of valid UTF-8 characters.
+	             * @property {ArrayBuffer} payloadBytes <i>read only</i> The payload as an ArrayBuffer.
+	             * <p>
+	             * @property {string} destinationName <b>mandatory</b> The name of the destination to which the message is to be sent
+	             *                    (for messages about to be sent) or the name of the destination from which the message has been received.
+	             *                    (for messages received by the onMessage function).
+	             * <p>
+	             * @property {number} qos The Quality of Service used to deliver the message.
+	             * <dl>
+	             *     <dt>0 Best effort (default).
+	             *     <dt>1 At least once.
+	             *     <dt>2 Exactly once.
+	             * </dl>
+	             * <p>
+	             * @property {Boolean} retained If true, the message is to be retained by the server and delivered
+	             *                     to both current and future subscriptions.
+	             *                     If false the server only delivers the message to current subscribers, this is the default for new Messages.
+	             *                     A received message has the retained boolean set to true if the message was published
+	             *                     with the retained boolean set to true
+	             *                     and the subscrption was made after the message has been published.
+	             * <p>
+	             * @property {Boolean} duplicate <i>read only</i> If true, this message might be a duplicate of one which has already been received.
+	             *                     This is only set on messages received from the server.
+	             *
+	             */var Message=function Message(newPayload){var payload;if(typeof newPayload==="string"||newPayload instanceof ArrayBuffer||newPayload instanceof Int8Array||newPayload instanceof Uint8Array||newPayload instanceof Int16Array||newPayload instanceof Uint16Array||newPayload instanceof Int32Array||newPayload instanceof Uint32Array||newPayload instanceof Float32Array||newPayload instanceof Float64Array){payload=newPayload;}else{throw format(ERROR.INVALID_ARGUMENT,[newPayload,"newPayload"]);}this._getPayloadString=function(){if(typeof payload==="string")return payload;else return parseUTF8(payload,0,payload.length);};this._getPayloadBytes=function(){if(typeof payload==="string"){var buffer=new ArrayBuffer(UTF8Length(payload));var byteStream=new Uint8Array(buffer);stringToUTF8(payload,byteStream,0);return byteStream;}else{return payload;};};var destinationName=undefined;this._getDestinationName=function(){return destinationName;};this._setDestinationName=function(newDestinationName){if(typeof newDestinationName==="string")destinationName=newDestinationName;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newDestinationName,"newDestinationName"]));};var qos=0;this._getQos=function(){return qos;};this._setQos=function(newQos){if(newQos===0||newQos===1||newQos===2)qos=newQos;else throw new Error("Invalid argument:"+newQos);};var retained=false;this._getRetained=function(){return retained;};this._setRetained=function(newRetained){if(typeof newRetained==="boolean")retained=newRetained;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newRetained,"newRetained"]));};var duplicate=false;this._getDuplicate=function(){return duplicate;};this._setDuplicate=function(newDuplicate){duplicate=newDuplicate;};};Message.prototype={get payloadString(){return this._getPayloadString();},get payloadBytes(){return this._getPayloadBytes();},get destinationName(){return this._getDestinationName();},set destinationName(newDestinationName){this._setDestinationName(newDestinationName);},get qos(){return this._getQos();},set qos(newQos){this._setQos(newQos);},get retained(){return this._getRetained();},set retained(newRetained){this._setRetained(newRetained);},get duplicate(){return this._getDuplicate();},set duplicate(newDuplicate){this._setDuplicate(newDuplicate);}};// Module contents.
+	return{Client:Client,Message:Message};}(window);return _Paho;};exports.default=_get__("Paho");var _RewiredData__=Object.create(null);var INTENTIONAL_UNDEFINED='__INTENTIONAL_UNDEFINED__';var _RewireAPI__={};(function(){function addPropertyToAPIObject(name,value){Object.defineProperty(_RewireAPI__,name,{value:value,enumerable:false,configurable:true});}addPropertyToAPIObject('__get__',_get__);addPropertyToAPIObject('__GetDependency__',_get__);addPropertyToAPIObject('__Rewire__',_set__);addPropertyToAPIObject('__set__',_set__);addPropertyToAPIObject('__reset__',_reset__);addPropertyToAPIObject('__ResetDependency__',_reset__);addPropertyToAPIObject('__with__',_with__);})();function _get__(variableName){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _get_original__(variableName);}else{var value=_RewiredData__[variableName];if(value===INTENTIONAL_UNDEFINED){return undefined;}else{return value;}}}function _get_original__(variableName){switch(variableName){case"Paho":return Paho;}return undefined;}function _assign__(variableName,value){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _set_original__(variableName,value);}else{return _RewiredData__[variableName]=value;}}function _set_original__(variableName,_value){switch(variableName){}return undefined;}function _update_operation__(operation,variableName,prefix){var oldValue=_get__(variableName);var newValue=operation==='++'?oldValue+1:oldValue-1;_assign__(variableName,newValue);return prefix?newValue:oldValue;}function _set__(variableName,value){if((typeof variableName==="undefined"?"undefined":_typeof(variableName))==='object'){Object.keys(variableName).forEach(function(name){_RewiredData__[name]=variableName[name];});}else{if(value===undefined){_RewiredData__[variableName]=INTENTIONAL_UNDEFINED;}else{_RewiredData__[variableName]=value;}return value;}}function _reset__(variableName){delete _RewiredData__[variableName];}function _with__(object){var rewiredVariableNames=Object.keys(object);var previousValues={};function reset(){rewiredVariableNames.forEach(function(variableName){_RewiredData__[variableName]=previousValues[variableName];});}return function(callback){rewiredVariableNames.forEach(function(variableName){previousValues[variableName]=_RewiredData__[variableName];_RewiredData__[variableName]=object[variableName];});var result=callback();if(!!result&&typeof result.then=='function'){result.then(reset).catch(reset);}else{reset();}return result;};}var _typeOfOriginalExport=typeof Paho==="undefined"?"undefined":_typeof(Paho);function addNonEnumerableProperty(name,value){Object.defineProperty(Paho,name,{value:value,enumerable:false,configurable:true});}if((_typeOfOriginalExport==='object'||_typeOfOriginalExport==='function')&&Object.isExtensible(Paho)){addNonEnumerableProperty('__get__',_get__);addNonEnumerableProperty('__GetDependency__',_get__);addNonEnumerableProperty('__Rewire__',_set__);addNonEnumerableProperty('__set__',_set__);addNonEnumerableProperty('__reset__',_reset__);addNonEnumerableProperty('__ResetDependency__',_reset__);addNonEnumerableProperty('__with__',_with__);addNonEnumerableProperty('__RewireAPI__',_RewireAPI__);}exports.__get__=_get__;exports.__GetDependency__=_get__;exports.__Rewire__=_set__;exports.__set__=_set__;exports.__ResetDependency__=_reset__;exports.__RewireAPI__=_RewireAPI__;});
 
 /***/ },
 /* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(module, exports);\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod, mod.exports);\n        global.ajax = mod.exports;\n    }\n})(this, function (module, exports) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var Ajax = function () {\n        function Ajax(options) {\n            _classCallCheck(this, Ajax);\n\n            this.tokenType = 'Bearer';\n            this.token = options.token;\n            this.uri = options.uri || 'api.relayr.io/';\n            this.protocol = options.protocol || 'https://';\n            this.customXHR;\n        }\n\n        _createClass(Ajax, [{\n            key: 'get',\n            value: function get(url) {\n                var _this = this;\n\n                var opts = arguments.length <= 1 || arguments[1] === undefined ? {\n                    contentType: 'application/json'\n                } : arguments[1];\n\n                if (!(url.charAt(0) === '/')) {\n                    throw new Error('Please provide a url with a leading /');\n                }\n\n                if (!url) {\n                    throw new Error('Please provide atleast a url');\n                }\n                if (typeof url !== 'string') {\n                    throw new Error('Please provide a string url');\n                }\n                url += this._serializeQueryStr(opts.queryObj);\n\n                return new Promise(function (resolve, reject) {\n                    var xhrObject = _this._xhrRequest({\n                        type: 'GET',\n                        url: url,\n                        isObject: opts.raw || true,\n                        contentType: opts.contentType\n                    }).then(function (result) {\n                        resolve(result);\n                    }).catch(function (xhrObject) {\n                        reject(xhrObject);\n                    });\n                });\n            }\n        }, {\n            key: 'post',\n            value: function post(url, body) {\n                var _this2 = this;\n\n                var opts = arguments.length <= 2 || arguments[2] === undefined ? {\n                    contentType: 'application/json'\n                } : arguments[2];\n\n                if (!url.charAt(0) === '/') {\n                    throw new Error('Please provide a url with a leading /');\n                }\n                if (!url) throw new Error('Please provide atleast a url');\n                if (typeof url !== 'string') throw new Error('Please provide a string url');\n\n                return new Promise(function (resolve, reject) {\n                    var xhrObject = _this2._xhrRequest({\n                        type: 'POST',\n                        url: url,\n                        body: body,\n                        isObject: opts.raw || true,\n                        contentType: opts.contentType\n                    }).then(function (result) {\n                        resolve(result);\n                    }).catch(function (xhrObject) {\n                        reject(xhrObject);\n                    });\n                });\n            }\n        }, {\n            key: 'patch',\n            value: function patch(url, body) {\n                var _this3 = this;\n\n                var opts = arguments.length <= 2 || arguments[2] === undefined ? {\n                    contentType: 'application/json'\n                } : arguments[2];\n\n                if (!url.charAt(0) === '/') {\n                    throw new Error('Please provide a url with a leading /');\n                }\n                if (!url) throw new Error('Please provide atleast a url');\n                if (typeof url !== 'string') throw new Error('Please provide a string url');\n\n                return new Promise(function (resolve, reject) {\n                    var xhrObject = _this3._xhrRequest({\n                        type: 'PATCH',\n                        url: url,\n                        body: body,\n                        isObject: opts.raw || true,\n                        contentType: opts.contentType\n                    }).then(function (result) {\n                        resolve(result);\n                    }).catch(function (xhrObject) {\n                        reject(xhrObject);\n                    });\n                });\n            }\n        }, {\n            key: 'delete',\n            value: function _delete(url) {\n                var _this4 = this;\n\n                var opts = arguments.length <= 1 || arguments[1] === undefined ? {\n                    contentType: 'application/json'\n                } : arguments[1];\n\n                if (!url.charAt(0) === '/') {\n                    throw new Error('Please provide a url with a leading /');\n                }\n                if (!url) throw new Error('Please provide atleast a url');\n                if (typeof url !== 'string') throw new Error('Please provide a string url');\n\n                return new Promise(function (resolve, reject) {\n                    var xhrObject = _this4._xhrRequest({\n                        type: 'DELETE',\n                        url: url,\n                        contentType: opts.contentType\n                    }).then(function (result) {\n                        resolve(result);\n                    }).catch(function (xhrObject) {\n                        reject(xhrObject);\n                    });\n                });\n            }\n        }, {\n            key: '_serializeQueryStr',\n            value: function _serializeQueryStr(obj) {\n                var str = [];\n\n                if (!obj || Object.keys(obj).length === 0) {\n                    return '';\n                }\n\n                for (var p in obj) {\n                    if (obj.hasOwnProperty(p)) {\n                        str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));\n                    }\n                }\n                return '?' + str.join('&');\n            }\n        }, {\n            key: '_xhrRequest',\n            value: function _xhrRequest(options) {\n\n                var xhrObject = void 0;\n\n                xhrObject = new XMLHttpRequest();\n\n                xhrObject.open(options.type, '' + this.protocol + this.uri + options.url, true);\n\n                xhrObject.setRequestHeader('Authorization', this.token);\n                xhrObject.setRequestHeader('Content-Type', options.contentType);\n\n                return new Promise(function (resolve, reject) {\n\n                    xhrObject.onreadystatechange = function () {\n                        if (xhrObject.readyState === 4) {\n                            if (xhrObject.status > 199 && xhrObject.status < 299) {\n                                //2xx success\n                                if (options.isObject) {\n\n                                    resolve(JSON.parse(xhrObject.responseText));\n                                } else {\n\n                                    resolve(xhrObject.responseText);\n                                }\n                            } else if (xhrObject.status > 399 && xhrObject.status < 499) {\n                                //4xx client error\n                                console.log('there seems to be a problem on the client side');\n                                reject(xhrObject);\n                            } else if (xhrObject.status > 499) {\n                                //5xx server error\n                                console.log('there seems to be a problem on the server side');\n                                reject(xhrObject);\n                            }\n                        }\n                    };\n\n                    if (options.body) {\n                        xhrObject.send(JSON.stringify(options.body));\n                    } else {\n                        xhrObject.send();\n                    }\n                });\n            }\n        }]);\n\n        return Ajax;\n    }();\n\n    exports.default = Ajax;\n    module.exports = exports['default'];\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/tools/ajax.js\n ** module id = 12\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/tools/ajax.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../tools/ajax.js'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.ajax);
+	        global.Model = mod.exports;
+	    }
+	})(this, function (exports, _ajax) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.cache = undefined;
+
+	    var _ajax2 = _interopRequireDefault(_ajax);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var cache = exports.cache = {
+	        init: function init() {},
+	        public: {
+	            toArray: [],
+	            toDictionary: {}
+	        },
+	        clear: function clear() {
+	            _get__('cache').public.toArray = [];
+	            _get__('cache').public.toDictionary = [];
+	        }
+	    };
+
+	    var Model = function () {
+	        function Model() {
+	            var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	            var config = arguments[1];
+
+	            _classCallCheck(this, Model);
+
+	            this.config = config;
+	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	            if (id) {
+	                this.id = id;
+	            }
+	        }
+
+	        _createClass(Model, [{
+	            key: 'getAllModels',
+	            value: function getAllModels() {
+	                var _this = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    if (_get__('cache').public.toArray.length > 0) {
+	                        resolve(_get__('cache').public.toArray);
+	                    } else {
+	                        _this.ajax.get('/device-models', {
+	                            queryObj: 'limit=100000',
+	                            contentType: 'application/hal+json'
+	                        }).then(function (response) {
+	                            _get__('cache').public.toArray = response.models;
+	                            _this._makeDictionary(_get__('cache').public.toArray);
+	                            resolve(_get__('cache').public.toArray);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    }
+	                });
+	            }
+	        }, {
+	            key: 'getModel',
+	            value: function getModel(id) {
+	                var _this2 = this;
+
+	                if (this.id && !id) {
+	                    id = this.id;
+	                }
+
+	                if (_get__('cache').public.toDictionary[id]) {
+	                    return new Promise(function (resolve, reject) {
+	                        resolve(_get__('cache').public.toDictionary[id]);
+	                    });
+	                } else {
+	                    return new Promise(function (resolve, reject) {
+	                        _this2.ajax.get('/device-models/' + id, {
+	                            contentType: 'application/hal+json'
+	                        }).then(function (model) {
+	                            _get__('cache').public.toArray.push(model);
+	                            _get__('cache').public.toDictionary[id] = model;
+	                            resolve(model);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    });
+	                }
+	            }
+	        }, {
+	            key: '_getModelById',
+	            value: function _getModelById(id) {
+	                if (_get__('cache').public.toArray.length > 0) {
+	                    return _get__('cache').public.toDictionary[id] || null;
+	                } else {
+	                    return null;
+	                }
+	            }
+	        }, {
+	            key: '_getPublicModelsFromArray',
+	            value: function _getPublicModelsFromArray() {
+	                return _get__('cache').public.toArray || [];
+	            }
+	        }, {
+	            key: '_getPublicModelsFromDictionary',
+	            value: function _getPublicModelsFromDictionary() {
+	                return _get__('cache').public.toDictionary || [];
+	            }
+	        }, {
+	            key: '_makeDictionary',
+	            value: function _makeDictionary(modelsArray) {
+	                if (!modelsArray) {
+	                    return;
+	                }
+	                if (!_get__('cache').public.toDictionary) _get__('cache').public.toDictionary = {};
+	                var len = modelsArray.length;
+	                var i = 0;
+	                while (len--) {
+	                    var model = modelsArray[i];
+	                    _get__('cache').public.toDictionary[model.id] = model;
+	                    i++;
+	                }
+	                return _get__('cache').public.toDictionary;
+	            }
+	        }]);
+
+	        return Model;
+	    }();
+
+	    exports.default = Model;
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'cache':
+	                return cache;
+
+	            case 'Ajax':
+	                return _ajax2.default;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Model === 'undefined' ? 'undefined' : _typeof(Model);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Model, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Model)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ },
 /* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(12), __webpack_require__(14), __webpack_require__(15), __webpack_require__(18), __webpack_require__(20)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../tools/ajax.js'), require('../tools/connection.js'), require('./history/DeviceHistory'), require('../tools/mqtt'), require('./Model'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.ajax, global.connection, global.DeviceHistory, global.mqtt, global.Model);\n        global.Device = mod.exports;\n    }\n})(this, function (exports, _ajax, _connection, _DeviceHistory, _mqtt, _Model) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    var _connection2 = _interopRequireDefault(_connection);\n\n    var _DeviceHistory2 = _interopRequireDefault(_DeviceHistory);\n\n    var _Model2 = _interopRequireDefault(_Model);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var sharedChannel = null;\n\n    var Device = function () {\n        function Device() {\n            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];\n            var config = arguments[1];\n\n            _classCallCheck(this, Device);\n\n            this.rawDevice = rawDevice;\n            this.config = config;\n\n            this.id = rawDevice.id;\n            this.name = rawDevice.name;\n            this.modelId = rawDevice.modelId;\n            this.model = new (_get__('Model'))(this.modelId, config);\n            this.description = rawDevice.description;\n            this.owner = rawDevice.owner;\n            this.openToPublic = rawDevice.public;\n            this.ajax = new (_get__('Ajax'))(config.ajax);\n            this.history = new (_get__('DeviceHistory'))(rawDevice, config);\n            this.configurations = [];\n            this.commands = [];\n            this.metadata = {};\n        }\n\n        _createClass(Device, [{\n            key: 'updateDevice',\n            value: function updateDevice(patch, raw) {\n                var _this = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the device id during instantiation');\n                } else if (!patch) {\n                    throw new Error('Provide a patch of parameters to update');\n                } else if (!Object.keys(patch).length) {\n                    throw new Error('Provide a patch with some parameters to update');\n                }\n\n                for (var x in patch) {\n                    if (!this.hasOwnProperty(x)) {\n                        throw new Error('Provide a patch with relevant parameters to update');\n                    }\n                }\n\n                return new Promise(function (resolve, reject) {\n                    _this.ajax.patch('/devices/' + _this.id, patch, {\n                        raw: raw\n                    }).then(function (response) {\n                        _this.name = response.name;\n                        _this.modelId = response.modelId;\n                        _this.owner = response.owner;\n                        _this.openToPublic = response.public;\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'getHistoricalData',\n            value: function getHistoricalData(opts) {\n                return this.history.getHistoricalData(opts);\n            }\n        }, {\n            key: 'getAllHistoricalData',\n            value: function getAllHistoricalData(opts) {\n                return this.history.getAllHistoricalData(opts);\n            }\n        }, {\n            key: 'getReadings',\n            value: function getReadings() {\n                if (!this.id) {\n                    throw new Error('Provid a device id');\n                }\n                return this.ajax.get('/devices/' + this.id + '/readings');\n            }\n        }, {\n            key: 'deleteDevice',\n            value: function deleteDevice(raw) {\n                var _this2 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the device id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this2.ajax.delete('/devices/' + _this2.id).then(function (response) {\n                        //right now the object hangs around, but on the cloud it is gone\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'sendCommand',\n            value: function sendCommand(command, raw) {\n                var _this3 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the device id during instantiation');\n                } else if (!command) {\n                    throw new Error('Provide a command');\n                }\n                //path, name, value\n                else if (!command.path && !command.name && !command.value) {\n                        throw new Error('Provide a properly formatted command');\n                    }\n\n                return new Promise(function (resolve, reject) {\n                    _this3.ajax.patch('/devices/' + _this3.id, patch, {\n                        raw: raw\n                    }).then(function (response) {\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'getChannel',\n            value: function getChannel(transport) {\n                var _this4 = this;\n\n                return new Promise(function (resolve, reject) {\n                    if (_this4._channelCredentials) {\n                        resolve(_this4._channelCredentials);\n                    } else {\n\n                        var body = {\n                            deviceId: _this4.id,\n                            transport: transport || 'mqtt'\n                        };\n                        _this4.ajax.post('/channels', body).then(function (response) {\n                            _this4._channelCredentials = response;\n                            if (!_get__('sharedChannel')) {\n                                _assign__('sharedChannel', _this4._channelCredentials);\n                            }\n                            resolve(response);\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    }\n                });\n            }\n        }, {\n            key: 'connect',\n            value: function connect() {\n                var transport = arguments.length <= 0 || arguments[0] === undefined ? 'mqtt' : arguments[0];\n\n                var connection = new (_get__('Connection'))();\n                var getChannel = this.getChannel();\n\n                var subscribeMqtt = function subscribeMqtt(newChannelCredentials) {\n                    var options = {\n                        password: _get__('sharedChannel').credentials.password,\n                        userName: _get__('sharedChannel').credentials.user\n                    };\n\n                    _get__('mqtt').subscribe(newChannelCredentials.credentials.topic, connection.event);\n                    return _get__('mqtt').connect(options);\n                };\n\n                return new Promise(function (resolve, reject) {\n                    getChannel.then(subscribeMqtt).then(function () {\n                        resolve(connection);\n                    });\n                });\n            }\n        }, {\n            key: 'getDeviceState',\n            value: function getDeviceState() {\n                var _this5 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the device id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this5.ajax.get('/devices/' + _this5.id + '/state').then(function (response) {\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'getDeviceConfigurations',\n            value: function getDeviceConfigurations() {\n                var _this6 = this;\n\n                // api/devices/deviceId/configurations\n                if (!this.id) {\n                    throw new Error('Provide the device id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this6.ajax.get('/devices/' + _this6.id + '/configurations').then(function (response) {\n                        _this6.configurations = response;\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'setDeviceConfigurations',\n            value: function setDeviceConfigurations(schema) {\n                var _this7 = this;\n\n                // api/devices/deviceId/configurations\n                //POST\n                if (!this.id) {\n                    throw new Error('Provide the userId during instantiation');\n                } else if (!schema) {\n                    throw new Error('Provide a schema of parameters to set');\n                } else if (!Object.keys(schema).length) {\n                    throw new Error('Provide a schema with some parameters to set');\n                }\n                if (!(schema.path && schema.name && schema.value)) {\n                    throw new Error('Provide a schema with path, name, and value');\n                }\n\n                return new Promise(function (resolve, reject) {\n                    _this7.ajax.post('/devices/' + _this7.id + '/configurations', schema).then(function (response) {\n                        _this7.configurations.push(response);\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'getDeviceCommands',\n            value: function getDeviceCommands() {\n                var _this8 = this;\n\n                // api/devices/deviceId/commands\n                if (!this.id) {\n                    throw new Error('Provide the deviceId during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this8.ajax.get('/devices/' + _this8.id + '/commands').then(function (response) {\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'setDeviceCommands',\n            value: function setDeviceCommands(schema) {\n                var _this9 = this;\n\n                // api/devices/deviceId/commands\n                //POST\n                if (!this.id) {\n                    throw new Error('Provide the userId during instantiation');\n                } else if (!schema) {\n                    throw new Error('Provide a schema of parameters to set');\n                } else if (!Object.keys(schema).length) {\n                    throw new Error('Provide a schema with some parameters to set');\n                }\n                if (!(schema.path && schema.name && schema.value)) {\n                    throw new Error('Provide a schema with path, name, and value');\n                }\n\n                return new Promise(function (resolve, reject) {\n                    _this9.ajax.post('/devices/' + _this9.id + '/commands', schema).then(function (response) {\n                        _this9.commands.push(response);\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'getDeviceMetadata',\n            value: function getDeviceMetadata() {\n                var _this10 = this;\n\n                // api/devices/deviceId/metadata\n                if (!this.id) {\n                    throw new Error('Provide the deviceId during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this10.ajax.get('/devices/' + _this10.id + '/metadata').then(function (response) {\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'setDeviceMetadata',\n            value: function setDeviceMetadata(schema) {\n                var _this11 = this;\n\n                // api/devices/deviceId/metadata\n                //POST\n                if (!this.id) {\n                    throw new Error('Provide the userId during instantiation');\n                } else if (!schema) {\n                    throw new Error('Provide a schema of parameters to set');\n                } else if (!Object.keys(schema).length) {\n                    throw new Error('Provide a schema with some parameters to set');\n                }\n\n                return new Promise(function (resolve, reject) {\n                    _this11.ajax.post('/devices/' + _this11.id + '/metadata', schema).then(function (response) {\n                        _this11.metadata = response;\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'deleteDeviceMetadata',\n            value: function deleteDeviceMetadata() {\n                var _this12 = this;\n\n                // api/devices/deviceId/metadata\n                //DELETE\n                if (!this.id) {\n                    throw new Error('Provide the userId during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this12.ajax.delete('/devices/' + _this12.id + '/metadata').then(function (response) {\n                        //right now the object hangs around, but on the cloud it is gone\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }]);\n\n        return Device;\n    }();\n\n    exports.default = Device;\n    ;\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'Model':\n                return _Model2.default;\n\n            case 'Ajax':\n                return _ajax2.default;\n\n            case 'DeviceHistory':\n                return _DeviceHistory2.default;\n\n            case 'sharedChannel':\n                return sharedChannel;\n\n            case 'Connection':\n                return _connection2.default;\n\n            case 'mqtt':\n                return _mqtt.mqtt;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {\n            case 'sharedChannel':\n                return sharedChannel = _value;\n        }\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof Device === 'undefined' ? 'undefined' : _typeof(Device);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(Device, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Device)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/Device.js\n ** module id = 13\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/Device.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../tools/ajax.js'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.ajax);
+	        global.Transmitter = mod.exports;
+	    }
+	})(this, function (exports, _ajax) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
+
+	    var _ajax2 = _interopRequireDefault(_ajax);
+
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var Transmitter = function () {
+	        function Transmitter(config) {
+	            _classCallCheck(this, Transmitter);
+
+	            this.id = config.id;
+	            this.secret = config.secret;
+	            this.name = config.name;
+	            this.topic = config.topic;
+	            this.owner = config.owner;
+	            this.integrationType = config.integrationType;
+	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	        }
+
+	        _createClass(Transmitter, [{
+	            key: 'deleteTransmitter',
+	            value: function deleteTransmitter(opts) {
+	                var _this = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this.ajax.delete('/transmitters/' + _this.id, opts).then(function (response) {
+	                        //right now the object hangs around, but on the cloud it is gone
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'updateTransmitter',
+	            value: function updateTransmitter(patchBody, opts) {
+	                var _this2 = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the id during instantiation');
+	                } else if (!patchBody) {
+	                    throw new Error('Provide a patch of parameters to update');
+	                } else if (!Object.keys(patchBody).length) {
+	                    throw new Error('Provide a patch with some parameters to update');
+	                }
+
+	                for (var x in patchBody) {
+	                    if (!this.hasOwnProperty(x)) {
+	                        throw new Error('Provide a patch with relevant parameters to update');
+	                    }
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this2.ajax.patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
+	                        _this2.id = response.id, _this2.secret = response.secret, _this2.name = response.name, _this2.topic = response.topic, _this2.owner = response.owner, _this2.integrationType = response.integrationType, resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }]);
+
+	        return Transmitter;
+	    }();
+
+	    exports.default = Transmitter;
+	    ;
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Ajax':
+	                return _ajax2.default;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Transmitter === 'undefined' ? 'undefined' : _typeof(Transmitter);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Transmitter, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Transmitter)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ },
 /* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(module, exports);\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod, mod.exports);\n        global.connection = mod.exports;\n    }\n})(this, function (module, exports) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.default = connection;\n    function connection() {\n        var self = this;\n        this.buffer = [];\n        this.event = function (data) {\n            if (self._dataSubscriber) {\n                self._dataSubscriber(data);\n            } else {\n                self.buffer.push(data);\n            }\n        };\n\n        this._flush = function () {\n            if (self._dataSubscriber) {\n                for (var i = self.buffer.length - 1; i >= 0; i--) {\n                    self._dataSubscriber(self.buffer[i]) && self.buffer.splice(i, 1);\n                }\n            }\n            return;\n        };\n\n        this.on = function (event, _dataSubscriber) {\n            switch (event) {\n                case 'data':\n                    self._dataSubscriber = _dataSubscriber;\n                    this._flush();\n                    break;\n                case 'error':\n                    break;\n                case 'connectionLost':\n                    break;\n                case 'reconnecting':\n                    break;\n            }\n        };\n    }\n    module.exports = exports['default'];\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/tools/connection.js\n ** module id = 14\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/tools/connection.js?");
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(exports, require('../tools/ajax.js'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod.exports, global.ajax);
+	        global.Group = mod.exports;
+	    }
+	})(this, function (exports, _ajax) {
+	    'use strict';
 
-/***/ },
-/* 15 */
-/***/ function(module, exports, __webpack_require__) {
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(12), __webpack_require__(16), __webpack_require__(17)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../../tools/ajax.js'), require('./sampleCalculator'), require('./DeviceHistoryPoints'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.ajax, global.sampleCalculator, global.DeviceHistoryPoints);\n        global.DeviceHistory = mod.exports;\n    }\n})(this, function (exports, _ajax, _sampleCalculator, _DeviceHistoryPoints) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    var _sampleCalculator2 = _interopRequireDefault(_sampleCalculator);\n\n    var _DeviceHistoryPoints2 = _interopRequireDefault(_DeviceHistoryPoints);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var DeviceHistory = function () {\n        function DeviceHistory() {\n            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];\n            var config = arguments[1];\n\n            _classCallCheck(this, DeviceHistory);\n\n            this.id = rawDevice.id;\n            this.dataUri = config.ajax.dataUri;\n            this.ajax = new (_get__('Ajax'))({\n                uri: config.ajax.dataUri,\n                token: config.ajax.token\n            });\n        }\n\n        _createClass(DeviceHistory, [{\n            key: 'getHistoricalData',\n            value: function getHistoricalData() {\n                var _this = this;\n\n                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];\n                var _opts$limit = opts.limit;\n                var limit = _opts$limit === undefined ? 1000 : _opts$limit;\n                var _opts$offset = opts.offset;\n                var offset = _opts$offset === undefined ? 0 : _opts$offset;\n                var end = opts.end;\n                var start = opts.start;\n                var sample = opts.sample;\n                var periode = opts.periode;\n\n                var queryParams = {};\n\n                if (periode && periode.length > 0) {\n                    var sampleObj = _get__('sampleCalculator')(periode);\n                    sample = sampleObj.sampleSize;\n                    start = sampleObj.start;\n                    end = sampleObj.end;\n                }\n\n                if (sample !== undefined) {\n                    queryParams.sample = sample;\n                }\n\n                if (end) {\n                    queryParams.end = end.getTime();\n                }\n                if (start) {\n                    queryParams.start = start.getTime();\n                }\n\n                queryParams.offset = offset;\n                queryParams.limit = limit;\n\n                return new Promise(function (resolve, reject) {\n                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {\n                        resolve({\n                            points: new (_get__('DeviceHistoryPoints'))(response.results),\n                            response: response\n                        });\n                    }, reject);\n                });\n            }\n        }, {\n            key: 'getAllHistoricalData',\n            value: function getAllHistoricalData() {\n                var _this2 = this;\n\n                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];\n\n                var points = void 0;\n\n                var onDataReceived = opts.onDataReceived;\n                var periode = opts.periode;\n\n                onDataReceived = onDataReceived || function () {};\n\n                var hasMore = function hasMore(data) {\n                    return data.count > data.limit && data.count - data.offset > data.limit;\n                };\n\n                var handleResponse = function handleResponse(data, resolve, reject) {\n                    if (data.points && !points) {\n                        points = data.points;\n                    } else if (data.response && data.response.results) {\n                        points.addPoints(data.response.results);\n                    }\n\n                    onDataReceived(points);\n\n                    if (hasMore(data.response)) {\n                        getData({\n                            offset: data.response.offset + data.response.limit\n                        }, resolve, reject);\n                    } else {\n                        resolve({\n                            points: points\n                        });\n                    }\n                };\n\n                var getData = function getData(opts, resolve, reject) {\n                    _this2.getHistoricalData(opts).then(function (data) {\n                        handleResponse(data, resolve, reject);\n                    }, reject);\n                };\n\n                return new Promise(function (resolve, reject) {\n                    getData(opts, resolve, reject);\n                });\n            }\n        }]);\n\n        return DeviceHistory;\n    }();\n\n    exports.default = DeviceHistory;\n    ;\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'Ajax':\n                return _ajax2.default;\n\n            case 'sampleCalculator':\n                return _sampleCalculator2.default;\n\n            case 'DeviceHistoryPoints':\n                return _DeviceHistoryPoints2.default;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof DeviceHistory === 'undefined' ? 'undefined' : _typeof(DeviceHistory);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(DeviceHistory, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(DeviceHistory)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/history/DeviceHistory.js\n ** module id = 15\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/history/DeviceHistory.js?");
+	    var _ajax2 = _interopRequireDefault(_ajax);
 
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
+	    function _interopRequireDefault(obj) {
+	        return obj && obj.__esModule ? obj : {
+	            default: obj
+	        };
+	    }
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports);\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports);\n        global.sampleCalculator = mod.exports;\n    }\n})(this, function (exports) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    var oneHourMs = 1000 * 3600;\n    var daysInMonth = function daysInMonth() {\n        var d = new Date();\n        d.setDate(0);\n        return d.getDate();\n    };\n\n    function calculateTimeframe(timeframeStr) {\n        var obj = {\n            end: new Date()\n        };\n        var startDate = new Date();\n        var sampleSize = null;\n        switch (timeframeStr) {\n            case '1h':\n                startDate = new Date(obj.end.getTime() - _get__('oneHourMs'));\n                sampleSize = '1m';\n                break;\n            case '5h':\n                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 5);\n                sampleSize = '1m';\n                break;\n            case '1d':\n                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24);\n                sampleSize = '1m';\n                break;\n            case '1w':\n                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24 * 7);\n                sampleSize = '1h';\n                break;\n            case '1m':\n                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24 * _get__('daysInMonth')());\n                sampleSize = '1h';\n                break;\n            case '1y':\n                startDate.setFullYear(obj.end.getFullYear() - 1);\n                sampleSize = '1h';\n                break;\n        };\n        obj.start = startDate;\n        obj.sampleSize = sampleSize;\n\n        return obj;\n    };\n\n    exports.default = _get__('calculateTimeframe');\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'oneHourMs':\n                return oneHourMs;\n\n            case 'daysInMonth':\n                return daysInMonth;\n\n            case 'calculateTimeframe':\n                return calculateTimeframe;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof calculateTimeframe === 'undefined' ? 'undefined' : _typeof(calculateTimeframe);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(calculateTimeframe, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(calculateTimeframe)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/history/sampleCalculator.js\n ** module id = 16\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/history/sampleCalculator.js?");
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
 
-/***/ },
-/* 17 */
-/***/ function(module, exports, __webpack_require__) {
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(module, exports);\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod, mod.exports);\n        global.DeviceHistoryPoints = mod.exports;\n    }\n})(this, function (module, exports) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var DeviceHistoryPoints = function () {\n        function DeviceHistoryPoints(deviceHistory) {\n            _classCallCheck(this, DeviceHistoryPoints);\n\n            if (!deviceHistory) {\n                return {};\n            }\n\n            this.devicesPoints = {};\n            this.addPoints(deviceHistory);\n        }\n\n        _createClass(DeviceHistoryPoints, [{\n            key: 'addPoints',\n            value: function addPoints(deviceHistory) {\n                var _this = this;\n\n                deviceHistory.forEach(function (res) {\n                    var key = _this._getKey(res.meaning, res.path);\n                    if (_this.devicesPoints[key]) {\n                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);\n                    } else {\n                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);\n                        delete _this.devicesPoints[key].deviceId;\n                    }\n                });\n            }\n        }, {\n            key: '_getKey',\n            value: function _getKey(meaning, path) {\n                if (!path || path === 'null') {\n                    return meaning;\n                }\n\n                if (!meaning || meaning === 'null') {\n                    return path;\n                }\n                return meaning + '-' + path;\n            }\n        }, {\n            key: 'get',\n            value: function get(meaning, path) {\n                return this.devicesPoints[this._getKey(meaning, path)];\n            }\n        }]);\n\n        return DeviceHistoryPoints;\n    }();\n\n    exports.default = DeviceHistoryPoints;\n    module.exports = exports['default'];\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/history/DeviceHistoryPoints.js\n ** module id = 17\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/history/DeviceHistoryPoints.js?");
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
 
-/***/ },
-/* 18 */
-/***/ function(module, exports, __webpack_require__) {
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(19)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../../vendors/mqttws31.min.js'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.mqttws31Min);\n        global.mqtt = mod.exports;\n    }\n})(this, function (exports, _mqttws31Min) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.mqtt = undefined;\n\n    var _mqttws31Min2 = _interopRequireDefault(_mqttws31Min);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var Mqtt = function () {\n        function Mqtt(config) {\n            _classCallCheck(this, Mqtt);\n\n            var self = this;\n\n            this.config = {\n                endpoint: 'mqtt.relayr.io',\n                port: 443,\n                mqttTimeout: 10000,\n                reconnectLimit: 10,\n                reconnectTimeout: 60000\n            };\n\n            if (config) {\n                Object.assign(this.config, config);\n            }\n            this.endpoint = this.config.endpoint;\n            this.port = this.config.port;\n            this.clientId = 'JSDK_' + Math.floor(Math.random() * 1000);\n            this._topics = {};\n\n            try {\n                this.paho = new (_get__('Paho'))();\n                this._initClient();\n            } catch (e) {\n                //Caught when window is not present\n            }\n\n            return this;\n        }\n\n        _createClass(Mqtt, [{\n            key: 'connect',\n            value: function connect(config) {\n                var _this = this;\n\n                if (!config) throw Error('You must provide configuration options');\n                if (!config.userName) throw Error('You must provide userName in options');\n                if (!config.password) throw Error('You must provide password in options');\n                return new Promise(function (resolve, reject) {\n\n                    var options = {\n                        timeout: 30,\n                        keepAliveInterval: 10,\n                        cleanSession: true,\n                        useSSL: true,\n                        onSuccess: function onSuccess() {\n                            _this.isConnecting = false;\n                            _this._onConnectSuccess();\n                            resolve();\n                        },\n                        onFailure: function onFailure(err) {\n                            _this.isConnecting = false;\n                            _this._onConnectFailure(err);\n                            reject();\n                        }\n\n                    };\n                    Object.assign(options, config);\n\n                    if (_this.client) {\n                        _this.client.onConnectionLost = function () {\n                            _this._onConnectionLost(options);\n                        };\n                        _this.client.onMessageArrived = function (data) {\n                            _this._onMessageArrived(data);\n                        };\n\n                        if (!_this.isConnecting) {\n                            _this.client.connect(options);\n                            _this.isConnecting = true;\n                        }\n                    }\n                    resolve();\n                });\n            }\n        }, {\n            key: 'subscribe',\n            value: function subscribe(topic, eventCallback) {\n                if (!topic) throw Error('You must provide a topic');\n                if (!eventCallback) throw Error('You must provide a callback for live events');\n                if (this.client && this.client.isConnected()) this.client.subscribe(topic, 0);\n\n                if (this._topics[topic]) {\n                    this._topics[topic].subscribers.push(eventCallback);\n                } else {\n                    this._topics[topic] = {};\n                    this._topics[topic].subscribers = [];\n                    this._topics[topic].subscribers.push(eventCallback);\n                }\n                return this;\n            }\n        }, {\n            key: '_onConnectSuccess',\n            value: function _onConnectSuccess() {\n                for (var topic in this._topics) {\n                    this.client.subscribe(topic, 0);\n                }\n            }\n        }, {\n            key: '_onConnectFailure',\n            value: function _onConnectFailure(err) {\n                console.log('onFailure', err);\n            }\n        }, {\n            key: '_onConnectionLost',\n            value: function _onConnectionLost(lastConfig) {\n                var _this2 = this;\n\n                if (lastConfig) {\n                    if (lastConfig._reconnects >= this.config.reconnectLimit) {\n                        setTimeout(function () {\n                            lastConfig._reconnects = 0;\n                            _this2.connect(lastConfig);\n                        }, this.config.reconnectTimeout);\n                    } else {\n                        if (!lastConfig._reconnects) lastConfig._reconnects = 0;\n                        lastConfig._reconnects++;\n                        this.connect(lastConfig);\n                    }\n                }\n            }\n        }, {\n            key: '_onMessageArrived',\n            value: function _onMessageArrived(data) {\n                var dataTopic = data._getDestinationName();\n                var incomingData = data._getPayloadString();\n                incomingData = JSON.parse(data._getPayloadString());\n\n                var subscribers = this._topics[dataTopic] ? this._topics[dataTopic].subscribers : null;\n                if (subscribers) {\n                    for (var i = subscribers.length - 1; i >= 0; i--) {\n                        var subscriber = subscribers[i];\n                        if (subscriber) {\n                            subscriber(incomingData);\n                        }\n                    }\n                }\n            }\n        }, {\n            key: '_initClient',\n            value: function _initClient() {\n                this.client = new this.paho.MQTT.Client(this.endpoint, this.port, this.clientId);\n                return this;\n            }\n        }]);\n\n        return Mqtt;\n    }();\n\n    var mqtt = exports.mqtt = new (_get__('Mqtt'))();\n\n    exports.default = _get__('Mqtt');\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'Paho':\n                return _mqttws31Min2.default;\n\n            case 'Mqtt':\n                return Mqtt;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof Mqtt === 'undefined' ? 'undefined' : _typeof(Mqtt);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(Mqtt, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Mqtt)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/tools/mqtt.js\n ** module id = 18\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/tools/mqtt.js?");
+	    var Group = function () {
+	        function Group(config) {
+	            _classCallCheck(this, Group);
 
-/***/ },
-/* 19 */
-/***/ function(module, exports, __webpack_require__) {
+	            this.owner = config.owner;
+	            this.position = config.position;
+	            this.id = config.id;
+	            this.devices = config.devices;
+	            this.name = config.name;
+	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	        }
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(global,factory){if(true){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));}else if(typeof exports!==\"undefined\"){factory(exports);}else{var mod={exports:{}};factory(mod.exports);global.mqttws31Min=mod.exports;}})(this,function(exports){\"use strict\";Object.defineProperty(exports,\"__esModule\",{value:true});var _typeof=typeof Symbol===\"function\"&&typeof Symbol.iterator===\"symbol\"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol===\"function\"&&obj.constructor===Symbol?\"symbol\":typeof obj;};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError(\"Cannot call a class as a function\");}}var Paho=function Paho(){_classCallCheck(this,Paho);//var window = {};\nvar _Paho={};_Paho.MQTT=function(global){// Private variables below, these are only visible inside the function closure\n// which is used to define the module.\nvar version=\"@VERSION@\";var buildLevel=\"@BUILDLEVEL@\";/**\n             * Unique message type identifiers, with associated\n             * associated integer values.\n             * @private\n             */var MESSAGE_TYPE={CONNECT:1,CONNACK:2,PUBLISH:3,PUBACK:4,PUBREC:5,PUBREL:6,PUBCOMP:7,SUBSCRIBE:8,SUBACK:9,UNSUBSCRIBE:10,UNSUBACK:11,PINGREQ:12,PINGRESP:13,DISCONNECT:14};// Collection of utility methods used to simplify module code\n// and promote the DRY pattern.\n/**\n             * Validate an object's parameter names to ensure they\n             * match a list of expected variables name for this option\n             * type. Used to ensure option object passed into the API don't\n             * contain erroneous parameters.\n             * @param {Object} obj - User options object\n             * @param {Object} keys - valid keys and types that may exist in obj.\n             * @throws {Error} Invalid option parameter found.\n             * @private\n             */var validate=function validate(obj,keys){for(var key in obj){if(obj.hasOwnProperty(key)){if(keys.hasOwnProperty(key)){if(_typeof(obj[key])!==keys[key])throw new Error(format(ERROR.INVALID_TYPE,[_typeof(obj[key]),key]));}else{var errorStr=\"Unknown property, \"+key+\". Valid properties are:\";for(var key in keys){if(keys.hasOwnProperty(key))errorStr=errorStr+\" \"+key;}throw new Error(errorStr);}}}};/**\n             * Return a new function which runs the user function bound\n             * to a fixed scope.\n             * @param {function} User function\n             * @param {object} Function scope\n             * @return {function} User function bound to another scope\n             * @private\n             */var scope=function scope(f,_scope){return function(){return f.apply(_scope,arguments);};};/**\n             * Unique message type identifiers, with associated\n             * associated integer values.\n             * @private\n             */var ERROR={OK:{code:0,text:\"AMQJSC0000I OK.\"},CONNECT_TIMEOUT:{code:1,text:\"AMQJSC0001E Connect timed out.\"},SUBSCRIBE_TIMEOUT:{code:2,text:\"AMQJS0002E Subscribe timed out.\"},UNSUBSCRIBE_TIMEOUT:{code:3,text:\"AMQJS0003E Unsubscribe timed out.\"},PING_TIMEOUT:{code:4,text:\"AMQJS0004E Ping timed out.\"},INTERNAL_ERROR:{code:5,text:\"AMQJS0005E Internal error. Error Message: {0}, Stack trace: {1}\"},CONNACK_RETURNCODE:{code:6,text:\"AMQJS0006E Bad Connack return code:{0} {1}.\"},SOCKET_ERROR:{code:7,text:\"AMQJS0007E Socket error:{0}.\"},SOCKET_CLOSE:{code:8,text:\"AMQJS0008I Socket closed.\"},MALFORMED_UTF:{code:9,text:\"AMQJS0009E Malformed UTF data:{0} {1} {2}.\"},UNSUPPORTED:{code:10,text:\"AMQJS0010E {0} is not supported by this browser.\"},INVALID_STATE:{code:11,text:\"AMQJS0011E Invalid state {0}.\"},INVALID_TYPE:{code:12,text:\"AMQJS0012E Invalid type {0} for {1}.\"},INVALID_ARGUMENT:{code:13,text:\"AMQJS0013E Invalid argument {0} for {1}.\"},UNSUPPORTED_OPERATION:{code:14,text:\"AMQJS0014E Unsupported operation.\"},INVALID_STORED_DATA:{code:15,text:\"AMQJS0015E Invalid data in local storage key={0} value={1}.\"},INVALID_MQTT_MESSAGE_TYPE:{code:16,text:\"AMQJS0016E Invalid MQTT message type {0}.\"},MALFORMED_UNICODE:{code:17,text:\"AMQJS0017E Malformed Unicode string:{0} {1}.\"}};/** CONNACK RC Meaning. */var CONNACK_RC={0:\"Connection Accepted\",1:\"Connection Refused: unacceptable protocol version\",2:\"Connection Refused: identifier rejected\",3:\"Connection Refused: server unavailable\",4:\"Connection Refused: bad user name or password\",5:\"Connection Refused: not authorized\"};/**\n             * Format an error message text.\n             * @private\n             * @param {error} ERROR.KEY value above.\n             * @param {substitutions} [array] substituted into the text.\n             * @return the text with the substitutions made.\n             */var format=function format(error,substitutions){var text=error.text;if(substitutions){var field,start;for(var i=0;i<substitutions.length;i++){field=\"{\"+i+\"}\";start=text.indexOf(field);if(start>0){var part1=text.substring(0,start);var part2=text.substring(start+field.length);text=part1+substitutions[i]+part2;}}}return text;};//MQTT protocol and version          6    M    Q    I    s    d    p    3\nvar MqttProtoIdentifierv3=[0x00,0x06,0x4d,0x51,0x49,0x73,0x64,0x70,0x03];//MQTT proto/version for 311         4    M    Q    T    T    4\nvar MqttProtoIdentifierv4=[0x00,0x04,0x4d,0x51,0x54,0x54,0x04];/**\n             * Construct an MQTT wire protocol message.\n             * @param type MQTT packet type.\n             * @param options optional wire message attributes.\n             *\n             * Optional properties\n             *\n             * messageIdentifier: message ID in the range [0..65535]\n             * payloadMessage:\tApplication Message - PUBLISH only\n             * connectStrings:\tarray of 0 or more Strings to be put into the CONNECT payload\n             * topics:\t\t\tarray of strings (SUBSCRIBE, UNSUBSCRIBE)\n             * requestQoS:\t\tarray of QoS values [0..2]\n             *\n             * \"Flag\" properties\n             * cleanSession:\ttrue if present / false if absent (CONNECT)\n             * willMessage:  \ttrue if present / false if absent (CONNECT)\n             * isRetained:\t\ttrue if present / false if absent (CONNECT)\n             * userName:\t\ttrue if present / false if absent (CONNECT)\n             * password:\t\ttrue if present / false if absent (CONNECT)\n             * keepAliveInterval:\tinteger [0..65535]  (CONNECT)\n             *\n             * @private\n             * @ignore\n             */var WireMessage=function WireMessage(type,options){this.type=type;for(var name in options){if(options.hasOwnProperty(name)){this[name]=options[name];}}};WireMessage.prototype.encode=function(){// Compute the first byte of the fixed header\nvar first=(this.type&0x0f)<<4;/*\n                 * Now calculate the length of the variable header + payload by adding up the lengths\n                 * of all the component parts\n                 */var remLength=0;var topicStrLength=new Array();var destinationNameLength=0;// if the message contains a messageIdentifier then we need two bytes for that\nif(this.messageIdentifier!=undefined)remLength+=2;switch(this.type){// If this a Connect then we need to include 12 bytes for its header\ncase MESSAGE_TYPE.CONNECT:switch(this.mqttVersion){case 3:remLength+=MqttProtoIdentifierv3.length+3;break;case 4:remLength+=MqttProtoIdentifierv4.length+3;break;}remLength+=UTF8Length(this.clientId)+2;if(this.willMessage!=undefined){remLength+=UTF8Length(this.willMessage.destinationName)+2;// Will message is always a string, sent as UTF-8 characters with a preceding length.\nvar willMessagePayloadBytes=this.willMessage.payloadBytes;if(!(willMessagePayloadBytes instanceof Uint8Array))willMessagePayloadBytes=new Uint8Array(payloadBytes);remLength+=willMessagePayloadBytes.byteLength+2;}if(this.userName!=undefined)remLength+=UTF8Length(this.userName)+2;if(this.password!=undefined)remLength+=UTF8Length(this.password)+2;break;// Subscribe, Unsubscribe can both contain topic strings\ncase MESSAGE_TYPE.SUBSCRIBE:first|=0x02;// Qos = 1;\nfor(var i=0;i<this.topics.length;i++){topicStrLength[i]=UTF8Length(this.topics[i]);remLength+=topicStrLength[i]+2;}remLength+=this.requestedQos.length;// 1 byte for each topic's Qos\n// QoS on Subscribe only\nbreak;case MESSAGE_TYPE.UNSUBSCRIBE:first|=0x02;// Qos = 1;\nfor(var i=0;i<this.topics.length;i++){topicStrLength[i]=UTF8Length(this.topics[i]);remLength+=topicStrLength[i]+2;}break;case MESSAGE_TYPE.PUBREL:first|=0x02;// Qos = 1;\nbreak;case MESSAGE_TYPE.PUBLISH:if(this.payloadMessage.duplicate)first|=0x08;first=first|=this.payloadMessage.qos<<1;if(this.payloadMessage.retained)first|=0x01;destinationNameLength=UTF8Length(this.payloadMessage.destinationName);remLength+=destinationNameLength+2;var payloadBytes=this.payloadMessage.payloadBytes;remLength+=payloadBytes.byteLength;if(payloadBytes instanceof ArrayBuffer)payloadBytes=new Uint8Array(payloadBytes);else if(!(payloadBytes instanceof Uint8Array))payloadBytes=new Uint8Array(payloadBytes.buffer);break;case MESSAGE_TYPE.DISCONNECT:break;default:;}// Now we can allocate a buffer for the message\nvar mbi=encodeMBI(remLength);// Convert the length to MQTT MBI format\nvar pos=mbi.length+1;// Offset of start of variable header\nvar buffer=new ArrayBuffer(remLength+pos);var byteStream=new Uint8Array(buffer);// view it as a sequence of bytes\n//Write the fixed header into the buffer\nbyteStream[0]=first;byteStream.set(mbi,1);// If this is a PUBLISH then the variable header starts with a topic\nif(this.type==MESSAGE_TYPE.PUBLISH)pos=writeString(this.payloadMessage.destinationName,destinationNameLength,byteStream,pos);// If this is a CONNECT then the variable header contains the protocol name/version, flags and keepalive time\nelse if(this.type==MESSAGE_TYPE.CONNECT){switch(this.mqttVersion){case 3:byteStream.set(MqttProtoIdentifierv3,pos);pos+=MqttProtoIdentifierv3.length;break;case 4:byteStream.set(MqttProtoIdentifierv4,pos);pos+=MqttProtoIdentifierv4.length;break;}var connectFlags=0;if(this.cleanSession)connectFlags=0x02;if(this.willMessage!=undefined){connectFlags|=0x04;connectFlags|=this.willMessage.qos<<3;if(this.willMessage.retained){connectFlags|=0x20;}}if(this.userName!=undefined)connectFlags|=0x80;if(this.password!=undefined)connectFlags|=0x40;byteStream[pos++]=connectFlags;pos=writeUint16(this.keepAliveInterval,byteStream,pos);}// Output the messageIdentifier - if there is one\nif(this.messageIdentifier!=undefined)pos=writeUint16(this.messageIdentifier,byteStream,pos);switch(this.type){case MESSAGE_TYPE.CONNECT:pos=writeString(this.clientId,UTF8Length(this.clientId),byteStream,pos);if(this.willMessage!=undefined){pos=writeString(this.willMessage.destinationName,UTF8Length(this.willMessage.destinationName),byteStream,pos);pos=writeUint16(willMessagePayloadBytes.byteLength,byteStream,pos);byteStream.set(willMessagePayloadBytes,pos);pos+=willMessagePayloadBytes.byteLength;}if(this.userName!=undefined)pos=writeString(this.userName,UTF8Length(this.userName),byteStream,pos);if(this.password!=undefined)pos=writeString(this.password,UTF8Length(this.password),byteStream,pos);break;case MESSAGE_TYPE.PUBLISH:// PUBLISH has a text or binary payload, if text do not add a 2 byte length field, just the UTF characters.\nbyteStream.set(payloadBytes,pos);break;//    \t    case MESSAGE_TYPE.PUBREC:\n//    \t    case MESSAGE_TYPE.PUBREL:\n//    \t    case MESSAGE_TYPE.PUBCOMP:\n//    \t    \tbreak;\ncase MESSAGE_TYPE.SUBSCRIBE:// SUBSCRIBE has a list of topic strings and request QoS\nfor(var i=0;i<this.topics.length;i++){pos=writeString(this.topics[i],topicStrLength[i],byteStream,pos);byteStream[pos++]=this.requestedQos[i];}break;case MESSAGE_TYPE.UNSUBSCRIBE:// UNSUBSCRIBE has a list of topic strings\nfor(var i=0;i<this.topics.length;i++){pos=writeString(this.topics[i],topicStrLength[i],byteStream,pos);}break;default:// Do nothing.\n}return buffer;};function decodeMessage(input,pos){var startingPos=pos;var first=input[pos];var type=first>>4;var messageInfo=first&=0x0f;pos+=1;// Decode the remaining length (MBI format)\nvar digit;var remLength=0;var multiplier=1;do{if(pos==input.length){return[null,startingPos];}digit=input[pos++];remLength+=(digit&0x7F)*multiplier;multiplier*=128;}while((digit&0x80)!=0);var endPos=pos+remLength;if(endPos>input.length){return[null,startingPos];}var wireMessage=new WireMessage(type);switch(type){case MESSAGE_TYPE.CONNACK:var connectAcknowledgeFlags=input[pos++];if(connectAcknowledgeFlags&0x01)wireMessage.sessionPresent=true;wireMessage.returnCode=input[pos++];break;case MESSAGE_TYPE.PUBLISH:var qos=messageInfo>>1&0x03;var len=readUint16(input,pos);pos+=2;var topicName=parseUTF8(input,pos,len);pos+=len;// If QoS 1 or 2 there will be a messageIdentifier\nif(qos>0){wireMessage.messageIdentifier=readUint16(input,pos);pos+=2;}var message=new _Paho.MQTT.Message(input.subarray(pos,endPos));if((messageInfo&0x01)==0x01)message.retained=true;if((messageInfo&0x08)==0x08)message.duplicate=true;message.qos=qos;message.destinationName=topicName;wireMessage.payloadMessage=message;break;case MESSAGE_TYPE.PUBACK:case MESSAGE_TYPE.PUBREC:case MESSAGE_TYPE.PUBREL:case MESSAGE_TYPE.PUBCOMP:case MESSAGE_TYPE.UNSUBACK:wireMessage.messageIdentifier=readUint16(input,pos);break;case MESSAGE_TYPE.SUBACK:wireMessage.messageIdentifier=readUint16(input,pos);pos+=2;wireMessage.returnCode=input.subarray(pos,endPos);break;default:;}return[wireMessage,endPos];}function writeUint16(input,buffer,offset){buffer[offset++]=input>>8;//MSB\nbuffer[offset++]=input%256;//LSB\nreturn offset;}function writeString(input,utf8Length,buffer,offset){offset=writeUint16(utf8Length,buffer,offset);stringToUTF8(input,buffer,offset);return offset+utf8Length;}function readUint16(buffer,offset){return 256*buffer[offset]+buffer[offset+1];}/**\n             * Encodes an MQTT Multi-Byte Integer\n             * @private\n             */function encodeMBI(number){var output=new Array(1);var numBytes=0;do{var digit=number%128;number=number>>7;if(number>0){digit|=0x80;}output[numBytes++]=digit;}while(number>0&&numBytes<4);return output;}/**\n             * Takes a String and calculates its length in bytes when encoded in UTF8.\n             * @private\n             */function UTF8Length(input){var output=0;for(var i=0;i<input.length;i++){var charCode=input.charCodeAt(i);if(charCode>0x7FF){// Surrogate pair means its a 4 byte character\nif(0xD800<=charCode&&charCode<=0xDBFF){i++;output++;}output+=3;}else if(charCode>0x7F)output+=2;else output++;}return output;}/**\n             * Takes a String and writes it into an array as UTF8 encoded bytes.\n             * @private\n             */function stringToUTF8(input,output,start){var pos=start;for(var i=0;i<input.length;i++){var charCode=input.charCodeAt(i);// Check for a surrogate pair.\nif(0xD800<=charCode&&charCode<=0xDBFF){var lowCharCode=input.charCodeAt(++i);if(isNaN(lowCharCode)){throw new Error(format(ERROR.MALFORMED_UNICODE,[charCode,lowCharCode]));}charCode=(charCode-0xD800<<10)+(lowCharCode-0xDC00)+0x10000;}if(charCode<=0x7F){output[pos++]=charCode;}else if(charCode<=0x7FF){output[pos++]=charCode>>6&0x1F|0xC0;output[pos++]=charCode&0x3F|0x80;}else if(charCode<=0xFFFF){output[pos++]=charCode>>12&0x0F|0xE0;output[pos++]=charCode>>6&0x3F|0x80;output[pos++]=charCode&0x3F|0x80;}else{output[pos++]=charCode>>18&0x07|0xF0;output[pos++]=charCode>>12&0x3F|0x80;output[pos++]=charCode>>6&0x3F|0x80;output[pos++]=charCode&0x3F|0x80;};}return output;}function parseUTF8(input,offset,length){var output=\"\";var utf16;var pos=offset;while(pos<offset+length){var byte1=input[pos++];if(byte1<128)utf16=byte1;else{var byte2=input[pos++]-128;if(byte2<0)throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),\"\"]));if(byte1<0xE0)// 2 byte character\nutf16=64*(byte1-0xC0)+byte2;else{var byte3=input[pos++]-128;if(byte3<0)throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),byte3.toString(16)]));if(byte1<0xF0)// 3 byte character\nutf16=4096*(byte1-0xE0)+64*byte2+byte3;else{var byte4=input[pos++]-128;if(byte4<0)throw new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),byte3.toString(16),byte4.toString(16)]));if(byte1<0xF8)// 4 byte character\nutf16=262144*(byte1-0xF0)+4096*byte2+64*byte3+byte4;else// longer encodings are not supported\nthrow new Error(format(ERROR.MALFORMED_UTF,[byte1.toString(16),byte2.toString(16),byte3.toString(16),byte4.toString(16)]));}}}if(utf16>0xFFFF)// 4 byte character - express as a surrogate pair\n{utf16-=0x10000;output+=String.fromCharCode(0xD800+(utf16>>10));// lead character\nutf16=0xDC00+(utf16&0x3FF);// trail character\n}output+=String.fromCharCode(utf16);}return output;}/**\n             * Repeat keepalive requests, monitor responses.\n             * @ignore\n             */var Pinger=function Pinger(client,window,keepAliveInterval){this._client=client;this._window=window;this._keepAliveInterval=keepAliveInterval*1000;this.isReset=false;var pingReq=new WireMessage(MESSAGE_TYPE.PINGREQ).encode();var doTimeout=function doTimeout(pinger){return function(){return doPing.apply(pinger);};};/** @ignore */var doPing=function doPing(){if(!this.isReset){this._client._trace(\"Pinger.doPing\",\"Timed out\");this._client._disconnected(ERROR.PING_TIMEOUT.code,format(ERROR.PING_TIMEOUT));}else{this.isReset=false;this._client._trace(\"Pinger.doPing\",\"send PINGREQ\");this._client.socket.send(pingReq);this.timeout=this._window.setTimeout(doTimeout(this),this._keepAliveInterval);}};this.reset=function(){this.isReset=true;this._window.clearTimeout(this.timeout);if(this._keepAliveInterval>0)this.timeout=setTimeout(doTimeout(this),this._keepAliveInterval);};this.cancel=function(){this._window.clearTimeout(this.timeout);};};/**\n             * Monitor request completion.\n             * @ignore\n             */var Timeout=function Timeout(client,window,timeoutSeconds,action,args){this._window=window;if(!timeoutSeconds)timeoutSeconds=30;var doTimeout=function doTimeout(action,client,args){return function(){return action.apply(client,args);};};this.timeout=setTimeout(doTimeout(action,client,args),timeoutSeconds*1000);this.cancel=function(){this._window.clearTimeout(this.timeout);};};/*\n             * Internal implementation of the Websockets MQTT V3.1 client.\n             *\n             * @name Paho.MQTT.ClientImpl @constructor\n             * @param {String} host the DNS nameof the webSocket host.\n             * @param {Number} port the port number for that host.\n             * @param {String} clientId the MQ client identifier.\n             */var ClientImpl=function ClientImpl(uri,host,port,path,clientId){// Check dependencies are satisfied in this browser.\nif(!(\"WebSocket\"in global&&global[\"WebSocket\"]!==null)){throw new Error(format(ERROR.UNSUPPORTED,[\"WebSocket\"]));}if(!(\"localStorage\"in global&&global[\"localStorage\"]!==null)){throw new Error(format(ERROR.UNSUPPORTED,[\"localStorage\"]));}if(!(\"ArrayBuffer\"in global&&global[\"ArrayBuffer\"]!==null)){throw new Error(format(ERROR.UNSUPPORTED,[\"ArrayBuffer\"]));}this._trace(\"Paho.MQTT.Client\",uri,host,port,path,clientId);this.host=host;this.port=port;this.path=path;this.uri=uri;this.clientId=clientId;// Local storagekeys are qualified with the following string.\n// The conditional inclusion of path in the key is for backward\n// compatibility to when the path was not configurable and assumed to\n// be /mqtt\nthis._localKey=host+\":\"+port+(path!=\"/mqtt\"?\":\"+path:\"\")+\":\"+clientId+\":\";// Create private instance-only message queue\n// Internal queue of messages to be sent, in sending order.\nthis._msg_queue=[];// Messages we have sent and are expecting a response for, indexed by their respective message ids.\nthis._sentMessages={};// Messages we have received and acknowleged and are expecting a confirm message for\n// indexed by their respective message ids.\nthis._receivedMessages={};// Internal list of callbacks to be executed when messages\n// have been successfully sent over web socket, e.g. disconnect\n// when it doesn't have to wait for ACK, just message is dispatched.\nthis._notify_msg_sent={};// Unique identifier for SEND messages, incrementing\n// counter as messages are sent.\nthis._message_identifier=1;// Used to determine the transmission sequence of stored sent messages.\nthis._sequence=0;// Load the local state, if any, from the saved version, only restore state relevant to this client.\nfor(var key in localStorage){if(key.indexOf(\"Sent:\"+this._localKey)==0||key.indexOf(\"Received:\"+this._localKey)==0)this.restore(key);}};// Messaging Client public instance members.\nClientImpl.prototype.host;ClientImpl.prototype.port;ClientImpl.prototype.path;ClientImpl.prototype.uri;ClientImpl.prototype.clientId;// Messaging Client private instance members.\nClientImpl.prototype.socket;/* true once we have received an acknowledgement to a CONNECT packet. */ClientImpl.prototype.connected=false;/* The largest message identifier allowed, may not be larger than 2**16 but\n             * if set smaller reduces the maximum number of outbound messages allowed.\n             */ClientImpl.prototype.maxMessageIdentifier=65536;ClientImpl.prototype.connectOptions;ClientImpl.prototype.hostIndex;ClientImpl.prototype.onConnectionLost;ClientImpl.prototype.onMessageDelivered;ClientImpl.prototype.onMessageArrived;ClientImpl.prototype.traceFunction;ClientImpl.prototype._msg_queue=null;ClientImpl.prototype._connectTimeout;/* The sendPinger monitors how long we allow before we send data to prove to the server that we are alive. */ClientImpl.prototype.sendPinger=null;/* The receivePinger monitors how long we allow before we require evidence that the server is alive. */ClientImpl.prototype.receivePinger=null;ClientImpl.prototype.receiveBuffer=null;ClientImpl.prototype._traceBuffer=null;ClientImpl.prototype._MAX_TRACE_ENTRIES=100;ClientImpl.prototype.connect=function(connectOptions){var connectOptionsMasked=this._traceMask(connectOptions,\"password\");this._trace(\"Client.connect\",connectOptionsMasked,this.socket,this.connected);if(this.connected)throw new Error(format(ERROR.INVALID_STATE,[\"already connected\"]));if(this.socket)throw new Error(format(ERROR.INVALID_STATE,[\"already connected\"]));this.connectOptions=connectOptions;if(connectOptions.uris){this.hostIndex=0;this._doConnect(connectOptions.uris[0]);}else{this._doConnect(this.uri);}};ClientImpl.prototype.subscribe=function(filter,subscribeOptions){this._trace(\"Client.subscribe\",filter,subscribeOptions);if(!this.connected)throw new Error(format(ERROR.INVALID_STATE,[\"not connected\"]));var wireMessage=new WireMessage(MESSAGE_TYPE.SUBSCRIBE);wireMessage.topics=[filter];if(subscribeOptions.qos!=undefined)wireMessage.requestedQos=[subscribeOptions.qos];else wireMessage.requestedQos=[0];if(subscribeOptions.onSuccess){wireMessage.onSuccess=function(grantedQos){subscribeOptions.onSuccess({invocationContext:subscribeOptions.invocationContext,grantedQos:grantedQos});};}if(subscribeOptions.onFailure){wireMessage.onFailure=function(errorCode){subscribeOptions.onFailure({invocationContext:subscribeOptions.invocationContext,errorCode:errorCode});};}if(subscribeOptions.timeout){wireMessage.timeOut=new Timeout(this,window,subscribeOptions.timeout,subscribeOptions.onFailure,[{invocationContext:subscribeOptions.invocationContext,errorCode:ERROR.SUBSCRIBE_TIMEOUT.code,errorMessage:format(ERROR.SUBSCRIBE_TIMEOUT)}]);}// All subscriptions return a SUBACK.\nthis._requires_ack(wireMessage);this._schedule_message(wireMessage);};/** @ignore */ClientImpl.prototype.unsubscribe=function(filter,unsubscribeOptions){this._trace(\"Client.unsubscribe\",filter,unsubscribeOptions);if(!this.connected)throw new Error(format(ERROR.INVALID_STATE,[\"not connected\"]));var wireMessage=new WireMessage(MESSAGE_TYPE.UNSUBSCRIBE);wireMessage.topics=[filter];if(unsubscribeOptions.onSuccess){wireMessage.callback=function(){unsubscribeOptions.onSuccess({invocationContext:unsubscribeOptions.invocationContext});};}if(unsubscribeOptions.timeout){wireMessage.timeOut=new Timeout(this,window,unsubscribeOptions.timeout,unsubscribeOptions.onFailure,[{invocationContext:unsubscribeOptions.invocationContext,errorCode:ERROR.UNSUBSCRIBE_TIMEOUT.code,errorMessage:format(ERROR.UNSUBSCRIBE_TIMEOUT)}]);}// All unsubscribes return a SUBACK.\nthis._requires_ack(wireMessage);this._schedule_message(wireMessage);};ClientImpl.prototype.send=function(message){this._trace(\"Client.send\",message);if(!this.connected)throw new Error(format(ERROR.INVALID_STATE,[\"not connected\"]));wireMessage=new WireMessage(MESSAGE_TYPE.PUBLISH);wireMessage.payloadMessage=message;if(message.qos>0)this._requires_ack(wireMessage);else if(this.onMessageDelivered)this._notify_msg_sent[wireMessage]=this.onMessageDelivered(wireMessage.payloadMessage);this._schedule_message(wireMessage);};ClientImpl.prototype.disconnect=function(){this._trace(\"Client.disconnect\");if(!this.socket)throw new Error(format(ERROR.INVALID_STATE,[\"not connecting or connected\"]));wireMessage=new WireMessage(MESSAGE_TYPE.DISCONNECT);// Run the disconnected call back as soon as the message has been sent,\n// in case of a failure later on in the disconnect processing.\n// as a consequence, the _disconected call back may be run several times.\nthis._notify_msg_sent[wireMessage]=scope(this._disconnected,this);this._schedule_message(wireMessage);};ClientImpl.prototype.getTraceLog=function(){if(this._traceBuffer!==null){this._trace(\"Client.getTraceLog\",new Date());this._trace(\"Client.getTraceLog in flight messages\",this._sentMessages.length);for(var key in this._sentMessages){this._trace(\"_sentMessages \",key,this._sentMessages[key]);}for(var key in this._receivedMessages){this._trace(\"_receivedMessages \",key,this._receivedMessages[key]);}return this._traceBuffer;}};ClientImpl.prototype.startTrace=function(){if(this._traceBuffer===null){this._traceBuffer=[];}this._trace(\"Client.startTrace\",new Date(),version);};ClientImpl.prototype.stopTrace=function(){delete this._traceBuffer;};ClientImpl.prototype._doConnect=function(wsurl){// When the socket is open, this client will send the CONNECT WireMessage using the saved parameters.\nif(this.connectOptions.useSSL){var uriParts=wsurl.split(\":\");uriParts[0]=\"wss\";wsurl=uriParts.join(\":\");}this.connected=false;if(this.connectOptions.mqttVersion<4){this.socket=new WebSocket(wsurl,[\"mqttv3.1\"]);}else{this.socket=new WebSocket(wsurl,[\"mqtt\"]);}this.socket.binaryType='arraybuffer';this.socket.onopen=scope(this._on_socket_open,this);this.socket.onmessage=scope(this._on_socket_message,this);this.socket.onerror=scope(this._on_socket_error,this);this.socket.onclose=scope(this._on_socket_close,this);this.sendPinger=new Pinger(this,window,this.connectOptions.keepAliveInterval);this.receivePinger=new Pinger(this,window,this.connectOptions.keepAliveInterval);this._connectTimeout=new Timeout(this,window,this.connectOptions.timeout,this._disconnected,[ERROR.CONNECT_TIMEOUT.code,format(ERROR.CONNECT_TIMEOUT)]);};// Schedule a new message to be sent over the WebSockets\n// connection. CONNECT messages cause WebSocket connection\n// to be started. All other messages are queued internally\n// until this has happened. When WS connection starts, process\n// all outstanding messages.\nClientImpl.prototype._schedule_message=function(message){this._msg_queue.push(message);// Process outstanding messages in the queue if we have an  open socket, and have received CONNACK.\nif(this.connected){this._process_queue();}};ClientImpl.prototype.store=function(prefix,wireMessage){var storedMessage={type:wireMessage.type,messageIdentifier:wireMessage.messageIdentifier,version:1};switch(wireMessage.type){case MESSAGE_TYPE.PUBLISH:if(wireMessage.pubRecReceived)storedMessage.pubRecReceived=true;// Convert the payload to a hex string.\nstoredMessage.payloadMessage={};var hex=\"\";var messageBytes=wireMessage.payloadMessage.payloadBytes;for(var i=0;i<messageBytes.length;i++){if(messageBytes[i]<=0xF)hex=hex+\"0\"+messageBytes[i].toString(16);else hex=hex+messageBytes[i].toString(16);}storedMessage.payloadMessage.payloadHex=hex;storedMessage.payloadMessage.qos=wireMessage.payloadMessage.qos;storedMessage.payloadMessage.destinationName=wireMessage.payloadMessage.destinationName;if(wireMessage.payloadMessage.duplicate)storedMessage.payloadMessage.duplicate=true;if(wireMessage.payloadMessage.retained)storedMessage.payloadMessage.retained=true;// Add a sequence number to sent messages.\nif(prefix.indexOf(\"Sent:\")==0){if(wireMessage.sequence===undefined)wireMessage.sequence=++this._sequence;storedMessage.sequence=wireMessage.sequence;}break;default:throw Error(format(ERROR.INVALID_STORED_DATA,[key,storedMessage]));}localStorage.setItem(prefix+this._localKey+wireMessage.messageIdentifier,JSON.stringify(storedMessage));};ClientImpl.prototype.restore=function(key){var value=localStorage.getItem(key);var storedMessage=JSON.parse(value);var wireMessage=new WireMessage(storedMessage.type,storedMessage);switch(storedMessage.type){case MESSAGE_TYPE.PUBLISH:// Replace the payload message with a Message object.\nvar hex=storedMessage.payloadMessage.payloadHex;var buffer=new ArrayBuffer(hex.length/2);var byteStream=new Uint8Array(buffer);var i=0;while(hex.length>=2){var x=parseInt(hex.substring(0,2),16);hex=hex.substring(2,hex.length);byteStream[i++]=x;}var payloadMessage=new _Paho.MQTT.Message(byteStream);payloadMessage.qos=storedMessage.payloadMessage.qos;payloadMessage.destinationName=storedMessage.payloadMessage.destinationName;if(storedMessage.payloadMessage.duplicate)payloadMessage.duplicate=true;if(storedMessage.payloadMessage.retained)payloadMessage.retained=true;wireMessage.payloadMessage=payloadMessage;break;default:throw Error(format(ERROR.INVALID_STORED_DATA,[key,value]));}if(key.indexOf(\"Sent:\"+this._localKey)==0){wireMessage.payloadMessage.duplicate=true;this._sentMessages[wireMessage.messageIdentifier]=wireMessage;}else if(key.indexOf(\"Received:\"+this._localKey)==0){this._receivedMessages[wireMessage.messageIdentifier]=wireMessage;}};ClientImpl.prototype._process_queue=function(){var message=null;// Process messages in order they were added\nvar fifo=this._msg_queue.reverse();// Send all queued messages down socket connection\nwhile(message=fifo.pop()){this._socket_send(message);// Notify listeners that message was successfully sent\nif(this._notify_msg_sent[message]){this._notify_msg_sent[message]();delete this._notify_msg_sent[message];}}};/**\n             * Expect an ACK response for this message. Add message to the set of in progress\n             * messages and set an unused identifier in this message.\n             * @ignore\n             */ClientImpl.prototype._requires_ack=function(wireMessage){var messageCount=Object.keys(this._sentMessages).length;if(messageCount>this.maxMessageIdentifier)throw Error(\"Too many messages:\"+messageCount);while(this._sentMessages[this._message_identifier]!==undefined){this._message_identifier++;}wireMessage.messageIdentifier=this._message_identifier;this._sentMessages[wireMessage.messageIdentifier]=wireMessage;if(wireMessage.type===MESSAGE_TYPE.PUBLISH){this.store(\"Sent:\",wireMessage);}if(this._message_identifier===this.maxMessageIdentifier){this._message_identifier=1;}};/**\n             * Called when the underlying websocket has been opened.\n             * @ignore\n             */ClientImpl.prototype._on_socket_open=function(){// Create the CONNECT message object.\nvar wireMessage=new WireMessage(MESSAGE_TYPE.CONNECT,this.connectOptions);wireMessage.clientId=this.clientId;this._socket_send(wireMessage);};/**\n             * Called when the underlying websocket has received a complete packet.\n             * @ignore\n             */ClientImpl.prototype._on_socket_message=function(event){this._trace(\"Client._on_socket_message\",event.data);// Reset the receive ping timer, we now have evidence the server is alive.\nthis.receivePinger.reset();var messages=this._deframeMessages(event.data);for(var i=0;i<messages.length;i+=1){this._handleMessage(messages[i]);}};ClientImpl.prototype._deframeMessages=function(data){var byteArray=new Uint8Array(data);if(this.receiveBuffer){var newData=new Uint8Array(this.receiveBuffer.length+byteArray.length);newData.set(this.receiveBuffer);newData.set(byteArray,this.receiveBuffer.length);byteArray=newData;delete this.receiveBuffer;}try{var offset=0;var messages=[];while(offset<byteArray.length){var result=decodeMessage(byteArray,offset);var wireMessage=result[0];offset=result[1];if(wireMessage!==null){messages.push(wireMessage);}else{break;}}if(offset<byteArray.length){this.receiveBuffer=byteArray.subarray(offset);}}catch(error){this._disconnected(ERROR.INTERNAL_ERROR.code,format(ERROR.INTERNAL_ERROR,[error.message,error.stack.toString()]));return;}return messages;};ClientImpl.prototype._handleMessage=function(wireMessage){this._trace(\"Client._handleMessage\",wireMessage);switch(wireMessage.type){case MESSAGE_TYPE.CONNACK:this._connectTimeout.cancel();// If we have started using clean session then clear up the local state.\nif(this.connectOptions.cleanSession){for(var key in this._sentMessages){var sentMessage=this._sentMessages[key];localStorage.removeItem(\"Sent:\"+this._localKey+sentMessage.messageIdentifier);}this._sentMessages={};for(var key in this._receivedMessages){var receivedMessage=this._receivedMessages[key];localStorage.removeItem(\"Received:\"+this._localKey+receivedMessage.messageIdentifier);}this._receivedMessages={};}// Client connected and ready for business.\nif(wireMessage.returnCode===0){this.connected=true;// Jump to the end of the list of uris and stop looking for a good host.\nif(this.connectOptions.uris)this.hostIndex=this.connectOptions.uris.length;}else{this._disconnected(ERROR.CONNACK_RETURNCODE.code,format(ERROR.CONNACK_RETURNCODE,[wireMessage.returnCode,CONNACK_RC[wireMessage.returnCode]]));break;}// Resend messages.\nvar sequencedMessages=new Array();for(var msgId in this._sentMessages){if(this._sentMessages.hasOwnProperty(msgId))sequencedMessages.push(this._sentMessages[msgId]);}// Sort sentMessages into the original sent order.\nvar sequencedMessages=sequencedMessages.sort(function(a,b){return a.sequence-b.sequence;});for(var i=0,len=sequencedMessages.length;i<len;i++){var sentMessage=sequencedMessages[i];if(sentMessage.type==MESSAGE_TYPE.PUBLISH&&sentMessage.pubRecReceived){var pubRelMessage=new WireMessage(MESSAGE_TYPE.PUBREL,{messageIdentifier:sentMessage.messageIdentifier});this._schedule_message(pubRelMessage);}else{this._schedule_message(sentMessage);};}// Execute the connectOptions.onSuccess callback if there is one.\nif(this.connectOptions.onSuccess){this.connectOptions.onSuccess({invocationContext:this.connectOptions.invocationContext});}// Process all queued messages now that the connection is established.\nthis._process_queue();break;case MESSAGE_TYPE.PUBLISH:this._receivePublish(wireMessage);break;case MESSAGE_TYPE.PUBACK:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];// If this is a re flow of a PUBACK after we have restarted receivedMessage will not exist.\nif(sentMessage){delete this._sentMessages[wireMessage.messageIdentifier];localStorage.removeItem(\"Sent:\"+this._localKey+wireMessage.messageIdentifier);if(this.onMessageDelivered)this.onMessageDelivered(sentMessage.payloadMessage);}break;case MESSAGE_TYPE.PUBREC:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];// If this is a re flow of a PUBREC after we have restarted receivedMessage will not exist.\nif(sentMessage){sentMessage.pubRecReceived=true;var pubRelMessage=new WireMessage(MESSAGE_TYPE.PUBREL,{messageIdentifier:wireMessage.messageIdentifier});this.store(\"Sent:\",sentMessage);this._schedule_message(pubRelMessage);}break;case MESSAGE_TYPE.PUBREL:var receivedMessage=this._receivedMessages[wireMessage.messageIdentifier];localStorage.removeItem(\"Received:\"+this._localKey+wireMessage.messageIdentifier);// If this is a re flow of a PUBREL after we have restarted receivedMessage will not exist.\nif(receivedMessage){this._receiveMessage(receivedMessage);delete this._receivedMessages[wireMessage.messageIdentifier];}// Always flow PubComp, we may have previously flowed PubComp but the server lost it and restarted.\nvar pubCompMessage=new WireMessage(MESSAGE_TYPE.PUBCOMP,{messageIdentifier:wireMessage.messageIdentifier});this._schedule_message(pubCompMessage);break;case MESSAGE_TYPE.PUBCOMP:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];delete this._sentMessages[wireMessage.messageIdentifier];localStorage.removeItem(\"Sent:\"+this._localKey+wireMessage.messageIdentifier);if(this.onMessageDelivered)this.onMessageDelivered(sentMessage.payloadMessage);break;case MESSAGE_TYPE.SUBACK:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];if(sentMessage){if(sentMessage.timeOut)sentMessage.timeOut.cancel();wireMessage.returnCode.indexOf=Array.prototype.indexOf;if(wireMessage.returnCode.indexOf(0x80)!==-1){if(sentMessage.onFailure){sentMessage.onFailure(wireMessage.returnCode);}}else if(sentMessage.onSuccess){sentMessage.onSuccess(wireMessage.returnCode);}delete this._sentMessages[wireMessage.messageIdentifier];}break;case MESSAGE_TYPE.UNSUBACK:var sentMessage=this._sentMessages[wireMessage.messageIdentifier];if(sentMessage){if(sentMessage.timeOut)sentMessage.timeOut.cancel();if(sentMessage.callback){sentMessage.callback();}delete this._sentMessages[wireMessage.messageIdentifier];}break;case MESSAGE_TYPE.PINGRESP:/* The sendPinger or receivePinger may have sent a ping, the receivePinger has already been reset. */this.sendPinger.reset();break;case MESSAGE_TYPE.DISCONNECT:// Clients do not expect to receive disconnect packets.\nthis._disconnected(ERROR.INVALID_MQTT_MESSAGE_TYPE.code,format(ERROR.INVALID_MQTT_MESSAGE_TYPE,[wireMessage.type]));break;default:this._disconnected(ERROR.INVALID_MQTT_MESSAGE_TYPE.code,format(ERROR.INVALID_MQTT_MESSAGE_TYPE,[wireMessage.type]));};};/** @ignore */ClientImpl.prototype._on_socket_error=function(error){this._disconnected(ERROR.SOCKET_ERROR.code,format(ERROR.SOCKET_ERROR,[error.data]));};/** @ignore */ClientImpl.prototype._on_socket_close=function(){this._disconnected(ERROR.SOCKET_CLOSE.code,format(ERROR.SOCKET_CLOSE));};/** @ignore */ClientImpl.prototype._socket_send=function(wireMessage){if(wireMessage.type==1){var wireMessageMasked=this._traceMask(wireMessage,\"password\");this._trace(\"Client._socket_send\",wireMessageMasked);}else this._trace(\"Client._socket_send\",wireMessage);this.socket.send(wireMessage.encode());/* We have proved to the server we are alive. */this.sendPinger.reset();};/** @ignore */ClientImpl.prototype._receivePublish=function(wireMessage){switch(wireMessage.payloadMessage.qos){case\"undefined\":case 0:this._receiveMessage(wireMessage);break;case 1:var pubAckMessage=new WireMessage(MESSAGE_TYPE.PUBACK,{messageIdentifier:wireMessage.messageIdentifier});this._schedule_message(pubAckMessage);this._receiveMessage(wireMessage);break;case 2:this._receivedMessages[wireMessage.messageIdentifier]=wireMessage;this.store(\"Received:\",wireMessage);var pubRecMessage=new WireMessage(MESSAGE_TYPE.PUBREC,{messageIdentifier:wireMessage.messageIdentifier});this._schedule_message(pubRecMessage);break;default:throw Error(\"Invaild qos=\"+wireMmessage.payloadMessage.qos);};};/** @ignore */ClientImpl.prototype._receiveMessage=function(wireMessage){if(this.onMessageArrived){this.onMessageArrived(wireMessage.payloadMessage);}};/**\n             * Client has disconnected either at its own request or because the server\n             * or network disconnected it. Remove all non-durable state.\n             * @param {errorCode} [number] the error number.\n             * @param {errorText} [string] the error text.\n             * @ignore\n             */ClientImpl.prototype._disconnected=function(errorCode,errorText){this._trace(\"Client._disconnected\",errorCode,errorText);this.sendPinger.cancel();this.receivePinger.cancel();if(this._connectTimeout)this._connectTimeout.cancel();// Clear message buffers.\nthis._msg_queue=[];this._notify_msg_sent={};if(this.socket){// Cancel all socket callbacks so that they cannot be driven again by this socket.\nthis.socket.onopen=null;this.socket.onmessage=null;this.socket.onerror=null;this.socket.onclose=null;if(this.socket.readyState===1)this.socket.close();delete this.socket;}if(this.connectOptions.uris&&this.hostIndex<this.connectOptions.uris.length-1){// Try the next host.\nthis.hostIndex++;this._doConnect(this.connectOptions.uris[this.hostIndex]);}else{if(errorCode===undefined){errorCode=ERROR.OK.code;errorText=format(ERROR.OK);}// Run any application callbacks last as they may attempt to reconnect and hence create a new socket.\nif(this.connected){this.connected=false;// Execute the connectionLostCallback if there is one, and we were connected.\nif(this.onConnectionLost)this.onConnectionLost({errorCode:errorCode,errorMessage:errorText});}else{// Otherwise we never had a connection, so indicate that the connect has failed.\nif(this.connectOptions.mqttVersion===4&&this.connectOptions.mqttVersionExplicit===false){this._trace(\"Failed to connect V4, dropping back to V3\");this.connectOptions.mqttVersion=3;if(this.connectOptions.uris){this.hostIndex=0;this._doConnect(this.connectOptions.uris[0]);}else{this._doConnect(this.uri);}}else if(this.connectOptions.onFailure){this.connectOptions.onFailure({invocationContext:this.connectOptions.invocationContext,errorCode:errorCode,errorMessage:errorText});}}}};/** @ignore */ClientImpl.prototype._trace=function(){// Pass trace message back to client's callback function\nif(this.traceFunction){for(var i in arguments){if(typeof arguments[i]!==\"undefined\")arguments[i]=JSON.stringify(arguments[i]);}var record=Array.prototype.slice.call(arguments).join(\"\");this.traceFunction({severity:\"Debug\",message:record});}//buffer style trace\nif(this._traceBuffer!==null){for(var i=0,max=arguments.length;i<max;i++){if(this._traceBuffer.length==this._MAX_TRACE_ENTRIES){this._traceBuffer.shift();}if(i===0)this._traceBuffer.push(arguments[i]);else if(typeof arguments[i]===\"undefined\")this._traceBuffer.push(arguments[i]);else this._traceBuffer.push(\"  \"+JSON.stringify(arguments[i]));};};};/** @ignore */ClientImpl.prototype._traceMask=function(traceObject,masked){var traceObjectMasked={};for(var attr in traceObject){if(traceObject.hasOwnProperty(attr)){if(attr==masked)traceObjectMasked[attr]=\"******\";else traceObjectMasked[attr]=traceObject[attr];}}return traceObjectMasked;};// ------------------------------------------------------------------------\n// Public Programming interface.\n// ------------------------------------------------------------------------\n/**\n             * The JavaScript application communicates to the server using a {@link Paho.MQTT.Client} object.\n             * <p>\n             * Most applications will create just one Client object and then call its connect() method,\n             * however applications can create more than one Client object if they wish.\n             * In this case the combination of host, port and clientId attributes must be different for each Client object.\n             * <p>\n             * The send, subscribe and unsubscribe methods are implemented as asynchronous JavaScript methods\n             * (even though the underlying protocol exchange might be synchronous in nature).\n             * This means they signal their completion by calling back to the application,\n             * via Success or Failure callback functions provided by the application on the method in question.\n             * Such callbacks are called at most once per method invocation and do not persist beyond the lifetime\n             * of the script that made the invocation.\n             * <p>\n             * In contrast there are some callback functions, most notably <i>onMessageArrived</i>,\n             * that are defined on the {@link Paho.MQTT.Client} object.\n             * These may get called multiple times, and aren't directly related to specific method invocations made by the client.\n             *\n             * @name Paho.MQTT.Client\n             *\n             * @constructor\n             *\n             * @param {string} host - the address of the messaging server, as a fully qualified WebSocket URI, as a DNS name or dotted decimal IP address.\n             * @param {number} port - the port number to connect to - only required if host is not a URI\n             * @param {string} path - the path on the host to connect to - only used if host is not a URI. Default: '/mqtt'.\n             * @param {string} clientId - the Messaging client identifier, between 1 and 23 characters in length.\n             *\n             * @property {string} host - <i>read only</i> the server's DNS hostname or dotted decimal IP address.\n             * @property {number} port - <i>read only</i> the server's port.\n             * @property {string} path - <i>read only</i> the server's path.\n             * @property {string} clientId - <i>read only</i> used when connecting to the server.\n             * @property {function} onConnectionLost - called when a connection has been lost.\n             *                            after a connect() method has succeeded.\n             *                            Establish the call back used when a connection has been lost. The connection may be\n             *                            lost because the client initiates a disconnect or because the server or network\n             *                            cause the client to be disconnected. The disconnect call back may be called without\n             *                            the connectionComplete call back being invoked if, for example the client fails to\n             *                            connect.\n             *                            A single response object parameter is passed to the onConnectionLost callback containing the following fields:\n             *                            <ol>\n             *                            <li>errorCode\n             *                            <li>errorMessage\n             *                            </ol>\n             * @property {function} onMessageDelivered called when a message has been delivered.\n             *                            All processing that this Client will ever do has been completed. So, for example,\n             *                            in the case of a Qos=2 message sent by this client, the PubComp flow has been received from the server\n             *                            and the message has been removed from persistent storage before this callback is invoked.\n             *                            Parameters passed to the onMessageDelivered callback are:\n             *                            <ol>\n             *                            <li>{@link Paho.MQTT.Message} that was delivered.\n             *                            </ol>\n             * @property {function} onMessageArrived called when a message has arrived in this Paho.MQTT.client.\n             *                            Parameters passed to the onMessageArrived callback are:\n             *                            <ol>\n             *                            <li>{@link Paho.MQTT.Message} that has arrived.\n             *                            </ol>\n             */var Client=function Client(host,port,path,clientId){var uri;if(typeof host!==\"string\")throw new Error(format(ERROR.INVALID_TYPE,[typeof host===\"undefined\"?\"undefined\":_typeof(host),\"host\"]));if(arguments.length==2){// host: must be full ws:// uri\n// port: clientId\nclientId=port;uri=host;var match=uri.match(/^(wss?):\\/\\/((\\[(.+)\\])|([^\\/]+?))(:(\\d+))?(\\/.*)$/);if(match){host=match[4]||match[2];port=parseInt(match[7]);path=match[8];}else{throw new Error(format(ERROR.INVALID_ARGUMENT,[host,\"host\"]));}}else{if(arguments.length==3){clientId=path;path=\"/mqtt\";}if(typeof port!==\"number\"||port<0)throw new Error(format(ERROR.INVALID_TYPE,[typeof port===\"undefined\"?\"undefined\":_typeof(port),\"port\"]));if(typeof path!==\"string\")throw new Error(format(ERROR.INVALID_TYPE,[typeof path===\"undefined\"?\"undefined\":_typeof(path),\"path\"]));var ipv6AddSBracket=host.indexOf(\":\")!=-1&&host.slice(0,1)!=\"[\"&&host.slice(-1)!=\"]\";uri=\"ws://\"+(ipv6AddSBracket?\"[\"+host+\"]\":host)+\":\"+port+path;}var clientIdLength=0;for(var i=0;i<clientId.length;i++){var charCode=clientId.charCodeAt(i);if(0xD800<=charCode&&charCode<=0xDBFF){i++;// Surrogate pair.\n}clientIdLength++;}if(typeof clientId!==\"string\"||clientIdLength>65535)throw new Error(format(ERROR.INVALID_ARGUMENT,[clientId,\"clientId\"]));var client=new ClientImpl(uri,host,port,path,clientId);this._getHost=function(){return host;};this._setHost=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getPort=function(){return port;};this._setPort=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getPath=function(){return path;};this._setPath=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getURI=function(){return uri;};this._setURI=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getClientId=function(){return client.clientId;};this._setClientId=function(){throw new Error(format(ERROR.UNSUPPORTED_OPERATION));};this._getOnConnectionLost=function(){return client.onConnectionLost;};this._setOnConnectionLost=function(newOnConnectionLost){if(typeof newOnConnectionLost===\"function\")client.onConnectionLost=newOnConnectionLost;else throw new Error(format(ERROR.INVALID_TYPE,[typeof newOnConnectionLost===\"undefined\"?\"undefined\":_typeof(newOnConnectionLost),\"onConnectionLost\"]));};this._getOnMessageDelivered=function(){return client.onMessageDelivered;};this._setOnMessageDelivered=function(newOnMessageDelivered){if(typeof newOnMessageDelivered===\"function\")client.onMessageDelivered=newOnMessageDelivered;else throw new Error(format(ERROR.INVALID_TYPE,[typeof newOnMessageDelivered===\"undefined\"?\"undefined\":_typeof(newOnMessageDelivered),\"onMessageDelivered\"]));};this._getOnMessageArrived=function(){return client.onMessageArrived;};this._setOnMessageArrived=function(newOnMessageArrived){if(typeof newOnMessageArrived===\"function\")client.onMessageArrived=newOnMessageArrived;else throw new Error(format(ERROR.INVALID_TYPE,[typeof newOnMessageArrived===\"undefined\"?\"undefined\":_typeof(newOnMessageArrived),\"onMessageArrived\"]));};this._getTrace=function(){return client.traceFunction;};this._setTrace=function(trace){if(typeof trace===\"function\"){client.traceFunction=trace;}else{throw new Error(format(ERROR.INVALID_TYPE,[typeof trace===\"undefined\"?\"undefined\":_typeof(trace),\"onTrace\"]));}};/**\n                 * Connect this Messaging client to its server.\n                 *\n                 * @name Paho.MQTT.Client#connect\n                 * @function\n                 * @param {Object} connectOptions - attributes used with the connection.\n                 * @param {number} connectOptions.timeout - If the connect has not succeeded within this\n                 *                    number of seconds, it is deemed to have failed.\n                 *                    The default is 30 seconds.\n                 * @param {string} connectOptions.userName - Authentication username for this connection.\n                 * @param {string} connectOptions.password - Authentication password for this connection.\n                 * @param {Paho.MQTT.Message} connectOptions.willMessage - sent by the server when the client\n                 *                    disconnects abnormally.\n                 * @param {Number} connectOptions.keepAliveInterval - the server disconnects this client if\n                 *                    there is no activity for this number of seconds.\n                 *                    The default value of 60 seconds is assumed if not set.\n                 * @param {boolean} connectOptions.cleanSession - if true(default) the client and server\n                 *                    persistent state is deleted on successful connect.\n                 * @param {boolean} connectOptions.useSSL - if present and true, use an SSL Websocket connection.\n                 * @param {object} connectOptions.invocationContext - passed to the onSuccess callback or onFailure callback.\n                 * @param {function} connectOptions.onSuccess - called when the connect acknowledgement\n                 *                    has been received from the server.\n                 * A single response object parameter is passed to the onSuccess callback containing the following fields:\n                 * <ol>\n                 * <li>invocationContext as passed in to the onSuccess method in the connectOptions.\n                 * </ol>\n                 * @config {function} [onFailure] called when the connect request has failed or timed out.\n                 * A single response object parameter is passed to the onFailure callback containing the following fields:\n                 * <ol>\n                 * <li>invocationContext as passed in to the onFailure method in the connectOptions.\n                 * <li>errorCode a number indicating the nature of the error.\n                 * <li>errorMessage text describing the error.\n                 * </ol>\n                 * @config {Array} [hosts] If present this contains either a set of hostnames or fully qualified\n                 * WebSocket URIs (ws://example.com:1883/mqtt), that are tried in order in place\n                 * of the host and port paramater on the construtor. The hosts are tried one at at time in order until\n                 * one of then succeeds.\n                 * @config {Array} [ports] If present the set of ports matching the hosts. If hosts contains URIs, this property\n                 * is not used.\n                 * @throws {InvalidState} if the client is not in disconnected state. The client must have received connectionLost\n                 * or disconnected before calling connect for a second or subsequent time.\n                 */this.connect=function(connectOptions){connectOptions=connectOptions||{};validate(connectOptions,{timeout:\"number\",userName:\"string\",password:\"string\",willMessage:\"object\",keepAliveInterval:\"number\",cleanSession:\"boolean\",useSSL:\"boolean\",invocationContext:\"object\",onSuccess:\"function\",onFailure:\"function\",hosts:\"object\",ports:\"object\",mqttVersion:\"number\"});// If no keep alive interval is set, assume 60 seconds.\nif(connectOptions.keepAliveInterval===undefined)connectOptions.keepAliveInterval=60;if(connectOptions.mqttVersion>4||connectOptions.mqttVersion<3){throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.mqttVersion,\"connectOptions.mqttVersion\"]));}if(connectOptions.mqttVersion===undefined){connectOptions.mqttVersionExplicit=false;connectOptions.mqttVersion=4;}else{connectOptions.mqttVersionExplicit=true;}//Check that if password is set, so is username\nif(connectOptions.password===undefined&&connectOptions.userName!==undefined)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.password,\"connectOptions.password\"]));if(connectOptions.willMessage){if(!(connectOptions.willMessage instanceof Message))throw new Error(format(ERROR.INVALID_TYPE,[connectOptions.willMessage,\"connectOptions.willMessage\"]));// The will message must have a payload that can be represented as a string.\n// Cause the willMessage to throw an exception if this is not the case.\nconnectOptions.willMessage.stringPayload;if(typeof connectOptions.willMessage.destinationName===\"undefined\")throw new Error(format(ERROR.INVALID_TYPE,[_typeof(connectOptions.willMessage.destinationName),\"connectOptions.willMessage.destinationName\"]));}if(typeof connectOptions.cleanSession===\"undefined\")connectOptions.cleanSession=true;if(connectOptions.hosts){if(!(connectOptions.hosts instanceof Array))throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts,\"connectOptions.hosts\"]));if(connectOptions.hosts.length<1)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts,\"connectOptions.hosts\"]));var usingURIs=false;for(var i=0;i<connectOptions.hosts.length;i++){if(typeof connectOptions.hosts[i]!==\"string\")throw new Error(format(ERROR.INVALID_TYPE,[_typeof(connectOptions.hosts[i]),\"connectOptions.hosts[\"+i+\"]\"]));if(/^(wss?):\\/\\/((\\[(.+)\\])|([^\\/]+?))(:(\\d+))?(\\/.*)$/.test(connectOptions.hosts[i])){if(i==0){usingURIs=true;}else if(!usingURIs){throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts[i],\"connectOptions.hosts[\"+i+\"]\"]));}}else if(usingURIs){throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.hosts[i],\"connectOptions.hosts[\"+i+\"]\"]));}}if(!usingURIs){if(!connectOptions.ports)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.ports,\"connectOptions.ports\"]));if(!(connectOptions.ports instanceof Array))throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.ports,\"connectOptions.ports\"]));if(connectOptions.hosts.length!=connectOptions.ports.length)throw new Error(format(ERROR.INVALID_ARGUMENT,[connectOptions.ports,\"connectOptions.ports\"]));connectOptions.uris=[];for(var i=0;i<connectOptions.hosts.length;i++){if(typeof connectOptions.ports[i]!==\"number\"||connectOptions.ports[i]<0)throw new Error(format(ERROR.INVALID_TYPE,[_typeof(connectOptions.ports[i]),\"connectOptions.ports[\"+i+\"]\"]));var host=connectOptions.hosts[i];var port=connectOptions.ports[i];var ipv6=host.indexOf(\":\")!=-1;uri=\"ws://\"+(ipv6?\"[\"+host+\"]\":host)+\":\"+port+path;connectOptions.uris.push(uri);}}else{connectOptions.uris=connectOptions.hosts;}}client.connect(connectOptions);};/**\n                 * Subscribe for messages, request receipt of a copy of messages sent to the destinations described by the filter.\n                 *\n                 * @name Paho.MQTT.Client#subscribe\n                 * @function\n                 * @param {string} filter describing the destinations to receive messages from.\n                 * <br>\n                 * @param {object} subscribeOptions - used to control the subscription\n                 *\n                 * @param {number} subscribeOptions.qos - the maiximum qos of any publications sent\n                 *                                  as a result of making this subscription.\n                 * @param {object} subscribeOptions.invocationContext - passed to the onSuccess callback\n                 *                                  or onFailure callback.\n                 * @param {function} subscribeOptions.onSuccess - called when the subscribe acknowledgement\n                 *                                  has been received from the server.\n                 *                                  A single response object parameter is passed to the onSuccess callback containing the following fields:\n                 *                                  <ol>\n                 *                                  <li>invocationContext if set in the subscribeOptions.\n                 *                                  </ol>\n                 * @param {function} subscribeOptions.onFailure - called when the subscribe request has failed or timed out.\n                 *                                  A single response object parameter is passed to the onFailure callback containing the following fields:\n                 *                                  <ol>\n                 *                                  <li>invocationContext - if set in the subscribeOptions.\n                 *                                  <li>errorCode - a number indicating the nature of the error.\n                 *                                  <li>errorMessage - text describing the error.\n                 *                                  </ol>\n                 * @param {number} subscribeOptions.timeout - which, if present, determines the number of\n                 *                                  seconds after which the onFailure calback is called.\n                 *                                  The presence of a timeout does not prevent the onSuccess\n                 *                                  callback from being called when the subscribe completes.\n                 * @throws {InvalidState} if the client is not in connected state.\n                 */this.subscribe=function(filter,subscribeOptions){if(typeof filter!==\"string\")throw new Error(\"Invalid argument:\"+filter);subscribeOptions=subscribeOptions||{};validate(subscribeOptions,{qos:\"number\",invocationContext:\"object\",onSuccess:\"function\",onFailure:\"function\",timeout:\"number\"});if(subscribeOptions.timeout&&!subscribeOptions.onFailure)throw new Error(\"subscribeOptions.timeout specified with no onFailure callback.\");if(typeof subscribeOptions.qos!==\"undefined\"&&!(subscribeOptions.qos===0||subscribeOptions.qos===1||subscribeOptions.qos===2))throw new Error(format(ERROR.INVALID_ARGUMENT,[subscribeOptions.qos,\"subscribeOptions.qos\"]));client.subscribe(filter,subscribeOptions);};/**\n\t\t * Unsubscribe for messages, stop receiving messages sent to destinations described by the filter.\n\t\t *\n\t\t * @name Paho.MQTT.Client#unsubscribe\n\t\t * @function\n\t\t * @param {string} filter - describing the destinations to receive messages from.\n\t\t * @param {object} unsubscribeOptions - used to control the subscription\n\t\t * @param {object} unsubscribeOptions.invocationContext - passed to the onSuccess callback\n\t\t                                      or onFailure callback.\n\t\t * @param {function} unsubscribeOptions.onSuccess - called when the unsubscribe acknowledgement has been received from the server.\n\t\t *                                    A single response object parameter is passed to the\n\t\t *                                    onSuccess callback containing the following fields:\n\t\t *                                    <ol>\n\t\t *                                    <li>invocationContext - if set in the unsubscribeOptions.\n\t\t *                                    </ol>\n\t\t * @param {function} unsubscribeOptions.onFailure called when the unsubscribe request has failed or timed out.\n\t\t *                                    A single response object parameter is passed to the onFailure callback containing the following fields:\n\t\t *                                    <ol>\n\t\t *                                    <li>invocationContext - if set in the unsubscribeOptions.\n\t\t *                                    <li>errorCode - a number indicating the nature of the error.\n\t\t *                                    <li>errorMessage - text describing the error.\n\t\t *                                    </ol>\n\t\t * @param {number} unsubscribeOptions.timeout - which, if present, determines the number of seconds\n\t\t *                                    after which the onFailure callback is called. The presence of\n\t\t *                                    a timeout does not prevent the onSuccess callback from being\n\t\t *                                    called when the unsubscribe completes\n\t\t * @throws {InvalidState} if the client is not in connected state.\n\t\t */this.unsubscribe=function(filter,unsubscribeOptions){if(typeof filter!==\"string\")throw new Error(\"Invalid argument:\"+filter);unsubscribeOptions=unsubscribeOptions||{};validate(unsubscribeOptions,{invocationContext:\"object\",onSuccess:\"function\",onFailure:\"function\",timeout:\"number\"});if(unsubscribeOptions.timeout&&!unsubscribeOptions.onFailure)throw new Error(\"unsubscribeOptions.timeout specified with no onFailure callback.\");client.unsubscribe(filter,unsubscribeOptions);};/**\n                 * Send a message to the consumers of the destination in the Message.\n                 *\n                 * @name Paho.MQTT.Client#send\n                 * @function\n                 * @param {string|Paho.MQTT.Message} topic - <b>mandatory</b> The name of the destination to which the message is to be sent.\n                 * \t\t\t\t\t   - If it is the only parameter, used as Paho.MQTT.Message object.\n                 * @param {String|ArrayBuffer} payload - The message data to be sent.\n                 * @param {number} qos The Quality of Service used to deliver the message.\n                 * \t\t<dl>\n                 * \t\t\t<dt>0 Best effort (default).\n                 *     \t\t\t<dt>1 At least once.\n                 *     \t\t\t<dt>2 Exactly once.\n                 * \t\t</dl>\n                 * @param {Boolean} retained If true, the message is to be retained by the server and delivered\n                 *                     to both current and future subscriptions.\n                 *                     If false the server only delivers the message to current subscribers, this is the default for new Messages.\n                 *                     A received message has the retained boolean set to true if the message was published\n                 *                     with the retained boolean set to true\n                 *                     and the subscrption was made after the message has been published.\n                 * @throws {InvalidState} if the client is not connected.\n                 */this.send=function(topic,payload,qos,retained){var message;if(arguments.length==0){throw new Error(\"Invalid argument.\"+\"length\");}else if(arguments.length==1){if(!(topic instanceof Message)&&typeof topic!==\"string\")throw new Error(\"Invalid argument:\"+(typeof topic===\"undefined\"?\"undefined\":_typeof(topic)));message=topic;if(typeof message.destinationName===\"undefined\")throw new Error(format(ERROR.INVALID_ARGUMENT,[message.destinationName,\"Message.destinationName\"]));client.send(message);}else{//parameter checking in Message object\nmessage=new Message(payload);message.destinationName=topic;if(arguments.length>=3)message.qos=qos;if(arguments.length>=4)message.retained=retained;client.send(message);}};/**\n                 * Normal disconnect of this Messaging client from its server.\n                 *\n                 * @name Paho.MQTT.Client#disconnect\n                 * @function\n                 * @throws {InvalidState} if the client is already disconnected.\n                 */this.disconnect=function(){client.disconnect();};/**\n                 * Get the contents of the trace log.\n                 *\n                 * @name Paho.MQTT.Client#getTraceLog\n                 * @function\n                 * @return {Object[]} tracebuffer containing the time ordered trace records.\n                 */this.getTraceLog=function(){return client.getTraceLog();};/**\n                 * Start tracing.\n                 *\n                 * @name Paho.MQTT.Client#startTrace\n                 * @function\n                 */this.startTrace=function(){client.startTrace();};/**\n                 * Stop tracing.\n                 *\n                 * @name Paho.MQTT.Client#stopTrace\n                 * @function\n                 */this.stopTrace=function(){client.stopTrace();};this.isConnected=function(){return client.connected;};};Client.prototype={get host(){return this._getHost();},set host(newHost){this._setHost(newHost);},get port(){return this._getPort();},set port(newPort){this._setPort(newPort);},get path(){return this._getPath();},set path(newPath){this._setPath(newPath);},get clientId(){return this._getClientId();},set clientId(newClientId){this._setClientId(newClientId);},get onConnectionLost(){return this._getOnConnectionLost();},set onConnectionLost(newOnConnectionLost){this._setOnConnectionLost(newOnConnectionLost);},get onMessageDelivered(){return this._getOnMessageDelivered();},set onMessageDelivered(newOnMessageDelivered){this._setOnMessageDelivered(newOnMessageDelivered);},get onMessageArrived(){return this._getOnMessageArrived();},set onMessageArrived(newOnMessageArrived){this._setOnMessageArrived(newOnMessageArrived);},get trace(){return this._getTrace();},set trace(newTraceFunction){this._setTrace(newTraceFunction);}};/**\n             * An application message, sent or received.\n             * <p>\n             * All attributes may be null, which implies the default values.\n             *\n             * @name Paho.MQTT.Message\n             * @constructor\n             * @param {String|ArrayBuffer} payload The message data to be sent.\n             * <p>\n             * @property {string} payloadString <i>read only</i> The payload as a string if the payload consists of valid UTF-8 characters.\n             * @property {ArrayBuffer} payloadBytes <i>read only</i> The payload as an ArrayBuffer.\n             * <p>\n             * @property {string} destinationName <b>mandatory</b> The name of the destination to which the message is to be sent\n             *                    (for messages about to be sent) or the name of the destination from which the message has been received.\n             *                    (for messages received by the onMessage function).\n             * <p>\n             * @property {number} qos The Quality of Service used to deliver the message.\n             * <dl>\n             *     <dt>0 Best effort (default).\n             *     <dt>1 At least once.\n             *     <dt>2 Exactly once.\n             * </dl>\n             * <p>\n             * @property {Boolean} retained If true, the message is to be retained by the server and delivered\n             *                     to both current and future subscriptions.\n             *                     If false the server only delivers the message to current subscribers, this is the default for new Messages.\n             *                     A received message has the retained boolean set to true if the message was published\n             *                     with the retained boolean set to true\n             *                     and the subscrption was made after the message has been published.\n             * <p>\n             * @property {Boolean} duplicate <i>read only</i> If true, this message might be a duplicate of one which has already been received.\n             *                     This is only set on messages received from the server.\n             *\n             */var Message=function Message(newPayload){var payload;if(typeof newPayload===\"string\"||newPayload instanceof ArrayBuffer||newPayload instanceof Int8Array||newPayload instanceof Uint8Array||newPayload instanceof Int16Array||newPayload instanceof Uint16Array||newPayload instanceof Int32Array||newPayload instanceof Uint32Array||newPayload instanceof Float32Array||newPayload instanceof Float64Array){payload=newPayload;}else{throw format(ERROR.INVALID_ARGUMENT,[newPayload,\"newPayload\"]);}this._getPayloadString=function(){if(typeof payload===\"string\")return payload;else return parseUTF8(payload,0,payload.length);};this._getPayloadBytes=function(){if(typeof payload===\"string\"){var buffer=new ArrayBuffer(UTF8Length(payload));var byteStream=new Uint8Array(buffer);stringToUTF8(payload,byteStream,0);return byteStream;}else{return payload;};};var destinationName=undefined;this._getDestinationName=function(){return destinationName;};this._setDestinationName=function(newDestinationName){if(typeof newDestinationName===\"string\")destinationName=newDestinationName;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newDestinationName,\"newDestinationName\"]));};var qos=0;this._getQos=function(){return qos;};this._setQos=function(newQos){if(newQos===0||newQos===1||newQos===2)qos=newQos;else throw new Error(\"Invalid argument:\"+newQos);};var retained=false;this._getRetained=function(){return retained;};this._setRetained=function(newRetained){if(typeof newRetained===\"boolean\")retained=newRetained;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newRetained,\"newRetained\"]));};var duplicate=false;this._getDuplicate=function(){return duplicate;};this._setDuplicate=function(newDuplicate){duplicate=newDuplicate;};};Message.prototype={get payloadString(){return this._getPayloadString();},get payloadBytes(){return this._getPayloadBytes();},get destinationName(){return this._getDestinationName();},set destinationName(newDestinationName){this._setDestinationName(newDestinationName);},get qos(){return this._getQos();},set qos(newQos){this._setQos(newQos);},get retained(){return this._getRetained();},set retained(newRetained){this._setRetained(newRetained);},get duplicate(){return this._getDuplicate();},set duplicate(newDuplicate){this._setDuplicate(newDuplicate);}};// Module contents.\nreturn{Client:Client,Message:Message};}(window);return _Paho;};exports.default=_get__(\"Paho\");var _RewiredData__=Object.create(null);var INTENTIONAL_UNDEFINED='__INTENTIONAL_UNDEFINED__';var _RewireAPI__={};(function(){function addPropertyToAPIObject(name,value){Object.defineProperty(_RewireAPI__,name,{value:value,enumerable:false,configurable:true});}addPropertyToAPIObject('__get__',_get__);addPropertyToAPIObject('__GetDependency__',_get__);addPropertyToAPIObject('__Rewire__',_set__);addPropertyToAPIObject('__set__',_set__);addPropertyToAPIObject('__reset__',_reset__);addPropertyToAPIObject('__ResetDependency__',_reset__);addPropertyToAPIObject('__with__',_with__);})();function _get__(variableName){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _get_original__(variableName);}else{var value=_RewiredData__[variableName];if(value===INTENTIONAL_UNDEFINED){return undefined;}else{return value;}}}function _get_original__(variableName){switch(variableName){case\"Paho\":return Paho;}return undefined;}function _assign__(variableName,value){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _set_original__(variableName,value);}else{return _RewiredData__[variableName]=value;}}function _set_original__(variableName,_value){switch(variableName){}return undefined;}function _update_operation__(operation,variableName,prefix){var oldValue=_get__(variableName);var newValue=operation==='++'?oldValue+1:oldValue-1;_assign__(variableName,newValue);return prefix?newValue:oldValue;}function _set__(variableName,value){if((typeof variableName===\"undefined\"?\"undefined\":_typeof(variableName))==='object'){Object.keys(variableName).forEach(function(name){_RewiredData__[name]=variableName[name];});}else{if(value===undefined){_RewiredData__[variableName]=INTENTIONAL_UNDEFINED;}else{_RewiredData__[variableName]=value;}return value;}}function _reset__(variableName){delete _RewiredData__[variableName];}function _with__(object){var rewiredVariableNames=Object.keys(object);var previousValues={};function reset(){rewiredVariableNames.forEach(function(variableName){_RewiredData__[variableName]=previousValues[variableName];});}return function(callback){rewiredVariableNames.forEach(function(variableName){previousValues[variableName]=_RewiredData__[variableName];_RewiredData__[variableName]=object[variableName];});var result=callback();if(!!result&&typeof result.then=='function'){result.then(reset).catch(reset);}else{reset();}return result;};}var _typeOfOriginalExport=typeof Paho===\"undefined\"?\"undefined\":_typeof(Paho);function addNonEnumerableProperty(name,value){Object.defineProperty(Paho,name,{value:value,enumerable:false,configurable:true});}if((_typeOfOriginalExport==='object'||_typeOfOriginalExport==='function')&&Object.isExtensible(Paho)){addNonEnumerableProperty('__get__',_get__);addNonEnumerableProperty('__GetDependency__',_get__);addNonEnumerableProperty('__Rewire__',_set__);addNonEnumerableProperty('__set__',_set__);addNonEnumerableProperty('__reset__',_reset__);addNonEnumerableProperty('__ResetDependency__',_reset__);addNonEnumerableProperty('__with__',_with__);addNonEnumerableProperty('__RewireAPI__',_RewireAPI__);}exports.__get__=_get__;exports.__GetDependency__=_get__;exports.__Rewire__=_set__;exports.__set__=_set__;exports.__ResetDependency__=_reset__;exports.__RewireAPI__=_RewireAPI__;});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./vendors/mqttws31.min.js\n ** module id = 19\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./vendors/mqttws31.min.js?");
+	        // A group has the structure:
+	        // {
+	        //   "owner": "...",
+	        //   "position": ...,
+	        //   "id": "...",
+	        //   "devices": [...],
+	        //   "name": "..."
+	        // }
 
-/***/ },
-/* 20 */
-/***/ function(module, exports, __webpack_require__) {
+	        _createClass(Group, [{
+	            key: 'getGroup',
+	            value: function getGroup() {
+	                var _this = this;
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(12)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../tools/ajax.js'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.ajax);\n        global.Model = mod.exports;\n    }\n})(this, function (exports, _ajax) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.cache = undefined;\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var cache = exports.cache = {\n        init: function init() {},\n        public: {\n            toArray: [],\n            toDictionary: {}\n        },\n        clear: function clear() {\n            _get__('cache').public.toArray = [];\n            _get__('cache').public.toDictionary = [];\n        }\n    };\n\n    var Model = function () {\n        function Model() {\n            var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];\n            var config = arguments[1];\n\n            _classCallCheck(this, Model);\n\n            this.config = config;\n            this.ajax = new (_get__('Ajax'))(config.ajax);\n            if (id) {\n                this.id = id;\n            }\n        }\n\n        _createClass(Model, [{\n            key: 'getAllModels',\n            value: function getAllModels() {\n                var _this = this;\n\n                return new Promise(function (resolve, reject) {\n                    if (_get__('cache').public.toArray.length > 0) {\n                        resolve(_get__('cache').public.toArray);\n                    } else {\n                        _this.ajax.get('/device-models', {\n                            queryObj: 'limit=100000',\n                            contentType: 'application/hal+json'\n                        }).then(function (response) {\n                            _get__('cache').public.toArray = response.models;\n                            _this._makeDictionary(_get__('cache').public.toArray);\n                            resolve(_get__('cache').public.toArray);\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    }\n                });\n            }\n        }, {\n            key: 'getModel',\n            value: function getModel(id) {\n                var _this2 = this;\n\n                if (this.id && !id) {\n                    id = this.id;\n                }\n\n                if (_get__('cache').public.toDictionary[id]) {\n                    return new Promise(function (resolve, reject) {\n                        resolve(_get__('cache').public.toDictionary[id]);\n                    });\n                } else {\n                    return new Promise(function (resolve, reject) {\n                        _this2.ajax.get('/device-models/' + id, {\n                            contentType: 'application/hal+json'\n                        }).then(function (model) {\n                            _get__('cache').public.toArray.push(model);\n                            _get__('cache').public.toDictionary[id] = model;\n                            resolve(model);\n                        }).catch(function (error) {\n                            reject(error);\n                        });\n                    });\n                }\n            }\n        }, {\n            key: '_getModelById',\n            value: function _getModelById(id) {\n                if (_get__('cache').public.toArray.length > 0) {\n                    return _get__('cache').public.toDictionary[id] || null;\n                } else {\n                    return null;\n                }\n            }\n        }, {\n            key: '_getPublicModelsFromArray',\n            value: function _getPublicModelsFromArray() {\n                return _get__('cache').public.toArray || [];\n            }\n        }, {\n            key: '_getPublicModelsFromDictionary',\n            value: function _getPublicModelsFromDictionary() {\n                return _get__('cache').public.toDictionary || [];\n            }\n        }, {\n            key: '_makeDictionary',\n            value: function _makeDictionary(modelsArray) {\n                if (!modelsArray) {\n                    return;\n                }\n                if (!_get__('cache').public.toDictionary) _get__('cache').public.toDictionary = {};\n                var len = modelsArray.length;\n                var i = 0;\n                while (len--) {\n                    var model = modelsArray[i];\n                    _get__('cache').public.toDictionary[model.id] = model;\n                    i++;\n                }\n                return _get__('cache').public.toDictionary;\n            }\n        }]);\n\n        return Model;\n    }();\n\n    exports.default = Model;\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'cache':\n                return cache;\n\n            case 'Ajax':\n                return _ajax2.default;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof Model === 'undefined' ? 'undefined' : _typeof(Model);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(Model, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Model)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/Model.js\n ** module id = 20\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/Model.js?");
+	                if (!this.id) {
+	                    throw new Error('Provide the group id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this.ajax.get('/groups/' + _this.id).then(function (response) {
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getGroupDevices',
+	            value: function getGroupDevices() {
+	                var _this2 = this;
 
-/***/ },
-/* 21 */
-/***/ function(module, exports, __webpack_require__) {
+	                if (!this.id) {
+	                    throw new Error('Provide the group id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this2.ajax.get('/groups/' + _this2.id).then(function (response) {
+	                        resolve(response.devices);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'deleteGroup',
+	            value: function deleteGroup(opts) {
+	                var _this3 = this;
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(12)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../tools/ajax.js'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.ajax);\n        global.Transmitter = mod.exports;\n    }\n})(this, function (exports, _ajax) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var Transmitter = function () {\n        function Transmitter(config) {\n            _classCallCheck(this, Transmitter);\n\n            this.id = config.id;\n            this.secret = config.secret;\n            this.name = config.name;\n            this.topic = config.topic;\n            this.owner = config.owner;\n            this.integrationType = config.integrationType;\n            this.ajax = new (_get__('Ajax'))(config.ajax);\n        }\n\n        _createClass(Transmitter, [{\n            key: 'deleteTransmitter',\n            value: function deleteTransmitter(opts) {\n                var _this = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this.ajax.delete('/transmitters/' + _this.id, opts).then(function (response) {\n                        //right now the object hangs around, but on the cloud it is gone\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'updateTransmitter',\n            value: function updateTransmitter(patchBody, opts) {\n                var _this2 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the id during instantiation');\n                } else if (!patchBody) {\n                    throw new Error('Provide a patch of parameters to update');\n                } else if (!Object.keys(patchBody).length) {\n                    throw new Error('Provide a patch with some parameters to update');\n                }\n\n                for (var x in patchBody) {\n                    if (!this.hasOwnProperty(x)) {\n                        throw new Error('Provide a patch with relevant parameters to update');\n                    }\n                }\n\n                return new Promise(function (resolve, reject) {\n                    _this2.ajax.patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {\n                        _this2.id = response.id, _this2.secret = response.secret, _this2.name = response.name, _this2.topic = response.topic, _this2.owner = response.owner, _this2.integrationType = response.integrationType, resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }]);\n\n        return Transmitter;\n    }();\n\n    exports.default = Transmitter;\n    ;\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'Ajax':\n                return _ajax2.default;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof Transmitter === 'undefined' ? 'undefined' : _typeof(Transmitter);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(Transmitter, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Transmitter)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/Transmitter.js\n ** module id = 21\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/Transmitter.js?");
+	                if (!this.id) {
+	                    throw new Error('Provide the group id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _this3.ajax.delete('/groups/' + _this3.id, opts).then(function (response) {
+	                        //right now the object hangs around, but on the cloud it is gone
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'updateGroup',
+	            value: function updateGroup(patch, opts) {
+	                var _this4 = this;
 
-/***/ },
-/* 22 */
-/***/ function(module, exports, __webpack_require__) {
+	                if (!this.id) {
+	                    throw new Error('Provide the group id during instantiation');
+	                } else if (!patch) {
+	                    throw new Error('Provide a patch of parameters to update');
+	                } else if (!Object.keys(patch).length) {
+	                    throw new Error('Provide a patch with some parameters to update');
+	                }
 
-	eval("var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {\n    if (true) {\n        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(12)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));\n    } else if (typeof exports !== \"undefined\") {\n        factory(exports, require('../tools/ajax.js'));\n    } else {\n        var mod = {\n            exports: {}\n        };\n        factory(mod.exports, global.ajax);\n        global.Group = mod.exports;\n    }\n})(this, function (exports, _ajax) {\n    'use strict';\n\n    Object.defineProperty(exports, \"__esModule\", {\n        value: true\n    });\n    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;\n\n    var _ajax2 = _interopRequireDefault(_ajax);\n\n    function _interopRequireDefault(obj) {\n        return obj && obj.__esModule ? obj : {\n            default: obj\n        };\n    }\n\n    var _typeof = typeof Symbol === \"function\" && typeof Symbol.iterator === \"symbol\" ? function (obj) {\n        return typeof obj;\n    } : function (obj) {\n        return obj && typeof Symbol === \"function\" && obj.constructor === Symbol ? \"symbol\" : typeof obj;\n    };\n\n    function _classCallCheck(instance, Constructor) {\n        if (!(instance instanceof Constructor)) {\n            throw new TypeError(\"Cannot call a class as a function\");\n        }\n    }\n\n    var _createClass = function () {\n        function defineProperties(target, props) {\n            for (var i = 0; i < props.length; i++) {\n                var descriptor = props[i];\n                descriptor.enumerable = descriptor.enumerable || false;\n                descriptor.configurable = true;\n                if (\"value\" in descriptor) descriptor.writable = true;\n                Object.defineProperty(target, descriptor.key, descriptor);\n            }\n        }\n\n        return function (Constructor, protoProps, staticProps) {\n            if (protoProps) defineProperties(Constructor.prototype, protoProps);\n            if (staticProps) defineProperties(Constructor, staticProps);\n            return Constructor;\n        };\n    }();\n\n    var Group = function () {\n        function Group(config) {\n            _classCallCheck(this, Group);\n\n            this.owner = config.owner;\n            this.position = config.position;\n            this.id = config.id;\n            this.devices = config.devices;\n            this.name = config.name;\n            this.ajax = new (_get__('Ajax'))(config.ajax);\n        }\n\n        // A group has the structure:\n        // {\n        //   \"owner\": \"...\",\n        //   \"position\": ...,\n        //   \"id\": \"...\",\n        //   \"devices\": [...],\n        //   \"name\": \"...\"\n        // }\n\n        _createClass(Group, [{\n            key: 'getGroup',\n            value: function getGroup() {\n                var _this = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the group id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this.ajax.get('/groups/' + _this.id).then(function (response) {\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'getGroupDevices',\n            value: function getGroupDevices() {\n                var _this2 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the group id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this2.ajax.get('/groups/' + _this2.id).then(function (response) {\n                        resolve(response.devices);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'deleteGroup',\n            value: function deleteGroup(opts) {\n                var _this3 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the group id during instantiation');\n                }\n                return new Promise(function (resolve, reject) {\n                    _this3.ajax.delete('/groups/' + _this3.id, opts).then(function (response) {\n                        //right now the object hangs around, but on the cloud it is gone\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }, {\n            key: 'updateGroup',\n            value: function updateGroup(patch, opts) {\n                var _this4 = this;\n\n                if (!this.id) {\n                    throw new Error('Provide the group id during instantiation');\n                } else if (!patch) {\n                    throw new Error('Provide a patch of parameters to update');\n                } else if (!Object.keys(patch).length) {\n                    throw new Error('Provide a patch with some parameters to update');\n                }\n\n                for (var x in patch) {\n                    if (!this.hasOwnProperty(x)) {\n                        throw new Error('Provide a patch with relevant parameters to update');\n                    }\n                }\n\n                return new Promise(function (resolve, reject) {\n                    _this4.ajax.patch('/groups/this.id}', patch, opts).then(function (response) {\n                        _this4.owner = response.owner;\n                        _this4.position = response.position;\n                        _this4.id = response.id;\n                        _this4.devices = response.devices;\n                        _this4.name = response.name;\n                        resolve(response);\n                    }).catch(function (error) {\n                        reject(error);\n                    });\n                });\n            }\n        }]);\n\n        return Group;\n    }();\n\n    exports.default = Group;\n    ;\n\n    var _RewiredData__ = Object.create(null);\n\n    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';\n    var _RewireAPI__ = {};\n\n    (function () {\n        function addPropertyToAPIObject(name, value) {\n            Object.defineProperty(_RewireAPI__, name, {\n                value: value,\n                enumerable: false,\n                configurable: true\n            });\n        }\n\n        addPropertyToAPIObject('__get__', _get__);\n        addPropertyToAPIObject('__GetDependency__', _get__);\n        addPropertyToAPIObject('__Rewire__', _set__);\n        addPropertyToAPIObject('__set__', _set__);\n        addPropertyToAPIObject('__reset__', _reset__);\n        addPropertyToAPIObject('__ResetDependency__', _reset__);\n        addPropertyToAPIObject('__with__', _with__);\n    })();\n\n    function _get__(variableName) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _get_original__(variableName);\n        } else {\n            var value = _RewiredData__[variableName];\n\n            if (value === INTENTIONAL_UNDEFINED) {\n                return undefined;\n            } else {\n                return value;\n            }\n        }\n    }\n\n    function _get_original__(variableName) {\n        switch (variableName) {\n            case 'Ajax':\n                return _ajax2.default;\n        }\n\n        return undefined;\n    }\n\n    function _assign__(variableName, value) {\n        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {\n            return _set_original__(variableName, value);\n        } else {\n            return _RewiredData__[variableName] = value;\n        }\n    }\n\n    function _set_original__(variableName, _value) {\n        switch (variableName) {}\n\n        return undefined;\n    }\n\n    function _update_operation__(operation, variableName, prefix) {\n        var oldValue = _get__(variableName);\n\n        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;\n\n        _assign__(variableName, newValue);\n\n        return prefix ? newValue : oldValue;\n    }\n\n    function _set__(variableName, value) {\n        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {\n            Object.keys(variableName).forEach(function (name) {\n                _RewiredData__[name] = variableName[name];\n            });\n        } else {\n            if (value === undefined) {\n                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;\n            } else {\n                _RewiredData__[variableName] = value;\n            }\n\n            return value;\n        }\n    }\n\n    function _reset__(variableName) {\n        delete _RewiredData__[variableName];\n    }\n\n    function _with__(object) {\n        var rewiredVariableNames = Object.keys(object);\n        var previousValues = {};\n\n        function reset() {\n            rewiredVariableNames.forEach(function (variableName) {\n                _RewiredData__[variableName] = previousValues[variableName];\n            });\n        }\n\n        return function (callback) {\n            rewiredVariableNames.forEach(function (variableName) {\n                previousValues[variableName] = _RewiredData__[variableName];\n                _RewiredData__[variableName] = object[variableName];\n            });\n            var result = callback();\n\n            if (!!result && typeof result.then == 'function') {\n                result.then(reset).catch(reset);\n            } else {\n                reset();\n            }\n\n            return result;\n        };\n    }\n\n    var _typeOfOriginalExport = typeof Group === 'undefined' ? 'undefined' : _typeof(Group);\n\n    function addNonEnumerableProperty(name, value) {\n        Object.defineProperty(Group, name, {\n            value: value,\n            enumerable: false,\n            configurable: true\n        });\n    }\n\n    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Group)) {\n        addNonEnumerableProperty('__get__', _get__);\n        addNonEnumerableProperty('__GetDependency__', _get__);\n        addNonEnumerableProperty('__Rewire__', _set__);\n        addNonEnumerableProperty('__set__', _set__);\n        addNonEnumerableProperty('__reset__', _reset__);\n        addNonEnumerableProperty('__ResetDependency__', _reset__);\n        addNonEnumerableProperty('__with__', _with__);\n        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);\n    }\n\n    exports.__get__ = _get__;\n    exports.__GetDependency__ = _get__;\n    exports.__Rewire__ = _set__;\n    exports.__set__ = _set__;\n    exports.__ResetDependency__ = _reset__;\n    exports.__RewireAPI__ = _RewireAPI__;\n});\n\n/*****************\n ** WEBPACK FOOTER\n ** ./src/entities/Group.js\n ** module id = 22\n ** module chunks = 0\n **/\n//# sourceURL=webpack:///./src/entities/Group.js?");
+	                for (var x in patch) {
+	                    if (!this.hasOwnProperty(x)) {
+	                        throw new Error('Provide a patch with relevant parameters to update');
+	                    }
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _this4.ajax.patch('/groups/this.id}', patch, opts).then(function (response) {
+	                        _this4.owner = response.owner;
+	                        _this4.position = response.position;
+	                        _this4.id = response.id;
+	                        _this4.devices = response.devices;
+	                        _this4.name = response.name;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }]);
+
+	        return Group;
+	    }();
+
+	    exports.default = Group;
+	    ;
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Ajax':
+	                return _ajax2.default;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Group === 'undefined' ? 'undefined' : _typeof(Group);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Group, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Group)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
+	});
 
 /***/ }
-/******/ ]);
+/******/ ])
+});
+;
