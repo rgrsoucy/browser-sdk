@@ -2,6 +2,8 @@ var path = require('path');
 var webpack = require('webpack');
 var nodeExternals = require('webpack-node-externals');
 
+var MINIFIED = process.env.DIST || null;
+var filename = MINIFIED ?'relayr-browser-sdk.min.js': "relayr-browser-sdk.js";
 
 module.exports = {
   entry: [
@@ -9,7 +11,7 @@ module.exports = {
   ],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'relayr-browser-sdk.min.js', //minified bundle excludes node modules
+    filename: filename, //minified bundle excludes node modules
     library: 'relayr',
     libraryTarget: 'umd',
   },
@@ -20,5 +22,12 @@ module.exports = {
       test: /\.js$/,
       loaders: ['babel']
     }]
-  }
+  },
+  plugins: MINIFIED ? [
+    new webpack.optimize.UglifyJsPlugin({
+      compress: {
+        warnings: false
+      }
+    })
+  ] : []
 };

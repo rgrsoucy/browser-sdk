@@ -4,13 +4,12 @@
   "description": "The relayr browser sdk",
   "main": "dist/relayr-browser-sdk.min.js",
   "scripts": {
-    "start": "node server.js",
     "test": "NODE_ENV=test mocha --recursive --compilers js:babel-core/register -r mock-local-storage",
     "cover": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha ./test",
     "test:watch": "npm run test -- -w",
-    "build:js": "webpack --config webpack.dev.config.js --progress --profile --colors",
-    "build:min:js": "NODE_ENV=production webpack --config webpack.prod.config.js --progress --profile --colors",
-    "build:min:js:watch": "NODE_ENV=production webpack --config webpack.prod.config.js --progress --profile --colors -w"
+    "build:js": "NODE_ENV=production webpack --config webpack.prod.config.js --progress --profile --colors",
+    "build:min:js": "NODE_ENV=production DIST=minified webpack --config webpack.prod.config.js --progress --profile --colors",
+    "build:min:js:watch": "NODE_ENV=production DIST=minified webpack --config webpack.prod.config.js --progress --profile --colors -w"
   },
   "repository": {
     "type": "git",
