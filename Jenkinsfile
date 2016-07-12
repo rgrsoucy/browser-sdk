@@ -32,7 +32,6 @@ node {
   """
 
   stage 'Build & Push'
-  checkout scm
   sh """#!/bin/bash -e
     NVM_DIR=
     source ~/.nvm/nvm.sh
