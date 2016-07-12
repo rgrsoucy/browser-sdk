@@ -70,6 +70,7 @@ node {
   """
 
   stage 'Tag new version'
+  checkout scm
   sh """#!/bin/bash -e
       NVM_DIR=
       source ~/.nvm/nvm.sh
