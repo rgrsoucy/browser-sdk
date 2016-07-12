@@ -77,7 +77,7 @@ node {
       nvm use 4.4.4
       npm install
       npm run version:increment
-      PACKAGE_VERSION=$(cat package.json \
+      PACKAGE_VERSION=\$(cat package.json \
       | grep version \
       | head -1 \
       | awk -F: '{ print \$2 }' \
