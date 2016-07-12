@@ -83,8 +83,5 @@ node {
       | sed 's/[",]//g'
       | tr -d '[[:space:]]')
       echo $PACKAGE_VERSION
-      git tag $PACKAGE_VERSION
-      git push origin $PACKAGE_VERSION
   """
-
 }
