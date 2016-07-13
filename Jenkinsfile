@@ -62,7 +62,8 @@ node {
             git push
             npm run build:js
             npm run build:min:js
-            sh stamp.sh
+            sh stamp.sh dist/relayr-browser-sdk.js
+            sh stamp.sh dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
             git add -f dist/relayr-browser-sdk.min.js
 
