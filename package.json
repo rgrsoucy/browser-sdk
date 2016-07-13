@@ -8,6 +8,7 @@
     "cover": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha ./test",
     "test:watch": "npm run test -- -w",
     "version:increment": "node_modules/versiony-cli/bin/cli.js package.json --patch",
+    "version:fetch": "node_modules/json-package/bin/jso.js v",
     "build:js": "NODE_ENV=production webpack --config webpack.prod.config.js --progress --profile --colors",
     "build:min:js": "NODE_ENV=production DIST=minified webpack --config webpack.prod.config.js --progress --profile --colors",
     "build:min:js:watch": "NODE_ENV=production DIST=minified webpack --config webpack.prod.config.js --progress --profile --colors -w"
