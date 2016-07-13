@@ -31,7 +31,7 @@ node {
       npm run test
   """
 
-  stage 'Build & Push'
+  stage 'Build & Tag'
   sh """#!/bin/bash -e
     NVM_DIR=
     source ~/.nvm/nvm.sh
@@ -47,37 +47,27 @@ node {
             sh stamp.sh dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
             git add -f dist/relayr-browser-sdk.min.js
-
             git status
             git commit -m "Jenkins dist build"
             git push origin master
+            git push --follow-tags
             ;;
-        "dev")
-            git checkout dev
-            rm -rf dist
-            npm run build:min:js
+        "jenkins-setup")
+            git checkout jenkins-setup
+            git pull
+            git push
             npm run build:js
-            git add -f dist/relayr-browser-sdk.min.js
+            npm run build:min:js
+            sh stamp.sh dist/relayr-browser-sdk.js
+            sh stamp.sh dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
+            git add -f dist/relayr-browser-sdk.min.js
+            git add -f package.json
+            git status
             git commit -m "Jenkins dist build"
-            git push origin dev
+            git push origin jenkins-setup
+            git push --follow-tags
             ;;
     esac
-  """
-
-  stage 'Tag new version'
-  checkout scm
-  sh """#!/bin/bash -e
-      NVM_DIR=
-      source ~/.nvm/nvm.sh
-      nvm use 4.4.4
-      npm install
-      case ${env.BRANCH_NAME} in
-          "master")
-              npm run version:increment
-              npm run version:tag
-              git push --follow-tags
-              ;;
-      esac
   """
 }
