@@ -82,11 +82,7 @@ node {
       nvm use 4.4.4
       npm install
       npm run version:increment
-      echo "Version incremented"
-      PACKAGE_VERSION=\$(npm run version:fetch -s)
-      echo "fetched new version"
-      git tag \$PACKAGE_VERSION
-      echo "tagging"
-      git push origin \$PACKAGE_VERSION
+      npm run version:tag
+      git push --follow-tags
   """
 }
