@@ -82,7 +82,7 @@ node {
       nvm use 4.4.4
       npm install
       npm run version:increment
-      PACKAGE_VERSION=\$(./node_modules/json-package/bin/jso.js v)
+      PACKAGE_VERSION=\$(node_modules/json-package/bin/jso.js v)
       git tag \$PACKAGE_VERSION
       git push \$PACKAGE_VERSION
   """
