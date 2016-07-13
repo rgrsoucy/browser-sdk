@@ -62,20 +62,7 @@ node {
             git push
             npm run build:js
             npm run build:min:js
-
-            ed -s dist/relayr-browser-sdk.min.js << EOF
-            0a
-            //Latest build: \$(date +"%m-%d-%y %H:%M")
-            .
-            w
-            EOF
-
-            ed -s dist/relayr-browser-sdk.js << EOF
-            0a
-            //Latest build: \$(date +"%m-%d-%y %H:%M")
-            .
-            w
-            EOF
+            sh stamp.sh
             git add -f dist/relayr-browser-sdk.js
             git add -f dist/relayr-browser-sdk.min.js
 
