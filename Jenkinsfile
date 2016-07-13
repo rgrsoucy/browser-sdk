@@ -39,10 +39,16 @@ node {
     case ${env.BRANCH_NAME} in
         "master")
             git checkout master
-            npm run build:min:js
+            git pull
+            git push
             npm run build:js
-            git add -f dist/relayr-browser-sdk.min.js
+            npm run build:min:js
+            sh stamp.sh dist/relayr-browser-sdk.js
+            sh stamp.sh dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
+            git add -f dist/relayr-browser-sdk.min.js
+
+            git status
             git commit -m "Jenkins dist build"
             git push origin master
             ;;
@@ -56,21 +62,6 @@ node {
             git commit -m "Jenkins dist build"
             git push origin dev
             ;;
-        "jenkins-setup")
-            git checkout jenkins-setup
-            git pull
-            git push
-            npm run build:js
-            npm run build:min:js
-            sh stamp.sh dist/relayr-browser-sdk.js
-            sh stamp.sh dist/relayr-browser-sdk.min.js
-            git add -f dist/relayr-browser-sdk.js
-            git add -f dist/relayr-browser-sdk.min.js
-
-            git status
-            git commit -m "Jenkins dist build"
-            git push origin jenkins-setup
-            ;;
     esac
   """
 
@@ -83,11 +74,6 @@ node {
       npm install
       case ${env.BRANCH_NAME} in
           "master")
-              npm run version:increment
-              npm run version:tag
-              git push --follow-tags
-              ;;
-          "jenkins-setup")
               npm run version:increment
               npm run version:tag
               git push --follow-tags
