@@ -62,6 +62,8 @@ node {
             sh stamp.sh dist/relayr-browser-sdk.min.js
             git add -f dist/relayr-browser-sdk.js
             git add -f dist/relayr-browser-sdk.min.js
+            npm run version:increment
+            npm run version:tag
             git add -f package.json
             git status
             git commit -m "Jenkins dist build"
