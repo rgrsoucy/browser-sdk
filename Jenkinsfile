@@ -55,24 +55,6 @@ node {
             git push origin master
             git push --follow-tags
             ;;
-        "jenkins-setup")
-            git checkout jenkins-setup
-            git pull
-            git push
-            npm run build:js
-            npm run build:min:js
-            sh stamp.sh dist/relayr-browser-sdk.js
-            sh stamp.sh dist/relayr-browser-sdk.min.js
-            git add -f dist/relayr-browser-sdk.js
-            git add -f dist/relayr-browser-sdk.min.js
-            npm run version:increment
-            npm run version:tag
-            git add -f package.json
-            git status
-            git commit -m "Jenkins dist build"
-            git push origin jenkins-setup
-            git push --follow-tags
-            ;;
     esac
   """
 }
