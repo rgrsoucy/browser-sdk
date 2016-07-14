@@ -22,7 +22,8 @@ describe('Mqtt', function() {
         mqtt = new Mqtt();
         mqtt.client = {
             connect: sinon.spy(),
-            isConnected: function() {}
+            isConnected: function() {},
+            unsubscribe: sinon.spy()
         };
     });
 
@@ -97,10 +98,8 @@ describe('Mqtt', function() {
         });
 
         it('should store subscription in an array to connect later', function() {
-
             let myTopic = '/v1/someId/topic';
             mqtt.subscribe(myTopic, function() {
-
             });
 
             expect(mqtt._topics[myTopic]).to.be.defined;
@@ -166,6 +165,74 @@ describe('Mqtt', function() {
                 expect(cbSpy).not.to.have.been.calledOnce;
             });
         });
+    });
 
+    describe('unsubscribe', function() {
+        beforeEach(function() {
+            mqtt.connect(fakeOptions);
+        });
+
+        it('should throw if no topic was provided to subscribe', function() {
+            var fn = function() {
+                mqtt.unsubscribe(null, null);
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('shuold remove cb from subcribers', function() {
+            let myTopic = '/v1/someId/topic';
+            const cb = function() {};
+            mqtt.subscribe(myTopic, cb);
+            mqtt.unsubscribe(myTopic, cb);
+
+            expect(mqtt._topics[myTopic].subscribers.length).to.equal(0);
+        });
+
+        it('should not remove all subscribers if a cb is provided', function() {
+            let myTopic = '/v1/someId/topic';
+            const cb = function() {};
+            mqtt.subscribe(myTopic, function() {});
+            mqtt.subscribe(myTopic, cb);
+            mqtt.unsubscribe(myTopic, cb);
+
+            expect(mqtt._topics[myTopic].subscribers.length).to.equal(1);
+        });
+
+        it('should remove cb all subscribers if a cb is not provided', function() {
+            let myTopic = '/v1/someId/topic';
+            mqtt.subscribe(myTopic, function() {});
+            mqtt.subscribe(myTopic, function() {});
+            mqtt.unsubscribe(myTopic);
+
+            expect(mqtt._topics[myTopic].subscribers.length).to.equal(0);
+        });
+
+        it('should not notify cb on message when it unsubscribed', function() {
+            let myTopic = '/v1/someId/topic';
+            let cbSpy = sinon.spy();
+
+            mqtt.subscribe(myTopic, cbSpy);
+            mqtt.unsubscribe(myTopic, cbSpy);
+
+            mqtt.client.onMessageArrived({
+                _getDestinationName: function() {
+                    return myTopic;
+                },
+                _getPayloadString: function() {
+                    return '{ "test": 123 }';
+                }
+            });
+
+            expect(cbSpy).not.to.have.been.calledOnce;
+        });
+
+        it('should unsubscribe from the mqtt client if there are no more subscribers on the topic', function() {
+            let myTopic = '/v1/someId/topic';
+            mqtt.subscribe(myTopic, function() {});
+            mqtt.unsubscribe(myTopic);
+
+            expect(mqtt.client.unsubscribe).to.have.been.calledOnce;
+            expect(mqtt.client.unsubscribe).to.have.been.calledWith(myTopic);
+        });
     });
 });

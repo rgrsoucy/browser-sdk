@@ -88,6 +88,25 @@ class Mqtt {
         return this;
     }
 
+    unsubscribe(topic, eventCallback) {
+        if (!topic) throw Error('You must provide a topic');
+
+        if (this._topics[topic]) {
+            this._topics[topic].subscribers = this._topics[topic].subscribers.filter(function(subscriber) {
+                return eventCallback !== subscriber;
+            });
+        }
+
+        if (this._topics[topic] && !eventCallback) {
+            this._topics[topic].subscribers = [];
+        }
+
+        if(this._topics[topic] && this._topics[topic].subscribers.length === 0) {
+            this.client.unsubscribe(topic);
+        }
+        return this;
+    }
+
     _onConnectSuccess() {
         for (let topic in this._topics) {
             this.client.subscribe(topic, 0);
