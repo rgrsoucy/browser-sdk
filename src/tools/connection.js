@@ -18,6 +18,8 @@ export default function connection() {
         return;
     };
 
+    this.unsubscribe = () => {};
+
     this.on = function(event, _dataSubscriber) {
         switch (event) {
             case 'data':
