@@ -63,7 +63,7 @@ class Mqtt {
                     this._onMessageArrived(data);
                 };
 
-                if (!this.isConnecting) {
+                if (!this.isConnecting && !this.client.isConnected()) {
                     this.client.connect(options);
                     this.isConnecting = true;
                 }

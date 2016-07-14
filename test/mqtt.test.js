@@ -53,6 +53,13 @@ describe('Mqtt', function() {
 
             expect(mqtt.client.connect).to.have.been.calledOnce;
         });
+
+        it('should not create a connection if it is already connected', sinon.test(function() {
+            this.stub(mqtt.client, 'isConnected').returns(true);
+            mqtt.connect(fakeOptions);
+
+            expect(mqtt.client.connect).not.to.have.been.calledOnce;
+        }));
     });
 
 
