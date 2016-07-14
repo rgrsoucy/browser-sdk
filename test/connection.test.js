@@ -71,4 +71,9 @@ describe('Connection', function() {
         fakeProcessingWait();
     });
 
+    it('should have an empty unsubscribe method', function() {
+        const connection = new Connection();
+        expect(connection.unsubscribe).to.be.a('function');
+    });
+
 });

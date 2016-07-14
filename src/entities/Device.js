@@ -149,6 +149,9 @@ default class Device {
             };
 
             mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
+            connection.unsubscribe = (() => {
+                mqtt.unsubscribe(newChannelCredentials.credentials.topic, connection.event);
+            });
             return mqtt.connect(options);
         };
 

@@ -63,7 +63,7 @@ class Mqtt {
                     this._onMessageArrived(data);
                 };
 
-                if (!this.isConnecting) {
+                if (!this.isConnecting && !this.client.isConnected()) {
                     this.client.connect(options);
                     this.isConnecting = true;
                 }
@@ -84,6 +84,25 @@ class Mqtt {
             this._topics[topic] = {};
             this._topics[topic].subscribers = [];
             this._topics[topic].subscribers.push(eventCallback);
+        }
+        return this;
+    }
+
+    unsubscribe(topic, eventCallback) {
+        if (!topic) throw Error('You must provide a topic');
+
+        if (this._topics[topic]) {
+            this._topics[topic].subscribers = this._topics[topic].subscribers.filter(function(subscriber) {
+                return eventCallback !== subscriber;
+            });
+        }
+
+        if (this._topics[topic] && !eventCallback) {
+            this._topics[topic].subscribers = [];
+        }
+
+        if(this._topics[topic] && this._topics[topic].subscribers.length === 0) {
+            this.client.unsubscribe(topic);
         }
         return this;
     }

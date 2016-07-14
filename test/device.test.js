@@ -5,6 +5,7 @@ import readingFixture from './fixtures/devices/readings.fixture';
 
 let MQTTMock = {
     subscribe: function() {},
+    unsubscribe: function() {},
     connect: function() {}
 };
 Device.__Rewire__('mqtt', MQTTMock);
@@ -214,6 +215,8 @@ describe('Device', function() {
                     connectionCb = cb;
                 });
 
+                sandbox.stub(MQTTMock, 'unsubscribe', function() {});
+
                 deviceInstance._channelCredentials = {
                     credentials: {
                         topic: 'fake-topic'
@@ -240,6 +243,14 @@ describe('Device', function() {
                     connectionCb({ data: 'fake-reading' });
                 });
 
+            });
+
+            it('should create a unsubscribe method that unsubscribes from mqtt', (done) => {
+                deviceInstance.connect().then(function(connection) {
+                    connection.unsubscribe();
+                    expect(MQTTMock.unsubscribe).to.have.been.calledWith('fake-topic');
+                    done();
+                });
             });
         });
     });
