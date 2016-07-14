@@ -1,4 +1,4 @@
-//Latest build: 07-13-16 16:07
+//Latest build: 07-14-16 13:33
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -1435,6 +1435,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    };
 
 	                    _get__('mqtt').subscribe(newChannelCredentials.credentials.topic, connection.event);
+	                    connection.unsubscribe = function () {
+	                        _get__('mqtt').unsubscribe(newChannelCredentials.credentials.topic, connection.event);
+	                    };
 	                    return _get__('mqtt').connect(options);
 	                };
 
@@ -1823,6 +1826,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	            return;
 	        };
+
+	        this.unsubscribe = function () {};
 
 	        this.on = function (event, _dataSubscriber) {
 	            switch (event) {
@@ -2637,7 +2642,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            _this._onMessageArrived(data);
 	                        };
 
-	                        if (!_this.isConnecting) {
+	                        if (!_this.isConnecting && !_this.client.isConnected()) {
 	                            _this.client.connect(options);
 	                            _this.isConnecting = true;
 	                        }
@@ -2658,6 +2663,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    this._topics[topic] = {};
 	                    this._topics[topic].subscribers = [];
 	                    this._topics[topic].subscribers.push(eventCallback);
+	                }
+	                return this;
+	            }
+	        }, {
+	            key: 'unsubscribe',
+	            value: function unsubscribe(topic, eventCallback) {
+	                if (!topic) throw Error('You must provide a topic');
+
+	                if (this._topics[topic]) {
+	                    this._topics[topic].subscribers = this._topics[topic].subscribers.filter(function (subscriber) {
+	                        return eventCallback !== subscriber;
+	                    });
+	                }
+
+	                if (this._topics[topic] && !eventCallback) {
+	                    this._topics[topic].subscribers = [];
+	                }
+
+	                if (this._topics[topic] && this._topics[topic].subscribers.length === 0) {
+	                    this.client.unsubscribe(topic);
 	                }
 	                return this;
 	            }
