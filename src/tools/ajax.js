@@ -10,10 +10,11 @@ class Ajax {
     set options(options){
         this._options = {
             tokenType : 'Bearer',
-            token : options.token ||'notoken',
-            uri : options.uri || 'api.relayr.io/',
-            protocol : options.protocol || 'https://'
+            token : 'notoken',
+            uri : 'api.relayr.io/',
+            protocol : 'https://',
         }
+        Object.assign(this._options, options)
     }
 
     get options(){
@@ -147,7 +148,7 @@ class Ajax {
 
         xhrObject.open(
             options.type,
-            `${this.protocol}${this.uri}${options.url}`,
+            `${this.options.protocol}${this.options.uri}${options.url}`,
             true
         );
 

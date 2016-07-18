@@ -65,7 +65,7 @@ describe('Main', function() {
 
             it('should populate the new token', function(done) {
                 main.authorize().then(() => {
-                    expect(main.getConfig().ajax.token).to.be.equal('fake-token');
+                    expect(ajax.options.token).to.be.equal('fake-token');
                     done();
                 });
             });
@@ -81,7 +81,7 @@ describe('Main', function() {
             });
 
             it('should set the token', function() {
-                expect(main.getConfig().ajax.token).to.be.equal('fake-provided-token');
+                expect(ajax.options.token).to.be.equal('fake-provided-token');
             });
         });
     });
@@ -150,7 +150,8 @@ describe('Main', function() {
                     uri: 'kittens.com',
                     protocol: 'https://', 
                     tokenType: 'Bearer', 
-                    token: 'fake-token'
+                    token: 'fake-token', 
+                    dataUri: 'data-api.relayr.io',
             }};
 
             let ajaxConfig = {

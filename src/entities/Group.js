@@ -1,4 +1,4 @@
-import Ajax from '../tools/ajax.js';
+import { ajax } from '../tools/ajax.js';
 
 export
 default class Group {
@@ -8,7 +8,7 @@ default class Group {
         this.id = config.id;
         this.devices = config.devices;
         this.name = config.name;
-        this.ajax = new Ajax(config.ajax);
+
     }
 
     // A group has the structure:
@@ -25,7 +25,7 @@ default class Group {
             throw new Error('Provide the group id during instantiation');
         }
         return new Promise((resolve, reject) => {
-            this.ajax.get(`/groups/${this.id}`)
+            ajax.get(`/groups/${this.id}`)
                 .then((response) => {
                     resolve(response);
                 }).catch((error) => {
@@ -39,7 +39,7 @@ default class Group {
             throw new Error('Provide the group id during instantiation');
         }
         return new Promise((resolve, reject) => {
-            this.ajax.get(`/groups/${this.id}`)
+            ajax.get(`/groups/${this.id}`)
                 .then((response) => {
                     resolve(response.devices);
                 }).catch((error) => {
@@ -53,7 +53,7 @@ default class Group {
             throw new Error('Provide the group id during instantiation');
         }
         return new Promise((resolve, reject) => {
-            this.ajax.delete(`/groups/${this.id}`, opts)
+            ajax.delete(`/groups/${this.id}`, opts)
                 .then((response) => {
                     //right now the object hangs around, but on the cloud it is gone
                     resolve(response);
@@ -80,7 +80,7 @@ default class Group {
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/groups/this.id}`, patch, opts)
+            ajax.patch(`/groups/this.id}`, patch, opts)
                 .then((response) => {
                     this.owner = response.owner;
                     this.position = response.position;

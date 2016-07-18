@@ -42,7 +42,7 @@ let main = {
                     redirectURI: project.redirectURI,
                     persist: config.persistToken
                 });
-            }
+            }       
             if (!optionalToken) {
                 oauth2.login();
 

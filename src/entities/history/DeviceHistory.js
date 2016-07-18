@@ -5,11 +5,7 @@ import DeviceHistoryPoints from './DeviceHistoryPoints';
 export default class DeviceHistory {
     constructor(rawDevice = {}, config) {
         this.id = rawDevice.id;
-        this.dataUri = config.ajax.dataUri;
-        this.ajax = new Ajax({
-            uri: config.ajax.dataUri,
-            token: config.ajax.token
-        });
+        this.ajax = new Ajax(config.ajax);
     }
 
     getHistoricalData(opts = {}) {

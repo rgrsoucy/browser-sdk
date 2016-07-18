@@ -13,32 +13,27 @@ let ajaxInstance;
 
 
 describe('Ajax', function() {
-    
+    beforeEach(function() {
         ajaxInstance = ajax;
         ajaxInstance.options= {
-        tokenType: 'Bearer',
-        token: 'FAKE_TOKEN',
-        uri: null
+            tokenType: 'Bearer',
+            token: 'FAKE_TOKEN'
         };
 
         //instance.xhr doesn't exist anymore as a property
-        ajaxInstance.xhr = sinon.useFakeXMLHttpRequest();
+        this.xhr = sinon.useFakeXMLHttpRequest();
 
-        ajaxInstance.requests = [];
+        this.requests = [];
+    
 
-
-        sinon.spy(ajaxInstance, '_xhrRequest');
-
-    beforeEach(function() {
-
-        ajaxInstance.xhr.onCreate = function(xhr) {
-            ajaxInstance.requests.push(xhr);
-        };
+        this.xhr.onCreate = function(xhr) {
+            this.requests.push(xhr);
+        }.bind(this);
 
     });
 
     afterEach(function() {
-        // ajaxInstance.xhr.restore();
+        this.xhr.restore();
     });
 
 
@@ -59,6 +54,7 @@ describe('Ajax', function() {
         });
 
         it('should default uri to api.relayr.io', function() {
+            console.log(ajaxInstance)
             expect(ajaxInstance.options.uri).to.equal('api.relayr.io/');
         });
     });
@@ -80,18 +76,23 @@ describe('Ajax', function() {
                 type: 'GET',
                 isObject: true
             }, null).then((result) => {
+               
                 expect(result).to.deep.equal(data);
                 done();
             });
+           
 
-            ajaxInstance.requests[0].respond(200, {
+            this.requests[0].respond(200, {
                 'Content-Type': 'application/json'
             }, dataJson);
+       
         });
 
 
         it('Should pass the correct options to the _xhrRequest', function() {
 
+            sinon.spy(ajaxInstance, '_xhrRequest');
+    
             var options = {
                 url: '/oauth-userinfo',
                 type: 'GET',
@@ -123,6 +124,8 @@ describe('Ajax', function() {
 
 
         describe('query parameters', function() {
+
+
             it('should create a query params string of query object', function() {
                 ajaxInstance.get('/test', {
                     raw: true,
@@ -133,7 +136,7 @@ describe('Ajax', function() {
                     }
                 });
 
-                expect(ajaxInstance.requests[0].url).to.contain('?one=1&two=2&three=3');
+                expect(this.requests[0].url).to.contain('?one=1&two=2&three=3');
             });
 
             it('should URI encode all query parameters', function() {
@@ -144,19 +147,19 @@ describe('Ajax', function() {
                     }
                 });
 
-                expect(ajaxInstance.requests[0].url).to.contain('?complicated=--%20test%20*');
+                expect(this.requests[0].url).to.contain('?complicated=--%20test%20*');
             });
 
             it('should not add any query string if no query parameter object was provided', function() {
                 ajaxInstance.get('/test', true);
 
-                expect(ajaxInstance.requests[0].url).to.not.contain('?');
+                expect(this.requests[0].url).to.not.contain('?');
             });
 
             it('should not add any query string if the query parameter objec is empty', function() {
                 ajaxInstance.get('/test', true, {});
 
-                expect(ajaxInstance.requests[0].url).to.not.contain('?');
+                expect(this.requests[0].url).to.not.contain('?');
             });
 
             it('should throw an error if the url doesnt have a leading /', function() {
@@ -175,7 +178,7 @@ describe('Ajax', function() {
                 fakeKey: 'fakeValue'
             });
 
-            expect(ajaxInstance.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
+            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
                 fakeKey: 'fakeValue'
             }));
         });
@@ -196,7 +199,7 @@ describe('Ajax', function() {
             };
 
             expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
-            ajaxInstance.requests[0].respond(404, {});
+            this.requests[0].respond(404, {});
         });
 
         it('Should throw an error upon server response 5xx', function(done) {
@@ -215,7 +218,7 @@ describe('Ajax', function() {
             };
 
             expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
-            ajaxInstance.requests[0].respond(500, {});
+            this.requests[0].respond(500, {});
         });
 
         it('should throw an error if the url doesnt have a leading /', function() {
@@ -234,7 +237,7 @@ describe('Ajax', function() {
                 fakeKey: 'fakeValue'
             });
 
-            expect(ajaxInstance.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
+            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
                 fakeKey: 'fakeValue'
             }));
         });
