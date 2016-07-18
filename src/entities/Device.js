@@ -1,4 +1,4 @@
-import Ajax from '../tools/ajax.js';
+import Ajax, { ajax } from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
 import DeviceHistory from './history/DeviceHistory';
 import {
@@ -22,7 +22,7 @@ default class Device {
         this.description = rawDevice.description;
         this.owner = rawDevice.owner;
         this.openToPublic = rawDevice.public;
-        this.ajax = new Ajax(config.ajax);
+        // this.ajax = new Ajax(config.ajax);
         this.history = new DeviceHistory(rawDevice, config);
         this.configurations = [];
         this.commands = [];

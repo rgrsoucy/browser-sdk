@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised';
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
-import Ajax from '../src/tools/ajax.js';
+import Ajax, { ajax } from '../src/tools/ajax.js';
 var expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiPromise);
@@ -13,50 +13,53 @@ let ajaxInstance;
 
 
 describe('Ajax', function() {
-    let options = {
+    
+        ajaxInstance = ajax;
+        ajaxInstance.options= {
         tokenType: 'Bearer',
         token: 'FAKE_TOKEN',
-        uri: null,
-    };
-    beforeEach(function() {
+        uri: null
+        };
 
-        ajaxInstance = new Ajax(options);
+        //instance.xhr doesn't exist anymore as a property
+        ajaxInstance.xhr = sinon.useFakeXMLHttpRequest();
 
-        this.xhr = sinon.useFakeXMLHttpRequest();
+        ajaxInstance.requests = [];
 
-        this.requests = [];
-
-        this.xhr.onCreate = function(xhr) {
-            this.requests.push(xhr);
-        }.bind(this);
 
         sinon.spy(ajaxInstance, '_xhrRequest');
+
+    beforeEach(function() {
+
+        ajaxInstance.xhr.onCreate = function(xhr) {
+            ajaxInstance.requests.push(xhr);
+        };
+
     });
 
     afterEach(function() {
-        this.xhr.restore();
+        // ajaxInstance.xhr.restore();
     });
 
 
     describe('setup', function() {
         it('should get the current token', function() {
-            expect(ajaxInstance.token).to.equal('FAKE_TOKEN');
+            expect(ajaxInstance.options.token).to.equal('FAKE_TOKEN');
         });
 
         it('should default protocol to https://', function() {
-            expect(ajaxInstance.protocol).to.equal('https://');
+            expect(ajaxInstance.options.protocol).to.equal('https://');
         });
 
         it('should be possible to specify another protocol', function() {
-            ajaxInstance = new Ajax(Object.assign({
+            let ajaxInstance2 = new Ajax({
                     protocol: 'http://'
-                },
-                options));
-            expect(ajaxInstance.protocol).to.equal('http://');
+                });
+            expect(ajaxInstance2.options.protocol).to.equal('http://');
         });
 
         it('should default uri to api.relayr.io', function() {
-            expect(ajaxInstance.uri).to.equal('api.relayr.io/');
+            expect(ajaxInstance.options.uri).to.equal('api.relayr.io/');
         });
     });
 
@@ -81,7 +84,7 @@ describe('Ajax', function() {
                 done();
             });
 
-            this.requests[0].respond(200, {
+            ajaxInstance.requests[0].respond(200, {
                 'Content-Type': 'application/json'
             }, dataJson);
         });
@@ -130,7 +133,7 @@ describe('Ajax', function() {
                     }
                 });
 
-                expect(this.requests[0].url).to.contain('?one=1&two=2&three=3');
+                expect(ajaxInstance.requests[0].url).to.contain('?one=1&two=2&three=3');
             });
 
             it('should URI encode all query parameters', function() {
@@ -141,19 +144,19 @@ describe('Ajax', function() {
                     }
                 });
 
-                expect(this.requests[0].url).to.contain('?complicated=--%20test%20*');
+                expect(ajaxInstance.requests[0].url).to.contain('?complicated=--%20test%20*');
             });
 
             it('should not add any query string if no query parameter object was provided', function() {
                 ajaxInstance.get('/test', true);
 
-                expect(this.requests[0].url).to.not.contain('?');
+                expect(ajaxInstance.requests[0].url).to.not.contain('?');
             });
 
             it('should not add any query string if the query parameter objec is empty', function() {
                 ajaxInstance.get('/test', true, {});
 
-                expect(this.requests[0].url).to.not.contain('?');
+                expect(ajaxInstance.requests[0].url).to.not.contain('?');
             });
 
             it('should throw an error if the url doesnt have a leading /', function() {
@@ -172,7 +175,7 @@ describe('Ajax', function() {
                 fakeKey: 'fakeValue'
             });
 
-            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
+            expect(ajaxInstance.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
                 fakeKey: 'fakeValue'
             }));
         });
@@ -193,7 +196,7 @@ describe('Ajax', function() {
             };
 
             expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
-            this.requests[0].respond(404, {});
+            ajaxInstance.requests[0].respond(404, {});
         });
 
         it('Should throw an error upon server response 5xx', function(done) {
@@ -212,7 +215,7 @@ describe('Ajax', function() {
             };
 
             expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
-            this.requests[0].respond(500, {});
+            ajaxInstance.requests[0].respond(500, {});
         });
 
         it('should throw an error if the url doesnt have a leading /', function() {
@@ -231,7 +234,7 @@ describe('Ajax', function() {
                 fakeKey: 'fakeValue'
             });
 
-            expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
+            expect(ajaxInstance.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
                 fakeKey: 'fakeValue'
             }));
         });

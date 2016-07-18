@@ -1,11 +1,23 @@
-export
-default class Ajax {
+
+let instance = null;
+
+class Ajax {
     constructor(options) {
-        this.tokenType = 'Bearer';
-        this.token = options.token;
-        this.uri = options.uri || 'api.relayr.io/';
-        this.protocol = options.protocol || 'https://';
-        this.customXHR;
+      //set options using method below
+      this.options=options;
+    }
+
+    set options(options){
+        this._options = {
+            tokenType : 'Bearer',
+            token : options.token ||'notoken',
+            uri : options.uri || 'api.relayr.io/',
+            protocol : options.protocol || 'https://'
+        }
+    }
+
+    get options(){
+        return this._options;
     }
 
     get(url, opts = {
@@ -176,3 +188,11 @@ default class Ajax {
         });
     }
 }
+
+
+
+export
+let ajax = new Ajax({});
+
+export
+default Ajax;
