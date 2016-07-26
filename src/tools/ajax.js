@@ -11,7 +11,7 @@ class Ajax {
         this._options = {
             tokenType : 'Bearer',
             token : 'notoken',
-            uri : 'api.relayr.io/',
+            uri : 'api.relayr.io',
             protocol : 'https://',
         }
         Object.assign(this._options, options)
@@ -152,7 +152,9 @@ class Ajax {
             true
         );
 
-        xhrObject.setRequestHeader('Authorization', this.token);
+        xhrObject.setRequestHeader('Authorization', this.options.token);
+        console.log("options: ", options);
+        console.log("this.options: ", this.options);
         xhrObject.setRequestHeader('Content-Type', options.contentType);
 
 
