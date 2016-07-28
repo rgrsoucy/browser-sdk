@@ -22,7 +22,6 @@ default class Device {
         this.description = rawDevice.description;
         this.owner = rawDevice.owner;
         this.openToPublic = rawDevice.public;
-        // ajax = new Ajax(config.ajax);
         this.history = new DeviceHistory(rawDevice, config);
         this.configurations = [];
         this.commands = [];

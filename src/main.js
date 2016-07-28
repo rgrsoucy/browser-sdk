@@ -71,11 +71,11 @@ let main = {
 
     customAjax: function(ajaxConfiguration) {
         if (ajaxConfiguration) {
-        return new Ajax(ajaxConfiguration);
+            return new Ajax(ajaxConfiguration);
         }
         else {
             throw new Error('Provide the custom configuration to make a new Ajax instance');
-    }
+        }
     
     }
 };

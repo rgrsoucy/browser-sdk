@@ -97,10 +97,7 @@ describe('Device', function() {
             };
             let response;
 
-            // deviceInstance.ajax.customXHR = this.xhr;
-
             deviceInstance.updateDevice(patch, true).then((response) => {
-                //console.log(response);
                 expect(patch).to.deep.equal(response);
                 done();
             });

@@ -54,7 +54,6 @@ describe('Ajax', function() {
         });
 
         it('should default uri to api.relayr.io', function() {
-            console.log(ajaxInstance)
             expect(ajaxInstance.options.uri).to.equal('api.relayr.io');
         });
     });

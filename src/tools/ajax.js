@@ -153,8 +153,6 @@ class Ajax {
         );
 
         xhrObject.setRequestHeader('Authorization', this.options.token);
-        console.log("options: ", options);
-        console.log("this.options: ", this.options);
         xhrObject.setRequestHeader('Content-Type', options.contentType);
 
 

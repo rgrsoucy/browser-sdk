@@ -6,7 +6,7 @@ import DeviceClass from '../src/entities/Device';
 import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
 import TransmitterClass from '../src/entities/Transmitter';
-import Ajax, { ajax } from '../src/tools/ajax'
+import { ajax } from '../src/tools/ajax'
 
 let oauthMock = {
     token: 'fake-token',
