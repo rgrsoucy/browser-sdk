@@ -15,8 +15,8 @@ global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 const fakeConfig = {
     ajax: {
-        url: 'fakeURL',
-        dataUri: 'http://test-data.example.com',
+        protocol:'http://',
+        uri: 'test-data.example.com',
         token: '12345',
         tokenType: 'Bearer'
     }

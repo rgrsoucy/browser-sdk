@@ -4,7 +4,7 @@ import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised';
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
-import Ajax from '../src/tools/ajax.js';
+import Ajax, { ajax } from '../src/tools/ajax.js';
 var expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiPromise);
@@ -13,24 +13,23 @@ let ajaxInstance;
 
 
 describe('Ajax', function() {
-    let options = {
-        tokenType: 'Bearer',
-        token: 'FAKE_TOKEN',
-        uri: null,
-    };
     beforeEach(function() {
+        ajaxInstance = ajax;
+        ajaxInstance.options= {
+            tokenType: 'Bearer',
+            token: 'FAKE_TOKEN'
+        };
 
-        ajaxInstance = new Ajax(options);
-
+        //instance.xhr doesn't exist anymore as a property
         this.xhr = sinon.useFakeXMLHttpRequest();
 
         this.requests = [];
+    
 
         this.xhr.onCreate = function(xhr) {
             this.requests.push(xhr);
         }.bind(this);
 
-        sinon.spy(ajaxInstance, '_xhrRequest');
     });
 
     afterEach(function() {
@@ -40,23 +39,22 @@ describe('Ajax', function() {
 
     describe('setup', function() {
         it('should get the current token', function() {
-            expect(ajaxInstance.token).to.equal('FAKE_TOKEN');
+            expect(ajaxInstance.options.token).to.equal('FAKE_TOKEN');
         });
 
         it('should default protocol to https://', function() {
-            expect(ajaxInstance.protocol).to.equal('https://');
+            expect(ajaxInstance.options.protocol).to.equal('https://');
         });
 
         it('should be possible to specify another protocol', function() {
-            ajaxInstance = new Ajax(Object.assign({
+            let ajaxInstance2 = new Ajax({
                     protocol: 'http://'
-                },
-                options));
-            expect(ajaxInstance.protocol).to.equal('http://');
+                });
+            expect(ajaxInstance2.options.protocol).to.equal('http://');
         });
 
         it('should default uri to api.relayr.io', function() {
-            expect(ajaxInstance.uri).to.equal('api.relayr.io/');
+            expect(ajaxInstance.options.uri).to.equal('api.relayr.io');
         });
     });
 
@@ -77,18 +75,23 @@ describe('Ajax', function() {
                 type: 'GET',
                 isObject: true
             }, null).then((result) => {
+               
                 expect(result).to.deep.equal(data);
                 done();
             });
+           
 
             this.requests[0].respond(200, {
                 'Content-Type': 'application/json'
             }, dataJson);
+       
         });
 
 
         it('Should pass the correct options to the _xhrRequest', function() {
 
+            sinon.spy(ajaxInstance, '_xhrRequest');
+    
             var options = {
                 url: '/oauth-userinfo',
                 type: 'GET',
@@ -120,6 +123,8 @@ describe('Ajax', function() {
 
 
         describe('query parameters', function() {
+
+
             it('should create a query params string of query object', function() {
                 ajaxInstance.get('/test', {
                     raw: true,

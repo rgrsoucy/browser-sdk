@@ -1,4 +1,4 @@
-import Ajax from '../tools/ajax.js';
+import { ajax } from '../tools/ajax.js';
 
 export
 default class Transmitter {
@@ -9,7 +9,6 @@ default class Transmitter {
         this.topic = config.topic;
         this.owner = config.owner;
         this.integrationType = config.integrationType;
-        this.ajax = new Ajax(config.ajax);
     }
 
     deleteTransmitter(opts) {
@@ -17,7 +16,7 @@ default class Transmitter {
             throw new Error('Provide the id during instantiation');
         }
         return new Promise((resolve, reject) => {
-            this.ajax.delete(`/transmitters/${this.id}`, opts)
+            ajax.delete(`/transmitters/${this.id}`, opts)
                 .then((response) => {
                     //right now the object hangs around, but on the cloud it is gone
                     resolve(response);
@@ -43,7 +42,7 @@ default class Transmitter {
         }
 
         return new Promise((resolve, reject) => {
-            this.ajax.patch(`/transmitters/${this.id}`, patchBody, opts)
+            ajax.patch(`/transmitters/${this.id}`, patchBody, opts)
                 .then((response) => {
                     this.id = response.id,
                     this.secret = response.secret,

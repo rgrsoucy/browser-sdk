@@ -4,25 +4,18 @@ import Device from './entities/Device';
 import Group from './entities/Group';
 import Model from './entities/Model';
 import Transmitter from './entities/Transmitter';
-import Ajax from './tools/ajax';
-import {
-    mqtt
-}
-from './tools/mqtt';
+import Ajax, { ajax } from './tools/ajax';
+
+import { mqtt } from './tools/mqtt';
 
 export {
-    Oauth2, User, Device, Group, Model, Transmitter, Ajax
+    Oauth2, User, Device, Group, Model, Transmitter
 };
 
 const config = {
     persistToken: true,
     mqtt: {
         endpoint: 'mqtt.relayr.io'
-    },
-    ajax: {
-        uri: 'api.relayr.io',
-        dataUri: 'data-api.relayr.io',
-        protocol: 'https://'
     }
 };
 
@@ -43,20 +36,20 @@ let main = {
 
             if (!oauth2) {
                 oauth2 = new Oauth2({
-                    protocol: config.ajax.protocol,
-                    uri: config.ajax.uri,
+                    protocol: ajax.options.protocol,
+                    uri: ajax.options.uri,
                     appId: project.id,
                     redirectURI: project.redirectURI,
                     persist: config.persistToken
                 });
-            }
+            }       
             if (!optionalToken) {
                 oauth2.login();
 
-                config.ajax.token = oauth2.token;
+                ajax.options.token = oauth2.token;
 
             } else {
-                config.ajax.token = optionalToken;
+                ajax.options.token = optionalToken;
             }
 
             currentUser = new User(config);
@@ -77,7 +70,13 @@ let main = {
     },
 
     customAjax: function(ajaxConfiguration) {
-        return new Ajax(ajaxConfiguration || config.ajax);
+        if (ajaxConfiguration) {
+            return new Ajax(ajaxConfiguration);
+        }
+        else {
+            throw new Error('Provide the custom configuration to make a new Ajax instance');
+        }
+    
     }
 };
 

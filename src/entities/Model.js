@@ -1,5 +1,5 @@
 // getAllModels
-import Ajax from '../tools/ajax.js';
+import { ajax } from '../tools/ajax.js';
 
 export
 let cache = {
@@ -20,7 +20,6 @@ export
 default class Model {
     constructor(id = null, config) {
         this.config = config;
-        this.ajax = new Ajax(config.ajax);
         if (id) {
             this.id = id;
         }
@@ -31,7 +30,7 @@ default class Model {
             if (cache.public.toArray.length > 0) {
                 resolve(cache.public.toArray);
             } else {
-                this.ajax.get('/device-models', {
+                ajax.get('/device-models', {
                     queryObj: 'limit=100000',
                     contentType: 'application/hal+json'
                 }).then((response) => {
@@ -56,7 +55,7 @@ default class Model {
             });
         } else {
             return new Promise((resolve, reject) => {
-                this.ajax.get(`/device-models/${id}`, {
+                ajax.get(`/device-models/${id}`, {
                     contentType: 'application/hal+json'
                 }).then((model) => {
                     cache.public.toArray.push(model);

@@ -1,11 +1,12 @@
 import main, {
-    User, Device, Model, Group, Transmitter, Ajax
+    User, Device, Model, Group, Transmitter
 }
 from '../src/main';
 import DeviceClass from '../src/entities/Device';
 import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
 import TransmitterClass from '../src/entities/Transmitter';
+import { ajax } from '../src/tools/ajax'
 
 let oauthMock = {
     token: 'fake-token',
@@ -64,7 +65,7 @@ describe('Main', function() {
 
             it('should populate the new token', function(done) {
                 main.authorize().then(() => {
-                    expect(main.getConfig().ajax.token).to.be.equal('fake-token');
+                    expect(ajax.options.token).to.be.equal('fake-token');
                     done();
                 });
             });
@@ -80,7 +81,7 @@ describe('Main', function() {
             });
 
             it('should set the token', function() {
-                expect(main.getConfig().ajax.token).to.be.equal('fake-provided-token');
+                expect(ajax.options.token).to.be.equal('fake-provided-token');
             });
         });
     });
@@ -106,12 +107,6 @@ describe('Main', function() {
                 persistToken: true,
                 mqtt: {
                     endpoint: 'mqtt.relayr.io'
-                },
-                ajax: {
-                    uri: 'api.relayr.io',
-                    dataUri: 'data-api.relayr.io',
-                    protocol: 'https://', 
-                    token: 'fake-token'
                 }
             };
 
@@ -129,19 +124,7 @@ describe('Main', function() {
 
         it('should return the current user', function(){
             let testUser = {
-                "ajax": {
-                  "protocol": "https://",
-                  "token": "fake-token",
-                  "tokenType": "Bearer",
-                  "uri": "api.relayr.io"
-                },
                 "config": {
-                  "ajax": {
-                    "dataUri": "data-api.relayr.io",
-                    "protocol": "https://",
-                    "token": "fake-token",
-                    "uri": "api.relayr.io"
-                  },
                   "mqtt": {
                     "endpoint": "mqtt.relayr.io"
                   },
@@ -162,12 +145,14 @@ describe('Main', function() {
         });
 
         it('should return the custom ajax if one is provided', function(){
-            let differentAjax = {
+
+            let differentAjax = {'_options':{
                     uri: 'kittens.com',
                     protocol: 'https://', 
                     tokenType: 'Bearer', 
-                    token: 'fake-token'
-            };
+                    token: 'fake-token', 
+                    dataUri: 'data-api.relayr.io',
+            }};
 
             let ajaxConfig = {
                                 uri: 'kittens.com',
@@ -180,15 +165,12 @@ describe('Main', function() {
         });
 
         it('should return the standard ajax if none is provided', function(){
-            let differentAjax = {
-                    uri: 'api.relayr.io',
-                    protocol: 'https://', 
-                    token: 'fake-token',
-                    tokenType: 'Bearer'
+            var fn = function() {
+                main.customAjax();
             };
-
-            expect(main.customAjax()).to.deep.equal(differentAjax);
+            expect(fn).to.throw(Error);
         });
+
     });
 });
 

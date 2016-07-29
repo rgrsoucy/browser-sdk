@@ -22,6 +22,7 @@ chai.use(sinonChai);
 let deviceInstance;
 let fakeConfig;
 let fakeDevice;
+global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 describe('Device', function() {
     beforeEach(function() {
@@ -96,10 +97,7 @@ describe('Device', function() {
             };
             let response;
 
-            deviceInstance.ajax.customXHR = this.xhr;
-
             deviceInstance.updateDevice(patch, true).then((response) => {
-                //console.log(response);
                 expect(patch).to.deep.equal(response);
                 done();
             });
@@ -123,7 +121,7 @@ describe('Device', function() {
         it('should delete the deviceInstance', function(done) {
             let data = {};
 
-            deviceInstance.ajax.customXHR = this.xhr;
+            // deviceInstance.ajax.customXHR = this.xhr;
             deviceInstance.deleteDevice(data).then((response) => {
                 expect(response).to.be.defined;
                 done();
