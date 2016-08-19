@@ -24,7 +24,7 @@ describe('Ajax', function() {
         this.xhr = sinon.useFakeXMLHttpRequest();
 
         this.requests = [];
-    
+
 
         this.xhr.onCreate = function(xhr) {
             this.requests.push(xhr);
@@ -75,23 +75,23 @@ describe('Ajax', function() {
                 type: 'GET',
                 isObject: true
             }, null).then((result) => {
-               
+
                 expect(result).to.deep.equal(data);
                 done();
             });
-           
+
 
             this.requests[0].respond(200, {
                 'Content-Type': 'application/json'
             }, dataJson);
-       
+
         });
 
 
         it('Should pass the correct options to the _xhrRequest', function() {
 
             sinon.spy(ajaxInstance, '_xhrRequest');
-    
+
             var options = {
                 url: '/oauth-userinfo',
                 type: 'GET',
@@ -124,7 +124,6 @@ describe('Ajax', function() {
 
         describe('query parameters', function() {
 
-
             it('should create a query params string of query object', function() {
                 ajaxInstance.get('/test', {
                     raw: true,
@@ -149,17 +148,38 @@ describe('Ajax', function() {
                 expect(this.requests[0].url).to.contain('?complicated=--%20test%20*');
             });
 
+            it('should support query parameters that are arrays', function() {
+                ajaxInstance.get('/test', {
+                    queryObj: {
+                        array: [1, 2, 3, 4]
+                    }
+                });
+
+                expect(this.requests[0].url).to.contain('?array=1%2C2%2C3%2C4');
+            });
+
+            it('should exclude properties that are empty', function() {
+                ajaxInstance.get('/test', {
+                    queryObj: {
+                        empty: null
+                    }
+                });
+
+                expect(this.requests[0].url).not.to.contain('?empty=');
+            });
+
             it('should not add any query string if no query parameter object was provided', function() {
                 ajaxInstance.get('/test', true);
 
                 expect(this.requests[0].url).to.not.contain('?');
             });
 
-            it('should not add any query string if the query parameter objec is empty', function() {
+            it('should not add any query string if the query parameter object is empty', function() {
                 ajaxInstance.get('/test', true, {});
 
                 expect(this.requests[0].url).to.not.contain('?');
             });
+
 
             it('should throw an error if the url doesnt have a leading /', function() {
 

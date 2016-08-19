@@ -125,18 +125,21 @@ class Ajax {
 
 
     _serializeQueryStr(obj) {
-        var str = [];
-
-        if (!obj || Object.keys(obj).length === 0) {
+        if (!obj  || Object.keys(obj).length === 0) {
             return '';
         }
 
-        for (var p in obj) {
-            if (obj.hasOwnProperty(p)) {
-                str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
+        let queries = Object.keys(obj).map((key) => {
+            if (!obj[key] && typeof obj[key] !== 'number') {
+                return null;
             }
+            return `${encodeURIComponent(key)}=${encodeURIComponent(obj[key])}`;
+        }).filter((item) => !!item);
+
+        if (queries.length === 0) {
+            return '';
         }
-        return '?' + str.join('&');
+        return '?' + queries.join('&');
     }
 
 

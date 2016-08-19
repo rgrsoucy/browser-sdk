@@ -8,8 +8,25 @@ global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 let userInstance;
 let fakeConfig;
-let userStub;
-let devicesStub;
+
+const userStub = {
+    id: '123',
+    email: 'john@doe',
+    name: 'billy'
+};
+
+const devicesStub = [{
+    id: 'fakeDeviceId',
+    name: 'fakeDeviceName1',
+    modelId: 'fakeModel',
+    owner: 'fakeOwner'
+
+}, {
+    id: 'fakeDeviceId2',
+    name: 'fakeDeviceName2',
+    modelId: 'fakeModel',
+    owner: 'fakeOwner'
+}];
 
 describe('User', function() {
     beforeEach(function() {
@@ -61,29 +78,6 @@ describe('User', function() {
 
     describe('#getAllMyDevices', function() {
 
-        beforeEach(function() {
-            userStub = {
-                id: '123',
-                email: 'john@doe',
-                name: 'billy'
-            };
-
-            devicesStub = [{
-                id: 'fakeDeviceId',
-                name: 'fakeDeviceName1',
-                modelId: 'fakeModel',
-                owner: 'fakeOwner'
-
-            }, {
-                id: 'fakeDeviceId2',
-                name: 'fakeDeviceName2',
-                modelId: 'fakeModel',
-                owner: 'fakeOwner'
-
-            }]
-
-        });
-
         it('should get all devices', function(done) {
             userInstance.userInfo = userStub;
             userInstance.getMyDevices().then((devices) => {
@@ -104,7 +98,7 @@ describe('User', function() {
             userInstance.getMyDevices({
                 asClasses: true
             }).then((devices) => {
-                expect(devices[0]).to.have.property("rawDevice");
+                expect(devices[0]).to.have.property('rawDevice');
                 done();
             });
 
@@ -116,5 +110,70 @@ describe('User', function() {
             }, 0);
         });
 
+    });
+
+    describe('#searchForDevices', function() {
+        it('should search for devices', function() {
+            userInstance.searchForDevices({
+                query: { name: 'testur' }
+            });
+
+            expect(this.requests[0].url).to.have.string('.io/devices');
+        });
+
+        it('should throw an error if no search object has been provided', function() {
+            let fn = function() {
+                userInstance.searchForDevices({});
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should resolve promise with found devices', function(done) {
+            userInstance.searchForDevices({
+                query: { name: 'testur' }
+            }).then((devices) => {
+                expect(devices).to.deep.equal([devicesStub]);
+                done();
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify([devicesStub]));
+        });
+
+        it('should be possible to get the devices as classes', function(done) {
+            userInstance.searchForDevices({
+                query: { name: 'testur' },
+                asClasses: true,
+            }).then((devices) => {
+                expect(devices[0]).to.have.property('rawDevice');
+                done();
+            }).catch(e => console.log(e));
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify([devicesStub]));
+        });
+
+        describe('query parameters', () => {
+            it('should create a query object with correct properties', function() {
+                userInstance.searchForDevices({
+                    query: {
+                        name: 'test-name',
+                        description: 'test-description',
+                        ids: ['my-id', 'my-second-id'],
+                        modelId: 'my-model-id',
+                        firmwareVersion: 'my-firmware'
+                    }
+                });
+
+                const URL = this.requests[0].url;
+                expect(URL).to.have.string('device_name=test-name');
+                expect(URL).to.have.string('device_description=test-description');
+                expect(URL).to.have.string('device_ids=my-id%2Cmy-second-id');
+                expect(URL).to.have.string('model_id=my-model-id');
+                expect(URL).to.have.string('firmware_version=my-firmware');
+            });
+        });
     });
 });

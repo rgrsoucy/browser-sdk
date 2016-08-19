@@ -27,19 +27,41 @@ export default class User {
             this.getUserInfo().then(() => {
 
                 ajax.get(`/users/${this.userInfo.id}/devices`).then((response) => {
-
                     if (opts.asClasses) {
                         resolve(response.map((device) => {
                             return new Device(device, this.config);
                         }));
                     } else {
                         resolve(response);
-
                     }
-                }).catch((error) => {
-                    reject(error);
-                });
+                }).catch(reject);
             });
+        });
+    }
+
+    searchForDevices(opts = {}) {
+        if (!opts.query) {
+            throw new Error('Please provide a query object');
+        }
+        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version } = opts.query;
+        return new Promise((resolve, reject) => {
+            ajax.get('/devices', {
+                queryObj: {
+                    device_name,
+                    device_description,
+                    device_ids,
+                    model_id,
+                    firmware_version
+                }
+            }).then((response) => {
+                if (opts.asClasses) {
+                    resolve(response.map((device) => {
+                        return new Device(device, this.config);
+                    }));
+                } else {
+                    resolve(response);
+                }
+            }, reject);
         });
     }
 
