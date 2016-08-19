@@ -124,12 +124,13 @@ describe('Main', function() {
 
         it('should return the current user', function(){
             let testUser = {
-                "config": {
-                  "mqtt": {
-                    "endpoint": "mqtt.relayr.io"
+                config: {
+                  mqtt: {
+                    endpoint: 'mqtt.relayr.io'
                   },
-                  "persistToken": true
-                }
+                  persistToken: true
+              },
+              token: 'fake-token'
             };
 
             expect(main.getCurrentUser()).to.deep.equal(testUser);
@@ -148,9 +149,9 @@ describe('Main', function() {
 
             let differentAjax = {'_options':{
                     uri: 'kittens.com',
-                    protocol: 'https://', 
-                    tokenType: 'Bearer', 
-                    token: 'fake-token', 
+                    protocol: 'https://',
+                    tokenType: 'Bearer',
+                    token: 'fake-token',
                     dataUri: 'data-api.relayr.io',
             }};
 
@@ -173,16 +174,3 @@ describe('Main', function() {
 
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-

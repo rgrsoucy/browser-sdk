@@ -38,7 +38,7 @@ describe('User', function() {
             }
         };
 
-        userInstance = new User(fakeConfig);
+        userInstance = new User(fakeConfig, 'test-token');
 
         this.xhr = sinon.useFakeXMLHttpRequest();
 
@@ -49,6 +49,13 @@ describe('User', function() {
         }.bind(this);
 
     });
+
+    describe('properties', function() {
+        it('should set token on user object', function() {
+            expect(userInstance.token).to.equal('test-token');
+        });
+    });
+
     describe('#getUserInfo', function() {
 
 

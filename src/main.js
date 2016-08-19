@@ -42,17 +42,19 @@ let main = {
                     redirectURI: project.redirectURI,
                     persist: config.persistToken
                 });
-            }       
+            }
+            let token;
             if (!optionalToken) {
                 oauth2.login();
 
-                ajax.options.token = oauth2.token;
+                token = oauth2.token;
 
             } else {
-                ajax.options.token = optionalToken;
+                token = optionalToken;
             }
 
-            currentUser = new User(config);
+            ajax.options.token = token;
+            currentUser = new User(config, token);
             resolve(currentUser);
         });
     },
@@ -76,7 +78,7 @@ let main = {
         else {
             throw new Error('Provide the custom configuration to make a new Ajax instance');
         }
-    
+
     }
 };
 

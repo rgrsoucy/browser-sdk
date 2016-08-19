@@ -2,8 +2,9 @@ import { ajax } from '../tools/ajax.js';
 import Device from './Device';
 
 export default class User {
-    constructor(config) {
+    constructor(config, token) {
         this.config = config;
+        this.token = token;
     }
 
     getUserInfo() {
