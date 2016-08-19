@@ -45,6 +45,25 @@ describe('Main', function() {
         expect(Transmitter).to.be.equal(TransmitterClass);    
     });
 
+    describe('#init', function() {
+        let oldAjaxConfig;
+        beforeEach(function() {
+            oldAjaxConfig = ajax.options;
+        });
+
+        afterEach(function() {
+            ajax.options = oldAjaxConfig;
+        });
+
+        it('should add ajax config to the ajax singelton', function() {
+            main.init({ id: 'fake-project-id' }, {
+                ajax: { url: 'my-special-url' }
+            });
+
+            expect(ajax.options.url).to.equal('my-special-url');
+        });
+    });
+
     describe('#authorize', function() {
         beforeEach(function() {
             main.init({
@@ -102,7 +121,7 @@ describe('Main', function() {
             main.authorize();
         });
 
-        it('should return the current config', function(){
+        it('should return the current config', function() {
             let testConfig = {
                 persistToken: true,
                 mqtt: {
@@ -110,7 +129,8 @@ describe('Main', function() {
                 }
             };
 
-            expect(main.getConfig()).to.deep.equal(testConfig);
+            expect(main.getConfig().persistToken).to.equal(true);
+            expect(main.getConfig().mqtt).deep.to.equal({ endpoint: 'mqtt.relayr.io' });
         });
     });
 
@@ -122,18 +142,9 @@ describe('Main', function() {
             main.authorize('fake-token');
         });
 
-        it('should return the current user', function(){
-            let testUser = {
-                config: {
-                  mqtt: {
-                    endpoint: 'mqtt.relayr.io'
-                  },
-                  persistToken: true
-              },
-              token: 'fake-token'
-            };
+        it('should return the current user', function() {
 
-            expect(main.getCurrentUser()).to.deep.equal(testUser);
+            expect(main.getCurrentUser().token).to.deep.equal('fake-token');
         });
     });
 

@@ -28,6 +28,7 @@ let main = {
 
         if (customConfig) {
             Object.assign(config, customConfig);
+            ajax.options = config.ajax;
         }
     },
 
