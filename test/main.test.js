@@ -7,27 +7,51 @@ import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
 import TransmitterClass from '../src/entities/Transmitter';
 import { ajax } from '../src/tools/ajax'
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiPromise from 'chai-as-promised';
+import 'sinon-as-promised';
+var expect = chai.expect;
+
+chai.use(sinonChai);
+chai.use(chaiPromise);
 
 let oauthMock = {
     token: 'fake-token',
-    login: sinon.spy(),
-    logout: sinon.spy()
+    login: function(){},
+    logout: function(){}
 };
 
 main.__Rewire__('Oauth2', function() {
     return oauthMock;
 });
 
-import chai from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chaiPromise from 'chai-as-promised';
-var expect = chai.expect;
-
-chai.use(sinonChai);
-chai.use(chaiPromise);
+let testUser = {
+                  "id": "abc123",
+                  "email": "relayr@relayr.com",
+                  "industryArea": "Aerospace",
+                  "config": {
+                          "mqtt": {
+                            "endpoint": "mqtt.relayr.io"
+                          },
+                          "persistToken": true
+                        }
+}; 
 
 describe('Main', function() {
+    beforeEach(function(){
+        sinon.stub(User.prototype, "getUserInfo").resolves(testUser);
+        sinon.spy(oauthMock, 'login');
+        sinon.spy(oauthMock, 'logout');
+    });
+
+    afterEach(function(){
+        oauthMock.login.restore();
+        oauthMock.logout.restore();
+        User.prototype.getUserInfo.restore();
+    });
+
 
     it('should export Device class under device', function() {        
         expect(Device).to.be.equal(DeviceClass);    
@@ -55,12 +79,19 @@ describe('Main', function() {
         describe('no optionalToken is provided', function() {
             it('should login', function() {
                 main.authorize();
+                expect(oauthMock.login).to.have.been.called;         
+            });
 
-                expect(oauthMock.login).to.have.beenCalled;
+            it('should ask to verify the token', function(){
+                sinon.spy(main, '_verifyToken');     
+                main.authorize();       
+                expect(main._verifyToken).to.have.been.called;
+                main._verifyToken.restore();
+
             });
 
             it('should update user with the user informaiton', function(done) {
-                expect(main.authorize()).to.eventually.to.have.property('getUserInfo').notify(done);
+                expect(main.authorize()).to.eventually.to.have.property('email').notify(done);
             });
 
             it('should populate the new token', function(done) {
@@ -77,20 +108,53 @@ describe('Main', function() {
             });
 
             it('should not login', function() {
-                expect(oauthMock.login).to.not.have.beenCalled;
+                expect(oauthMock.login).to.not.have.been.called;
             });
 
             it('should set the token', function() {
                 expect(ajax.options.token).to.be.equal('fake-provided-token');
             });
         });
+
+    });
+
+    describe.only('#_verifyToken', function() {
+        it('should logout and redirect to login if userinfo has no email', function() {
+            //stub out testuser w no email
+            let verifyUser = new User();
+            let badUser = {
+                "id": "abc123",
+                "industryArea": "Aerospace",
+            }
+            User.prototype.getUserInfo.restore();
+            sinon.stub(User.prototype, "getUserInfo").resolves(badUser);
+            main.authorize().then(()=>{
+                expect(oauthMock.logout).to.have.been.called;
+            });
+        });
+
+        it('should logout and redirect to login if userinfo has obviously bad email', function() {
+            //stub out testUser email with a bad one
+            let verifyUser = new User();
+            let badUser = {
+                "id": "abc123",
+                "email":"relayrATrelayr.com",
+                "industryArea": "Aerospace"
+            }
+            User.prototype.getUserInfo.restore();
+            sinon.stub(User.prototype, "getUserInfo").resolves(badUser);
+            main.authorize().then(()=>{
+                expect(oauthMock.logout).to.have.been.called;
+            });
+        });
+
     });
 
     describe('#logout', function() {
         it('should log the user out', function() {
             main.logout();
 
-            expect(oauthMock.logout).to.have.beenCalledOnce;
+            expect(oauthMock.logout).to.have.been.calledOnce;
         });
     });
 
@@ -119,20 +183,14 @@ describe('Main', function() {
             main.init({
                 id: 'fake-project-id'
             });
-            main.authorize('fake-token');
+            
         });
 
         it('should return the current user', function(){
-            let testUser = {
-                "config": {
-                  "mqtt": {
-                    "endpoint": "mqtt.relayr.io"
-                  },
-                  "persistToken": true
-                }
-            };
-
-            expect(main.getCurrentUser()).to.deep.equal(testUser);
+            main.authorize('fake-token').then(()=>{
+                expect(main.getCurrentUser()).to.deep.equal(testUser);
+            });
+            
         });
     });
 
