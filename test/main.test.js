@@ -118,7 +118,7 @@ describe('Main', function() {
 
     });
 
-    describe.only('#_verifyToken', function() {
+    describe('#_verifyToken', function() {
         it('should logout and redirect to login if userinfo has no email', function() {
             //stub out testuser w no email
             let verifyUser = new User();
