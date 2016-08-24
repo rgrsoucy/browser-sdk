@@ -197,4 +197,46 @@ describe('User', function() {
             });
         });
     });
+
+    describe('#getCachedDevices', function() {
+
+        it ('should return an empty array when there is no cache of devices', function (done){
+            userInstance.userInfo = userStub;
+
+
+            userInstance.getCachedDevices().then((devicesCache)=>{
+                expect(devicesCache).to.deep.equal([]);
+                done();
+            });
+
+
+                setTimeout(() => {
+                //give some time for the async userInfo cache to take effect
+                this.requests[0].respond(200, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify(devicesStub));
+            }, 0);
+
+        });
+
+        it('should get cached devices when there are some to get', function(done) {
+            userInstance.userInfo = userStub;
+
+            userInstance.getMyDevices().then(()=>{
+                userInstance.getCachedDevices().then((devicesCache)=>{
+                    expect(devicesCache).to.deep.equal(devicesStub);
+                    done();
+                });
+            });
+
+                setTimeout(() => {
+                //give some time for the async userInfo cache to take effect
+                this.requests[0].respond(200, {
+                    'Content-Type': 'text/json'
+                }, JSON.stringify(devicesStub));
+            }, 0);
+
+        })
+    });
+
 });

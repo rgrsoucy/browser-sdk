@@ -4,6 +4,7 @@ import Device from './Device';
 export default class User {
     constructor(config) {
         this.config = config;
+        this.token = ajax.options.token;
     }
 
     getUserInfo() {
@@ -34,6 +35,7 @@ export default class User {
                             return new Device(device, this.config);
                         }));
                     } else {
+                        this.devicesCache = response;
                         resolve(response);
                     }
                 }).catch(reject);
@@ -93,5 +95,15 @@ export default class User {
 
     _getConfig() {
         return this.config;
+    }
+
+    getCachedDevices() {
+        return new Promise((resolve, reject) => {
+            if (this.devicesCache){
+                    resolve(this.devicesCache);
+            } else {
+                    resolve([]);
+                }
+        });
     }
 }
