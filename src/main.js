@@ -62,18 +62,13 @@ let main = {
     _verifyToken: function(currentUser){
         return new Promise((resolve, reject) => {
             currentUser.getUserInfo().then((response)=>{
-                console.log(response.email);
                     if (!response.email||!(response.email.includes('@'))||!(response.email.includes('.'))) {
-                        console.log('3');
                         oauth2.logout();
-                        // main.authorize();   
                     }
-                    console.log('2');
                     resolve(response);
                 }).catch((err)=>{
                     console.log(err);
                     oauth2.logout();
-                    // main.authorize();
                     reject(err);
                 });
             });
