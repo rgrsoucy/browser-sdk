@@ -28,9 +28,6 @@ main.__Rewire__('Oauth2', function() {
 });
 
 let testUser = {
-                  "id": "abc123",
-                  "email": "relayr@relayr.com",
-                  "industryArea": "Aerospace",
                   "config": {
                           "mqtt": {
                             "endpoint": "mqtt.relayr.io"
@@ -90,8 +87,11 @@ describe('Main', function() {
 
             });
 
-            it('should update user with the user informaiton', function(done) {
-                expect(main.authorize()).to.eventually.to.have.property('email').notify(done);
+            it('should return newly created user instance', function(done) {
+                main.authorize().then((response) => {
+                    expect(response).to.deep.equal(testUser);
+                    done();
+                }).catch((err)=>{console.log(err)});
             });
 
             it('should populate the new token', function(done) {
@@ -116,39 +116,22 @@ describe('Main', function() {
             });
         });
 
-    });
-
-    describe('#_verifyToken', function() {
-        it('should logout and redirect to login if userinfo has no email', function() {
-            //stub out testuser w no email
-            let verifyUser = new User();
-            let badUser = {
-                "id": "abc123",
-                "industryArea": "Aerospace",
-            }
-            User.prototype.getUserInfo.restore();
-            sinon.stub(User.prototype, "getUserInfo").resolves(badUser);
-            main.authorize().then(()=>{
-                expect(oauthMock.logout).to.have.been.called;
+        describe('#_verifyToken', function(done) {
+            it('should logout if attempt to get userInfo fails', function() {
+                let verifyUser = new User();
+                let badRequest = {
+                    "status": 401               
+                }
+                User.prototype.getUserInfo.restore();
+                sinon.stub(User.prototype, "getUserInfo").onCall(0).rejects(badRequest);
+                main.authorize().then(()=>{
+                    expect(oauthMock.logout).to.have.been.called;
+                    done();
+                });
             });
         });
-
-        it('should logout and redirect to login if userinfo has obviously bad email', function() {
-            //stub out testUser email with a bad one
-            let verifyUser = new User();
-            let badUser = {
-                "id": "abc123",
-                "email":"relayrATrelayr.com",
-                "industryArea": "Aerospace"
-            }
-            User.prototype.getUserInfo.restore();
-            sinon.stub(User.prototype, "getUserInfo").resolves(badUser);
-            main.authorize().then(()=>{
-                expect(oauthMock.logout).to.have.been.called;
-            });
-        });
-
     });
+
 
     describe('#logout', function() {
         it('should log the user out', function() {
@@ -186,10 +169,11 @@ describe('Main', function() {
             
         });
 
-        it('should return the current user', function(){
+        it('should return the current user', function(done){
             main.authorize('fake-token').then(()=>{
                 expect(main.getCurrentUser()).to.deep.equal(testUser);
-            });
+                done();
+            }).catch((err)=>{console.log(err)});
             
         });
     });

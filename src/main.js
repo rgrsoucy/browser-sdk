@@ -53,8 +53,12 @@ let main = {
             }
 
             currentUser = new User(config);
-            main._verifyToken(currentUser).then((builtOutUser)=>{
-                resolve(builtOutUser);
+
+            main._verifyToken(currentUser).then(()=>{
+                resolve(currentUser);
+            }).catch((err)=>{
+                oauth2.logout();
+                oauth2.login();
             });
         });
     },
@@ -62,13 +66,11 @@ let main = {
     _verifyToken: function(currentUser){
         return new Promise((resolve, reject) => {
             currentUser.getUserInfo().then((response)=>{
-                    if (!response.email||!(response.email.includes('@'))||!(response.email.includes('.'))) {
-                        oauth2.logout();
-                    }
-                    resolve(response);
+                    resolve();
                 }).catch((err)=>{
-                    console.log(err);
-                    oauth2.logout();
+                    if (err.status == 401){
+                        console.log('your token is invalid, please log in again');
+                    }
                     reject(err);
                 });
             });
