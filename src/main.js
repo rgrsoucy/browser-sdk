@@ -49,13 +49,12 @@ let main = {
                 oauth2.login();
 
                 token = oauth2.token;
-
             } else {
                 token = optionalToken;
             }
 
             ajax.options.token = token;
-            currentUser = new User(config, token);
+            currentUser = new User(config);
             resolve(currentUser);
         });
     },

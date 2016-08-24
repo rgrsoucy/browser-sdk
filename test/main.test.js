@@ -5,8 +5,9 @@ from '../src/main';
 import DeviceClass from '../src/entities/Device';
 import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
+import UserClass from '../src/entities/User';
 import TransmitterClass from '../src/entities/Transmitter';
-import { ajax } from '../src/tools/ajax'
+import { ajax } from '../src/tools/ajax';
 
 let oauthMock = {
     token: 'fake-token',
@@ -143,8 +144,7 @@ describe('Main', function() {
         });
 
         it('should return the current user', function() {
-
-            expect(main.getCurrentUser().token).to.deep.equal('fake-token');
+            expect(main.getCurrentUser()).to.be.an.instanceof(UserClass);
         });
     });
 

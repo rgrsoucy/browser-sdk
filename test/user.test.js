@@ -1,4 +1,6 @@
 import User from '../src/entities/User.js';
+import { ajax } from '../src/tools/ajax.js';
+
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -28,6 +30,7 @@ const devicesStub = [{
     owner: 'fakeOwner'
 }];
 
+let oldToken;
 describe('User', function() {
     beforeEach(function() {
         fakeConfig = {
@@ -38,7 +41,7 @@ describe('User', function() {
             }
         };
 
-        userInstance = new User(fakeConfig, 'test-token');
+        userInstance = new User(fakeConfig);
 
         this.xhr = sinon.useFakeXMLHttpRequest();
 
@@ -48,17 +51,15 @@ describe('User', function() {
             this.requests.push(xhr);
         }.bind(this);
 
+        oldToken = ajax.options.token;
+        ajax.options.token = 'fake-token';
     });
 
-    describe('properties', function() {
-        it('should set token on user object', function() {
-            expect(userInstance.token).to.equal('test-token');
-        });
+    afterEach(function() {
+        ajax.options.token = oldToken;
     });
 
     describe('#getUserInfo', function() {
-
-
         it('should get the current config', function() {
             expect(userInstance._getConfig()).to.deep.equal(fakeConfig);
         });
@@ -70,16 +71,29 @@ describe('User', function() {
                 name: 'billy'
             };
 
-
             userInstance.getUserInfo().then((userInfo) => {
-                expect(userInfo).to.deep.equal(userStub);
+                expect(userInfo.id).to.equal('123');
+                expect(userInfo.email).to.equal('john@doe');
+                expect(userInfo.name).to.equal('billy');
                 done();
             });
-
 
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(userStub));
+        });
+
+        it('should attach the user token the user info', function(done) {
+            ajax.options.token = 'test-token';
+
+            userInstance.getUserInfo().then((userInfo) => {
+                expect(userInfo.token).to.deep.equal('test-token');
+                done();
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify({}));
         });
     });
 

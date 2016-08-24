@@ -2,9 +2,8 @@ import { ajax } from '../tools/ajax.js';
 import Device from './Device';
 
 export default class User {
-    constructor(config, token) {
+    constructor(config) {
         this.config = config;
-        this.token = token;
     }
 
     getUserInfo() {
@@ -13,8 +12,10 @@ export default class User {
                 resolve(this.userInfo);
             } else {
                 ajax.get('/oauth2/user-info').then((response) => {
-                    this.userInfo = response;
-                    resolve(response);
+                    this.userInfo = Object.assign({}, response, {
+                        token: ajax.options.token
+                    });
+                    resolve(this.userInfo);
                 }).catch((error) => {
                     reject(error);
                 });
