@@ -55,8 +55,27 @@ let main = {
 
             ajax.options.token = token;
             currentUser = new User(config);
-            resolve(currentUser);
+
+            main._verifyToken(currentUser).then(()=>{
+                resolve(currentUser);
+            }).catch((err)=>{
+                oauth2.logout();
+                oauth2.login();
+            });
         });
+    },
+
+    _verifyToken: function(currentUser){
+        return new Promise((resolve, reject) => {
+            currentUser.getUserInfo().then((response)=>{
+                    resolve();
+                }).catch((err)=>{
+                    if (err.status == 401){
+                        console.log('your token is invalid, please log in again');
+                    }
+                    reject(err);
+                });
+            });
     },
 
     logout: function() {

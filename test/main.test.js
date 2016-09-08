@@ -23,12 +23,25 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised';
+import 'sinon-as-promised';
 var expect = chai.expect;
 
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
 describe('Main', function() {
+    beforeEach(function(){
+        sinon.stub(User.prototype, "getUserInfo").resolves(testUser);
+        sinon.spy(oauthMock, 'login');
+        sinon.spy(oauthMock, 'logout');
+    });
+
+    afterEach(function(){
+        oauthMock.login.restore();
+        oauthMock.logout.restore();
+        User.prototype.getUserInfo.restore();
+    });
+
 
     it('should export Device class under device', function() {        
         expect(Device).to.be.equal(DeviceClass);    
@@ -75,12 +88,22 @@ describe('Main', function() {
         describe('no optionalToken is provided', function() {
             it('should login', function() {
                 main.authorize();
-
-                expect(oauthMock.login).to.have.beenCalled;
+                expect(oauthMock.login).to.have.been.called;         
             });
 
-            it('should update user with the user informaiton', function(done) {
-                expect(main.authorize()).to.eventually.to.have.property('getUserInfo').notify(done);
+            it('should ask to verify the token', function(){
+                sinon.spy(main, '_verifyToken');     
+                main.authorize();       
+                expect(main._verifyToken).to.have.been.called;
+                main._verifyToken.restore();
+
+            });
+
+            it('should return newly created user instance', function(done) {
+                main.authorize().then((response) => {
+                    expect(response).to.deep.equal(testUser);
+                    done();
+                }).catch((err)=>{console.log(err)});
             });
 
             it('should populate the new token', function(done) {
@@ -97,20 +120,36 @@ describe('Main', function() {
             });
 
             it('should not login', function() {
-                expect(oauthMock.login).to.not.have.beenCalled;
+                expect(oauthMock.login).to.not.have.been.called;
             });
 
             it('should set the token', function() {
                 expect(ajax.options.token).to.be.equal('fake-provided-token');
             });
         });
+
+        describe('#_verifyToken', function(done) {
+            it('should logout if attempt to get userInfo fails', function() {
+                let verifyUser = new User();
+                let badRequest = {
+                    "status": 401               
+                }
+                User.prototype.getUserInfo.restore();
+                sinon.stub(User.prototype, "getUserInfo").onCall(0).rejects(badRequest);
+                main.authorize().then(()=>{
+                    expect(oauthMock.logout).to.have.been.called;
+                    done();
+                });
+            });
+        });
     });
+
 
     describe('#logout', function() {
         it('should log the user out', function() {
             main.logout();
 
-            expect(oauthMock.logout).to.have.beenCalledOnce;
+            expect(oauthMock.logout).to.have.been.calledOnce;
         });
     });
 
@@ -140,11 +179,15 @@ describe('Main', function() {
             main.init({
                 id: 'fake-project-id'
             });
-            main.authorize('fake-token');
+            
         });
 
-        it('should return the current user', function() {
-            expect(main.getCurrentUser()).to.be.an.instanceof(UserClass);
+        it('should return the current user', function(done){
+            main.authorize('fake-token').then(()=>{
+                expect(main.getCurrentUser()).to.deep.equal(testUser);
+                done();
+            }).catch((err)=>{console.log(err)});
+            
         });
     });
 
