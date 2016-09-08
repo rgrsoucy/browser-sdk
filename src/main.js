@@ -79,7 +79,13 @@ let main = {
     },
 
     logout: function() {
-        oauth2.logout();
+        if (!!oauth2) {
+            oauth2.logout();
+            oauth2 = null;
+        }
+        else {
+            throw new Error('You must log in before you can log out');
+        }
     },
 
     getConfig: function() {
