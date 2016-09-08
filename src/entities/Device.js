@@ -47,15 +47,15 @@ default class Device {
             ajax.patch(`/devices/${this.id}`, patch, {
                 raw: raw
             })
-                .then((response) => {
-                    this.name = response.name;
-                    this.modelId = response.modelId;
-                    this.owner = response.owner;
-                    this.openToPublic = response.public;
-                    resolve(response);
-                }).catch((error) => {
-                    reject(error);
-                });
+            .then((response) => {
+                this.name = response.name;
+                this.modelId = response.modelId;
+                this.owner = response.owner;
+                this.openToPublic = response.public;
+                resolve(response);
+            }).catch((error) => {
+                reject(error);
+            });
         });
     }
 

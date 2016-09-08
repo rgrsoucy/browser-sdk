@@ -5,8 +5,20 @@ from '../src/main';
 import DeviceClass from '../src/entities/Device';
 import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
+import UserClass from '../src/entities/User';
 import TransmitterClass from '../src/entities/Transmitter';
-import { ajax } from '../src/tools/ajax'
+import { ajax } from '../src/tools/ajax';
+
+let oauthMock = {
+    token: 'fake-token',
+    login: sinon.spy(),
+    logout: sinon.spy()
+};
+
+main.__Rewire__('Oauth2', function() {
+    return oauthMock;
+});
+
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -16,25 +28,6 @@ var expect = chai.expect;
 
 chai.use(sinonChai);
 chai.use(chaiPromise);
-
-let oauthMock = {
-    token: 'fake-token',
-    login: function(){},
-    logout: function(){}
-};
-
-main.__Rewire__('Oauth2', function() {
-    return oauthMock;
-});
-
-let testUser = {
-                  "config": {
-                          "mqtt": {
-                            "endpoint": "mqtt.relayr.io"
-                          },
-                          "persistToken": true
-                        }
-}; 
 
 describe('Main', function() {
     beforeEach(function(){
@@ -64,6 +57,25 @@ describe('Main', function() {
 
     it('should export Transmitter class under device', function() {        
         expect(Transmitter).to.be.equal(TransmitterClass);    
+    });
+
+    describe('#init', function() {
+        let oldAjaxConfig;
+        beforeEach(function() {
+            oldAjaxConfig = ajax.options;
+        });
+
+        afterEach(function() {
+            ajax.options = oldAjaxConfig;
+        });
+
+        it('should add ajax config to the ajax singelton', function() {
+            main.init({ id: 'fake-project-id' }, {
+                ajax: { url: 'my-special-url' }
+            });
+
+            expect(ajax.options.url).to.equal('my-special-url');
+        });
     });
 
     describe('#authorize', function() {
@@ -149,7 +161,7 @@ describe('Main', function() {
             main.authorize();
         });
 
-        it('should return the current config', function(){
+        it('should return the current config', function() {
             let testConfig = {
                 persistToken: true,
                 mqtt: {
@@ -157,7 +169,8 @@ describe('Main', function() {
                 }
             };
 
-            expect(main.getConfig()).to.deep.equal(testConfig);
+            expect(main.getConfig().persistToken).to.equal(true);
+            expect(main.getConfig().mqtt).deep.to.equal({ endpoint: 'mqtt.relayr.io' });
         });
     });
 
@@ -190,9 +203,9 @@ describe('Main', function() {
 
             let differentAjax = {'_options':{
                     uri: 'kittens.com',
-                    protocol: 'https://', 
-                    tokenType: 'Bearer', 
-                    token: 'fake-token', 
+                    protocol: 'https://',
+                    tokenType: 'Bearer',
+                    token: 'fake-token',
                     dataUri: 'data-api.relayr.io',
             }};
 
@@ -215,16 +228,3 @@ describe('Main', function() {
 
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
-

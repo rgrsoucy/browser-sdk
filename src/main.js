@@ -28,6 +28,7 @@ let main = {
 
         if (customConfig) {
             Object.assign(config, customConfig);
+            ajax.options = config.ajax;
         }
     },
 
@@ -42,16 +43,17 @@ let main = {
                     redirectURI: project.redirectURI,
                     persist: config.persistToken
                 });
-            }       
+            }
+            let token;
             if (!optionalToken) {
                 oauth2.login();
 
-                ajax.options.token = oauth2.token;
-
+                token = oauth2.token;
             } else {
-                ajax.options.token = optionalToken;
+                token = optionalToken;
             }
 
+            ajax.options.token = token;
             currentUser = new User(config);
 
             main._verifyToken(currentUser).then(()=>{
@@ -95,7 +97,7 @@ let main = {
         else {
             throw new Error('Provide the custom configuration to make a new Ajax instance');
         }
-    
+
     }
 };
 

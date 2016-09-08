@@ -1,4 +1,3 @@
-//Latest build: 07-14-16 13:33
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -80,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.Ajax = exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
 
 	    var _oauth2 = _interopRequireDefault(_oauth);
 
@@ -114,18 +113,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	    exports.Group = _Group2.default;
 	    exports.Model = _Model2.default;
 	    exports.Transmitter = _Transmitter2.default;
-	    exports.Ajax = _ajax2.default;
 
 
 	    var config = {
 	        persistToken: true,
 	        mqtt: {
 	            endpoint: 'mqtt.relayr.io'
-	        },
-	        ajax: {
-	            uri: 'api.relayr.io',
-	            dataUri: 'data-api.relayr.io',
-	            protocol: 'https://'
 	        }
 	    };
 
@@ -138,6 +131,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            if (customConfig) {
 	                Object.assign(_get__('config'), customConfig);
+	                _get__('ajax').options = _get__('config').ajax;
 	            }
 	        },
 
@@ -146,21 +140,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                if (!_get__('oauth2')) {
 	                    _assign__('oauth2', new (_get__('Oauth2'))({
-	                        protocol: _get__('config').ajax.protocol,
-	                        uri: _get__('config').ajax.uri,
+	                        protocol: _get__('ajax').options.protocol,
+	                        uri: _get__('ajax').options.uri,
 	                        appId: _get__('project').id,
 	                        redirectURI: _get__('project').redirectURI,
 	                        persist: _get__('config').persistToken
 	                    }));
 	                }
+	                var token = void 0;
 	                if (!optionalToken) {
 	                    _get__('oauth2').login();
 
-	                    _get__('config').ajax.token = _get__('oauth2').token;
+	                    token = _get__('oauth2').token;
 	                } else {
-	                    _get__('config').ajax.token = optionalToken;
+	                    token = optionalToken;
 	                }
 
+	                _get__('ajax').options.token = token;
 	                _assign__('currentUser', new (_get__('User'))(_get__('config')));
 	                resolve(_get__('currentUser'));
 	            });
@@ -179,7 +175,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 
 	        customAjax: function customAjax(ajaxConfiguration) {
-	            return new (_get__('Ajax'))(ajaxConfiguration || _get__('config').ajax);
+	            if (ajaxConfiguration) {
+	                return new (_get__('Ajax'))(ajaxConfiguration);
+	            } else {
+	                throw new Error('Provide the custom configuration to make a new Ajax instance');
+	            }
 	        }
 	    };
 
@@ -229,6 +229,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            case 'config':
 	                return config;
+
+	            case 'ajax':
+	                return _ajax.ajax;
 
 	            case 'oauth2':
 	                return oauth2;
@@ -678,8 +681,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
-	    var _ajax2 = _interopRequireDefault(_ajax);
-
 	    var _Device2 = _interopRequireDefault(_Device);
 
 	    function _interopRequireDefault(obj) {
@@ -723,7 +724,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _classCallCheck(this, User);
 
 	            this.config = config;
-	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	            this.token = _get__('ajax').options.token;
 	        }
 
 	        _createClass(User, [{
@@ -735,9 +736,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_this.userInfo) {
 	                        resolve(_this.userInfo);
 	                    } else {
-	                        _this.ajax.get('/oauth2/user-info').then(function (response) {
-	                            _this.userInfo = response;
-	                            resolve(response);
+	                        _get__('ajax').get('/oauth2/user-info').then(function (response) {
+	                            _this.userInfo = Object.assign({}, response, {
+	                                token: _get__('ajax').options.token
+	                            });
+	                            resolve(_this.userInfo);
 	                        }).catch(function (error) {
 	                            reject(error);
 	                        });
@@ -754,29 +757,64 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return new Promise(function (resolve, reject) {
 	                    _this2.getUserInfo().then(function () {
 
-	                        _this2.ajax.get('/users/' + _this2.userInfo.id + '/devices').then(function (response) {
-
+	                        _get__('ajax').get('/users/' + _this2.userInfo.id + '/devices').then(function (response) {
 	                            if (opts.asClasses) {
 	                                resolve(response.map(function (device) {
 	                                    return new (_get__('Device'))(device, _this2.config);
 	                                }));
 	                            } else {
+	                                _this2.devicesCache = response;
 	                                resolve(response);
 	                            }
-	                        }).catch(function (error) {
-	                            reject(error);
-	                        });
+	                        }).catch(reject);
 	                    });
+	                });
+	            }
+	        }, {
+	            key: 'searchForDevices',
+	            value: function searchForDevices() {
+	                var _this3 = this;
+
+	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+	                if (!opts.query) {
+	                    throw new Error('Please provide a query object');
+	                }
+	                var _opts$query = opts.query;
+	                var device_name = _opts$query.name;
+	                var device_description = _opts$query.description;
+	                var device_ids = _opts$query.ids;
+	                var model_id = _opts$query.modelId;
+	                var firmware_version = _opts$query.firmwareVersion;
+
+	                return new Promise(function (resolve, reject) {
+	                    _get__('ajax').get('/devices', {
+	                        queryObj: {
+	                            device_name: device_name,
+	                            device_description: device_description,
+	                            device_ids: device_ids,
+	                            model_id: model_id,
+	                            firmware_version: firmware_version
+	                        }
+	                    }).then(function (response) {
+	                        if (opts.asClasses) {
+	                            resolve(response.map(function (device) {
+	                                return new (_get__('Device'))(device, _this3.config);
+	                            }));
+	                        } else {
+	                            resolve(response);
+	                        }
+	                    }, reject);
 	                });
 	            }
 	        }, {
 	            key: 'getMyGroups',
 	            value: function getMyGroups() {
-	                var _this3 = this;
+	                var _this4 = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this3.getUserInfo().then(function () {
-	                        _this3.ajax.get('/users/' + _this3.userInfo.id + '/groups').then(function (response) {
+	                    _this4.getUserInfo().then(function () {
+	                        _get__('ajax').get('/users/' + _this4.userInfo.id + '/groups').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -787,11 +825,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getMyTransmitters',
 	            value: function getMyTransmitters() {
-	                var _this4 = this;
+	                var _this5 = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this4.getUserInfo().then(function () {
-	                        _this4.ajax.get('/users/' + _this4.userInfo.id + '/transmitters').then(function (response) {
+	                    _this5.getUserInfo().then(function () {
+	                        _get__('ajax').get('/users/' + _this5.userInfo.id + '/transmitters').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -803,6 +841,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	            key: '_getConfig',
 	            value: function _getConfig() {
 	                return this.config;
+	            }
+	        }, {
+	            key: 'getCachedDevices',
+	            value: function getCachedDevices() {
+	                var _this6 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    if (_this6.devicesCache) {
+	                        resolve(_this6.devicesCache);
+	                    } else {
+	                        resolve([]);
+	                    }
+	                });
 	            }
 	        }]);
 
@@ -850,8 +901,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function _get_original__(variableName) {
 	        switch (variableName) {
-	            case 'Ajax':
-	                return _ajax2.default;
+	            case 'ajax':
+	                return _ajax.ajax;
 
 	            case 'Device':
 	                return _Device2.default;
@@ -966,22 +1017,28 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(module, exports);
+	        factory(exports);
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod, mod.exports);
+	        factory(mod.exports);
 	        global.ajax = mod.exports;
 	    }
-	})(this, function (module, exports) {
+	})(this, function (exports) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
+
+	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
+	        return typeof obj;
+	    } : function (obj) {
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -1007,15 +1064,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }();
 
+	    var instance = null;
+
 	    var Ajax = function () {
 	        function Ajax(options) {
 	            _classCallCheck(this, Ajax);
 
-	            this.tokenType = 'Bearer';
-	            this.token = options.token;
-	            this.uri = options.uri || 'api.relayr.io/';
-	            this.protocol = options.protocol || 'https://';
-	            this.customXHR;
+	            //set options using method below
+	            this.options = options;
 	        }
 
 	        _createClass(Ajax, [{
@@ -1140,18 +1196,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: '_serializeQueryStr',
 	            value: function _serializeQueryStr(obj) {
-	                var str = [];
-
 	                if (!obj || Object.keys(obj).length === 0) {
 	                    return '';
 	                }
 
-	                for (var p in obj) {
-	                    if (obj.hasOwnProperty(p)) {
-	                        str.push(encodeURIComponent(p) + '=' + encodeURIComponent(obj[p]));
+	                var queries = Object.keys(obj).map(function (key) {
+	                    if (!obj[key] && typeof obj[key] !== 'number') {
+	                        return null;
 	                    }
+	                    return encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]);
+	                }).filter(function (item) {
+	                    return !!item;
+	                });
+
+	                if (queries.length === 0) {
+	                    return '';
 	                }
-	                return '?' + str.join('&');
+	                return '?' + queries.join('&');
 	            }
 	        }, {
 	            key: '_xhrRequest',
@@ -1161,9 +1222,9 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                xhrObject = new XMLHttpRequest();
 
-	                xhrObject.open(options.type, '' + this.protocol + this.uri + options.url, true);
+	                xhrObject.open(options.type, '' + this.options.protocol + this.options.uri + options.url, true);
 
-	                xhrObject.setRequestHeader('Authorization', this.token);
+	                xhrObject.setRequestHeader('Authorization', this.options.token);
 	                xhrObject.setRequestHeader('Content-Type', options.contentType);
 
 	                return new Promise(function (resolve, reject) {
@@ -1198,13 +1259,173 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 	                });
 	            }
+	        }, {
+	            key: 'options',
+	            set: function set(options) {
+	                this._options = {
+	                    tokenType: 'Bearer',
+	                    token: 'notoken',
+	                    uri: 'api.relayr.io',
+	                    protocol: 'https://'
+	                };
+	                Object.assign(this._options, options);
+	            },
+	            get: function get() {
+	                return this._options;
+	            }
 	        }]);
 
 	        return Ajax;
 	    }();
 
-	    exports.default = Ajax;
-	    module.exports = exports['default'];
+	    var ajax = exports.ajax = new (_get__('Ajax'))({});
+
+	    exports.default = _get__('Ajax');
+
+	    var _RewiredData__ = Object.create(null);
+
+	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
+	    var _RewireAPI__ = {};
+
+	    (function () {
+	        function addPropertyToAPIObject(name, value) {
+	            Object.defineProperty(_RewireAPI__, name, {
+	                value: value,
+	                enumerable: false,
+	                configurable: true
+	            });
+	        }
+
+	        addPropertyToAPIObject('__get__', _get__);
+	        addPropertyToAPIObject('__GetDependency__', _get__);
+	        addPropertyToAPIObject('__Rewire__', _set__);
+	        addPropertyToAPIObject('__set__', _set__);
+	        addPropertyToAPIObject('__reset__', _reset__);
+	        addPropertyToAPIObject('__ResetDependency__', _reset__);
+	        addPropertyToAPIObject('__with__', _with__);
+	    })();
+
+	    function _get__(variableName) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _get_original__(variableName);
+	        } else {
+	            var value = _RewiredData__[variableName];
+
+	            if (value === INTENTIONAL_UNDEFINED) {
+	                return undefined;
+	            } else {
+	                return value;
+	            }
+	        }
+	    }
+
+	    function _get_original__(variableName) {
+	        switch (variableName) {
+	            case 'Ajax':
+	                return Ajax;
+	        }
+
+	        return undefined;
+	    }
+
+	    function _assign__(variableName, value) {
+	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
+	            return _set_original__(variableName, value);
+	        } else {
+	            return _RewiredData__[variableName] = value;
+	        }
+	    }
+
+	    function _set_original__(variableName, _value) {
+	        switch (variableName) {}
+
+	        return undefined;
+	    }
+
+	    function _update_operation__(operation, variableName, prefix) {
+	        var oldValue = _get__(variableName);
+
+	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
+
+	        _assign__(variableName, newValue);
+
+	        return prefix ? newValue : oldValue;
+	    }
+
+	    function _set__(variableName, value) {
+	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
+	            Object.keys(variableName).forEach(function (name) {
+	                _RewiredData__[name] = variableName[name];
+	            });
+	        } else {
+	            if (value === undefined) {
+	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
+	            } else {
+	                _RewiredData__[variableName] = value;
+	            }
+
+	            return value;
+	        }
+	    }
+
+	    function _reset__(variableName) {
+	        delete _RewiredData__[variableName];
+	    }
+
+	    function _with__(object) {
+	        var rewiredVariableNames = Object.keys(object);
+	        var previousValues = {};
+
+	        function reset() {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                _RewiredData__[variableName] = previousValues[variableName];
+	            });
+	        }
+
+	        return function (callback) {
+	            rewiredVariableNames.forEach(function (variableName) {
+	                previousValues[variableName] = _RewiredData__[variableName];
+	                _RewiredData__[variableName] = object[variableName];
+	            });
+	            var result = callback();
+
+	            if (!!result && typeof result.then == 'function') {
+	                result.then(reset).catch(reset);
+	            } else {
+	                reset();
+	            }
+
+	            return result;
+	        };
+	    }
+
+	    var _typeOfOriginalExport = typeof Ajax === 'undefined' ? 'undefined' : _typeof(Ajax);
+
+	    function addNonEnumerableProperty(name, value) {
+	        Object.defineProperty(Ajax, name, {
+	            value: value,
+	            enumerable: false,
+	            configurable: true
+	        });
+	    }
+
+	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Ajax)) {
+	        addNonEnumerableProperty('__get__', _get__);
+	        addNonEnumerableProperty('__GetDependency__', _get__);
+	        addNonEnumerableProperty('__Rewire__', _set__);
+	        addNonEnumerableProperty('__set__', _set__);
+	        addNonEnumerableProperty('__reset__', _reset__);
+	        addNonEnumerableProperty('__ResetDependency__', _reset__);
+	        addNonEnumerableProperty('__with__', _with__);
+	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
+	    }
+
+	    exports.__get__ = _get__;
+	    exports.__GetDependency__ = _get__;
+	    exports.__Rewire__ = _set__;
+	    exports.__set__ = _set__;
+	    exports.__ResetDependency__ = _reset__;
+	    exports.__RewireAPI__ = _RewireAPI__;
 	});
 
 /***/ },
@@ -1294,7 +1515,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.description = rawDevice.description;
 	            this.owner = rawDevice.owner;
 	            this.openToPublic = rawDevice.public;
-	            this.ajax = new (_get__('Ajax'))(config.ajax);
 	            this.history = new (_get__('DeviceHistory'))(rawDevice, config);
 	            this.configurations = [];
 	            this.commands = [];
@@ -1321,7 +1541,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.patch('/devices/' + _this.id, patch, {
+	                    _get__('ajax').patch('/devices/' + _this.id, patch, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        _this.name = response.name;
@@ -1350,7 +1570,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!this.id) {
 	                    throw new Error('Provid a device id');
 	                }
-	                return this.ajax.get('/devices/' + this.id + '/readings');
+	                return _get__('ajax').get('/devices/' + this.id + '/readings');
 	            }
 	        }, {
 	            key: 'deleteDevice',
@@ -1361,7 +1581,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this2.ajax.delete('/devices/' + _this2.id).then(function (response) {
+	                    _get__('ajax').delete('/devices/' + _this2.id).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1385,7 +1605,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this3.ajax.patch('/devices/' + _this3.id, patch, {
+	                    _get__('ajax').patch('/devices/' + _this3.id, patch, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        resolve(response);
@@ -1408,7 +1628,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            deviceId: _this4.id,
 	                            transport: transport || 'mqtt'
 	                        };
-	                        _this4.ajax.post('/channels', body).then(function (response) {
+	                        _get__('ajax').post('/channels', body).then(function (response) {
 	                            _this4._channelCredentials = response;
 	                            if (!_get__('sharedChannel')) {
 	                                _assign__('sharedChannel', _this4._channelCredentials);
@@ -1456,7 +1676,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this5.ajax.get('/devices/' + _this5.id + '/state').then(function (response) {
+	                    _get__('ajax').get('/devices/' + _this5.id + '/state').then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1473,7 +1693,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this6.ajax.get('/devices/' + _this6.id + '/configurations').then(function (response) {
+	                    _get__('ajax').get('/devices/' + _this6.id + '/configurations').then(function (response) {
 	                        _this6.configurations = response;
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1500,7 +1720,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this7.ajax.post('/devices/' + _this7.id + '/configurations', schema).then(function (response) {
+	                    _get__('ajax').post('/devices/' + _this7.id + '/configurations', schema).then(function (response) {
 	                        _this7.configurations.push(response);
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1518,7 +1738,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the deviceId during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this8.ajax.get('/devices/' + _this8.id + '/commands').then(function (response) {
+	                    _get__('ajax').get('/devices/' + _this8.id + '/commands').then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1544,7 +1764,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this9.ajax.post('/devices/' + _this9.id + '/commands', schema).then(function (response) {
+	                    _get__('ajax').post('/devices/' + _this9.id + '/commands', schema).then(function (response) {
 	                        _this9.commands.push(response);
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1562,7 +1782,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the deviceId during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this10.ajax.get('/devices/' + _this10.id + '/metadata').then(function (response) {
+	                    _get__('ajax').get('/devices/' + _this10.id + '/metadata').then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1585,7 +1805,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this11.ajax.post('/devices/' + _this11.id + '/metadata', schema).then(function (response) {
+	                    _get__('ajax').post('/devices/' + _this11.id + '/metadata', schema).then(function (response) {
 	                        _this11.metadata = response;
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1604,7 +1824,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the userId during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this12.ajax.delete('/devices/' + _this12.id + '/metadata').then(function (response) {
+	                    _get__('ajax').delete('/devices/' + _this12.id + '/metadata').then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1662,11 +1882,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            case 'Model':
 	                return _Model2.default;
 
-	            case 'Ajax':
-	                return _ajax2.default;
-
 	            case 'DeviceHistory':
 	                return _DeviceHistory2.default;
+
+	            case 'ajax':
+	                return _ajax.ajax;
 
 	            case 'sharedChannel':
 	                return sharedChannel;
@@ -1921,11 +2141,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _classCallCheck(this, DeviceHistory);
 
 	            this.id = rawDevice.id;
-	            this.dataUri = config.ajax.dataUri;
-	            this.ajax = new (_get__('Ajax'))({
-	                uri: config.ajax.dataUri,
-	                token: config.ajax.token
-	            });
+	            this.ajax = new (_get__('Ajax'))(config.ajax);
 	        }
 
 	        _createClass(DeviceHistory, [{
@@ -3371,14 +3587,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.cache = undefined;
 
-	    var _ajax2 = _interopRequireDefault(_ajax);
-
-	    function _interopRequireDefault(obj) {
-	        return obj && obj.__esModule ? obj : {
-	            default: obj
-	        };
-	    }
-
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
@@ -3429,7 +3637,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _classCallCheck(this, Model);
 
 	            this.config = config;
-	            this.ajax = new (_get__('Ajax'))(config.ajax);
 	            if (id) {
 	                this.id = id;
 	            }
@@ -3444,7 +3651,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_get__('cache').public.toArray.length > 0) {
 	                        resolve(_get__('cache').public.toArray);
 	                    } else {
-	                        _this.ajax.get('/device-models', {
+	                        _get__('ajax').get('/device-models', {
 	                            queryObj: 'limit=100000',
 	                            contentType: 'application/hal+json'
 	                        }).then(function (response) {
@@ -3460,8 +3667,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getModel',
 	            value: function getModel(id) {
-	                var _this2 = this;
-
 	                if (this.id && !id) {
 	                    id = this.id;
 	                }
@@ -3472,7 +3677,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    });
 	                } else {
 	                    return new Promise(function (resolve, reject) {
-	                        _this2.ajax.get('/device-models/' + id, {
+	                        _get__('ajax').get('/device-models/' + id, {
 	                            contentType: 'application/hal+json'
 	                        }).then(function (model) {
 	                            _get__('cache').public.toArray.push(model);
@@ -3568,8 +3773,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            case 'cache':
 	                return cache;
 
-	            case 'Ajax':
-	                return _ajax2.default;
+	            case 'ajax':
+	                return _ajax.ajax;
 	        }
 
 	        return undefined;
@@ -3699,14 +3904,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
-	    var _ajax2 = _interopRequireDefault(_ajax);
-
-	    function _interopRequireDefault(obj) {
-	        return obj && obj.__esModule ? obj : {
-	            default: obj
-	        };
-	    }
-
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
@@ -3747,7 +3944,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.topic = config.topic;
 	            this.owner = config.owner;
 	            this.integrationType = config.integrationType;
-	            this.ajax = new (_get__('Ajax'))(config.ajax);
 	        }
 
 	        _createClass(Transmitter, [{
@@ -3759,7 +3955,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.delete('/transmitters/' + _this.id, opts).then(function (response) {
+	                    _get__('ajax').delete('/transmitters/' + _this.id, opts).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -3787,7 +3983,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this2.ajax.patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
+	                    _get__('ajax').patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
 	                        _this2.id = response.id, _this2.secret = response.secret, _this2.name = response.name, _this2.topic = response.topic, _this2.owner = response.owner, _this2.integrationType = response.integrationType, resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -3841,8 +4037,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function _get_original__(variableName) {
 	        switch (variableName) {
-	            case 'Ajax':
-	                return _ajax2.default;
+	            case 'ajax':
+	                return _ajax.ajax;
 	        }
 
 	        return undefined;
@@ -3972,14 +4168,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
-	    var _ajax2 = _interopRequireDefault(_ajax);
-
-	    function _interopRequireDefault(obj) {
-	        return obj && obj.__esModule ? obj : {
-	            default: obj
-	        };
-	    }
-
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
@@ -4019,7 +4207,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.id = config.id;
 	            this.devices = config.devices;
 	            this.name = config.name;
-	            this.ajax = new (_get__('Ajax'))(config.ajax);
 	        }
 
 	        // A group has the structure:
@@ -4040,7 +4227,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the group id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.get('/groups/' + _this.id).then(function (response) {
+	                    _get__('ajax').get('/groups/' + _this.id).then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -4056,7 +4243,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the group id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this2.ajax.get('/groups/' + _this2.id).then(function (response) {
+	                    _get__('ajax').get('/groups/' + _this2.id).then(function (response) {
 	                        resolve(response.devices);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -4072,7 +4259,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the group id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _this3.ajax.delete('/groups/' + _this3.id, opts).then(function (response) {
+	                    _get__('ajax').delete('/groups/' + _this3.id, opts).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -4100,7 +4287,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _this4.ajax.patch('/groups/this.id}', patch, opts).then(function (response) {
+	                    _get__('ajax').patch('/groups/this.id}', patch, opts).then(function (response) {
 	                        _this4.owner = response.owner;
 	                        _this4.position = response.position;
 	                        _this4.id = response.id;
@@ -4159,8 +4346,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function _get_original__(variableName) {
 	        switch (variableName) {
-	            case 'Ajax':
-	                return _ajax2.default;
+	            case 'ajax':
+	                return _ajax.ajax;
 	        }
 
 	        return undefined;
