@@ -8,17 +8,6 @@ import GroupClass from '../src/entities/Group';
 import UserClass from '../src/entities/User';
 import TransmitterClass from '../src/entities/Transmitter';
 import { ajax } from '../src/tools/ajax';
-
-let oauthMock = {
-    token: 'fake-token',
-    login: sinon.spy(),
-    logout: sinon.spy()
-};
-
-main.__Rewire__('Oauth2', function() {
-    return oauthMock;
-});
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
@@ -28,6 +17,27 @@ var expect = chai.expect;
 
 chai.use(sinonChai);
 chai.use(chaiPromise);
+
+let oauthMock = {
+    token: 'notoken',
+    login: function(){},
+    logout: function(){}
+};
+
+main.__Rewire__('Oauth2', function() {
+    return oauthMock;
+});
+
+let testUser = {
+    "config": {
+      "persistToken": true,
+      "mqtt": {
+        "endpoint": "mqtt.relayr.io"
+      }
+    }
+};
+
+let testUserClassInstance = new UserClass(testUser.config);
 
 describe('Main', function() {
     beforeEach(function(){
@@ -59,24 +69,6 @@ describe('Main', function() {
         expect(Transmitter).to.be.equal(TransmitterClass);    
     });
 
-    describe('#init', function() {
-        let oldAjaxConfig;
-        beforeEach(function() {
-            oldAjaxConfig = ajax.options;
-        });
-
-        afterEach(function() {
-            ajax.options = oldAjaxConfig;
-        });
-
-        it('should add ajax config to the ajax singelton', function() {
-            main.init({ id: 'fake-project-id' }, {
-                ajax: { url: 'my-special-url' }
-            });
-
-            expect(ajax.options.url).to.equal('my-special-url');
-        });
-    });
 
     describe('#authorize', function() {
         beforeEach(function() {
@@ -101,14 +93,15 @@ describe('Main', function() {
 
             it('should return newly created user instance', function(done) {
                 main.authorize().then((response) => {
-                    expect(response).to.deep.equal(testUser);
+                    console.log("new userish", response.prototype)
+                    expect(response).to.deep.equal(testUserClassInstance);
                     done();
                 }).catch((err)=>{console.log(err)});
             });
 
             it('should populate the new token', function(done) {
                 main.authorize().then(() => {
-                    expect(ajax.options.token).to.be.equal('fake-token');
+                    expect(ajax.options.token).to.be.equal('notoken');
                     done();
                 });
             });
@@ -180,11 +173,12 @@ describe('Main', function() {
                 id: 'fake-project-id'
             });
             
+            testUserClassInstance.token = 'fake-token';
         });
 
         it('should return the current user', function(done){
             main.authorize('fake-token').then(()=>{
-                expect(main.getCurrentUser()).to.deep.equal(testUser);
+                expect(main.getCurrentUser()).to.deep.equal(testUserClassInstance);
                 done();
             }).catch((err)=>{console.log(err)});
             
@@ -226,5 +220,29 @@ describe('Main', function() {
             expect(fn).to.throw(Error);
         });
 
+    });
+
+    describe('#init', function() {
+        let oldAjaxConfig;
+        beforeEach(function() {
+            oldAjaxConfig = ajax.options;
+        });
+
+        afterEach(function() {
+            ajax.options = oldAjaxConfig;
+            main.init({ id: 'fake-project-id' }, {
+                ajax: null
+            });
+
+        });
+
+        it('should add ajax config to the ajax singelton', function() {
+
+            main.init({ id: 'fake-project-id' }, {
+                ajax: { url: 'my-special-url' }
+            });
+
+            expect(ajax.options.url).to.equal('my-special-url');
+        });
     });
 });
