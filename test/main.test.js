@@ -139,11 +139,25 @@ describe('Main', function() {
 
 
     describe('#logout', function() {
+        it('should throw an error if the user is already logged out', function() {        
+            main.logout();
+            var fn = function() {
+                main.logout();
+            };
+            expect(fn).to.throw(Error);
+        });
+
         it('should log the user out', function() {
+            main.init({
+                id: 'fake-project-id'
+            });
+            main.authorize();
+            
             main.logout();
 
             expect(oauthMock.logout).to.have.been.calledOnce;
         });
+
     });
 
     describe('#getConfig', function() {
