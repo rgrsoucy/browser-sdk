@@ -1,4 +1,4 @@
-//Latest build: 08-29-16 08:00
+//Latest build: 09-12-16 14:19
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -159,12 +159,36 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                _get__('ajax').options.token = token;
 	                _assign__('currentUser', new (_get__('User'))(_get__('config')));
-	                resolve(_get__('currentUser'));
+
+	                _get__('main')._verifyToken(_get__('currentUser')).then(function () {
+	                    resolve(_get__('currentUser'));
+	                }).catch(function (err) {
+	                    _get__('oauth2').logout();
+	                    _get__('oauth2').login();
+	                });
+	            });
+	        },
+
+	        _verifyToken: function _verifyToken(currentUser) {
+	            return new Promise(function (resolve, reject) {
+	                currentUser.getUserInfo().then(function (response) {
+	                    resolve();
+	                }).catch(function (err) {
+	                    if (err.status == 401) {
+	                        console.log('your token is invalid, please log in again');
+	                    }
+	                    reject(err);
+	                });
 	            });
 	        },
 
 	        logout: function logout() {
-	            _get__('oauth2').logout();
+	            if (!!_get__('oauth2')) {
+	                _get__('oauth2').logout();
+	                _assign__('oauth2', null);
+	            } else {
+	                throw new Error('You must log in before you can log out');
+	            }
 	        },
 
 	        getConfig: function getConfig() {
@@ -246,11 +270,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            case 'User':
 	                return _User2.default;
 
-	            case 'Ajax':
-	                return _ajax2.default;
-
 	            case 'main':
 	                return main;
+
+	            case 'Ajax':
+	                return _ajax2.default;
 	        }
 
 	        return undefined;
@@ -301,7 +325,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -594,7 +620,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -948,7 +976,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -1365,7 +1395,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -1941,7 +1973,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -2336,7 +2370,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -2564,7 +2600,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -3050,7 +3088,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -3562,7 +3602,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	             *                     This is only set on messages received from the server.
 	             *
 	             */var Message=function Message(newPayload){var payload;if(typeof newPayload==="string"||newPayload instanceof ArrayBuffer||newPayload instanceof Int8Array||newPayload instanceof Uint8Array||newPayload instanceof Int16Array||newPayload instanceof Uint16Array||newPayload instanceof Int32Array||newPayload instanceof Uint32Array||newPayload instanceof Float32Array||newPayload instanceof Float64Array){payload=newPayload;}else{throw format(ERROR.INVALID_ARGUMENT,[newPayload,"newPayload"]);}this._getPayloadString=function(){if(typeof payload==="string")return payload;else return parseUTF8(payload,0,payload.length);};this._getPayloadBytes=function(){if(typeof payload==="string"){var buffer=new ArrayBuffer(UTF8Length(payload));var byteStream=new Uint8Array(buffer);stringToUTF8(payload,byteStream,0);return byteStream;}else{return payload;};};var destinationName=undefined;this._getDestinationName=function(){return destinationName;};this._setDestinationName=function(newDestinationName){if(typeof newDestinationName==="string")destinationName=newDestinationName;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newDestinationName,"newDestinationName"]));};var qos=0;this._getQos=function(){return qos;};this._setQos=function(newQos){if(newQos===0||newQos===1||newQos===2)qos=newQos;else throw new Error("Invalid argument:"+newQos);};var retained=false;this._getRetained=function(){return retained;};this._setRetained=function(newRetained){if(typeof newRetained==="boolean")retained=newRetained;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newRetained,"newRetained"]));};var duplicate=false;this._getDuplicate=function(){return duplicate;};this._setDuplicate=function(newDuplicate){duplicate=newDuplicate;};};Message.prototype={get payloadString(){return this._getPayloadString();},get payloadBytes(){return this._getPayloadBytes();},get destinationName(){return this._getDestinationName();},set destinationName(newDestinationName){this._setDestinationName(newDestinationName);},get qos(){return this._getQos();},set qos(newQos){this._setQos(newQos);},get retained(){return this._getRetained();},set retained(newRetained){this._setRetained(newRetained);},get duplicate(){return this._getDuplicate();},set duplicate(newDuplicate){this._setDuplicate(newDuplicate);}};// Module contents.
-	return{Client:Client,Message:Message};}(window);return _Paho;};exports.default=_get__("Paho");var _RewiredData__=Object.create(null);var INTENTIONAL_UNDEFINED='__INTENTIONAL_UNDEFINED__';var _RewireAPI__={};(function(){function addPropertyToAPIObject(name,value){Object.defineProperty(_RewireAPI__,name,{value:value,enumerable:false,configurable:true});}addPropertyToAPIObject('__get__',_get__);addPropertyToAPIObject('__GetDependency__',_get__);addPropertyToAPIObject('__Rewire__',_set__);addPropertyToAPIObject('__set__',_set__);addPropertyToAPIObject('__reset__',_reset__);addPropertyToAPIObject('__ResetDependency__',_reset__);addPropertyToAPIObject('__with__',_with__);})();function _get__(variableName){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _get_original__(variableName);}else{var value=_RewiredData__[variableName];if(value===INTENTIONAL_UNDEFINED){return undefined;}else{return value;}}}function _get_original__(variableName){switch(variableName){case"Paho":return Paho;}return undefined;}function _assign__(variableName,value){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _set_original__(variableName,value);}else{return _RewiredData__[variableName]=value;}}function _set_original__(variableName,_value){switch(variableName){}return undefined;}function _update_operation__(operation,variableName,prefix){var oldValue=_get__(variableName);var newValue=operation==='++'?oldValue+1:oldValue-1;_assign__(variableName,newValue);return prefix?newValue:oldValue;}function _set__(variableName,value){if((typeof variableName==="undefined"?"undefined":_typeof(variableName))==='object'){Object.keys(variableName).forEach(function(name){_RewiredData__[name]=variableName[name];});}else{if(value===undefined){_RewiredData__[variableName]=INTENTIONAL_UNDEFINED;}else{_RewiredData__[variableName]=value;}return value;}}function _reset__(variableName){delete _RewiredData__[variableName];}function _with__(object){var rewiredVariableNames=Object.keys(object);var previousValues={};function reset(){rewiredVariableNames.forEach(function(variableName){_RewiredData__[variableName]=previousValues[variableName];});}return function(callback){rewiredVariableNames.forEach(function(variableName){previousValues[variableName]=_RewiredData__[variableName];_RewiredData__[variableName]=object[variableName];});var result=callback();if(!!result&&typeof result.then=='function'){result.then(reset).catch(reset);}else{reset();}return result;};}var _typeOfOriginalExport=typeof Paho==="undefined"?"undefined":_typeof(Paho);function addNonEnumerableProperty(name,value){Object.defineProperty(Paho,name,{value:value,enumerable:false,configurable:true});}if((_typeOfOriginalExport==='object'||_typeOfOriginalExport==='function')&&Object.isExtensible(Paho)){addNonEnumerableProperty('__get__',_get__);addNonEnumerableProperty('__GetDependency__',_get__);addNonEnumerableProperty('__Rewire__',_set__);addNonEnumerableProperty('__set__',_set__);addNonEnumerableProperty('__reset__',_reset__);addNonEnumerableProperty('__ResetDependency__',_reset__);addNonEnumerableProperty('__with__',_with__);addNonEnumerableProperty('__RewireAPI__',_RewireAPI__);}exports.__get__=_get__;exports.__GetDependency__=_get__;exports.__Rewire__=_set__;exports.__set__=_set__;exports.__ResetDependency__=_reset__;exports.__RewireAPI__=_RewireAPI__;});
+	return{Client:Client,Message:Message};}(window);return _Paho;};exports.default=_get__("Paho");var _RewiredData__=Object.create(null);var INTENTIONAL_UNDEFINED='__INTENTIONAL_UNDEFINED__';var _RewireAPI__={};(function(){function addPropertyToAPIObject(name,value){Object.defineProperty(_RewireAPI__,name,{value:value,enumerable:false,configurable:true});}addPropertyToAPIObject('__get__',_get__);addPropertyToAPIObject('__GetDependency__',_get__);addPropertyToAPIObject('__Rewire__',_set__);addPropertyToAPIObject('__set__',_set__);addPropertyToAPIObject('__reset__',_reset__);addPropertyToAPIObject('__ResetDependency__',_reset__);addPropertyToAPIObject('__with__',_with__);})();function _get__(variableName){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _get_original__(variableName);}else{var value=_RewiredData__[variableName];if(value===INTENTIONAL_UNDEFINED){return undefined;}else{return value;}}}function _get_original__(variableName){switch(variableName){case"Paho":return Paho;}return undefined;}function _assign__(variableName,value){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _set_original__(variableName,value);}else{return _RewiredData__[variableName]=value;}}function _set_original__(variableName,_value){switch(variableName){}return undefined;}function _update_operation__(operation,variableName,prefix){var oldValue=_get__(variableName);var newValue=operation==='++'?oldValue+1:oldValue-1;_assign__(variableName,newValue);return prefix?newValue:oldValue;}function _set__(variableName,value){if((typeof variableName==="undefined"?"undefined":_typeof(variableName))==='object'){Object.keys(variableName).forEach(function(name){_RewiredData__[name]=variableName[name];});}else{if(value===undefined){_RewiredData__[variableName]=INTENTIONAL_UNDEFINED;}else{_RewiredData__[variableName]=value;}return function(){_reset__(variableName);};}}function _reset__(variableName){delete _RewiredData__[variableName];}function _with__(object){var rewiredVariableNames=Object.keys(object);var previousValues={};function reset(){rewiredVariableNames.forEach(function(variableName){_RewiredData__[variableName]=previousValues[variableName];});}return function(callback){rewiredVariableNames.forEach(function(variableName){previousValues[variableName]=_RewiredData__[variableName];_RewiredData__[variableName]=object[variableName];});var result=callback();if(!!result&&typeof result.then=='function'){result.then(reset).catch(reset);}else{reset();}return result;};}var _typeOfOriginalExport=typeof Paho==="undefined"?"undefined":_typeof(Paho);function addNonEnumerableProperty(name,value){Object.defineProperty(Paho,name,{value:value,enumerable:false,configurable:true});}if((_typeOfOriginalExport==='object'||_typeOfOriginalExport==='function')&&Object.isExtensible(Paho)){addNonEnumerableProperty('__get__',_get__);addNonEnumerableProperty('__GetDependency__',_get__);addNonEnumerableProperty('__Rewire__',_set__);addNonEnumerableProperty('__set__',_set__);addNonEnumerableProperty('__reset__',_reset__);addNonEnumerableProperty('__ResetDependency__',_reset__);addNonEnumerableProperty('__with__',_with__);addNonEnumerableProperty('__RewireAPI__',_RewireAPI__);}exports.__get__=_get__;exports.__GetDependency__=_get__;exports.__Rewire__=_set__;exports.__set__=_set__;exports.__ResetDependency__=_reset__;exports.__RewireAPI__=_RewireAPI__;});
 
 /***/ },
 /* 12 */
@@ -3817,7 +3857,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -4081,7 +4123,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
@@ -4390,7 +4434,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                _RewiredData__[variableName] = value;
 	            }
 
-	            return value;
+	            return function () {
+	                _reset__(variableName);
+	            };
 	        }
 	    }
 
