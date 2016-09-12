@@ -8,27 +8,50 @@ import GroupClass from '../src/entities/Group';
 import UserClass from '../src/entities/User';
 import TransmitterClass from '../src/entities/Transmitter';
 import { ajax } from '../src/tools/ajax';
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiPromise from 'chai-as-promised';
+import 'sinon-as-promised';
+var expect = chai.expect;
+
+chai.use(sinonChai);
+chai.use(chaiPromise);
 
 let oauthMock = {
-    token: 'fake-token',
-    login: sinon.spy(),
-    logout: sinon.spy()
+    token: 'notoken',
+    login: function(){},
+    logout: function(){}
 };
 
 main.__Rewire__('Oauth2', function() {
     return oauthMock;
 });
 
-import chai from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chaiPromise from 'chai-as-promised';
-var expect = chai.expect;
+let testUser = {
+    "config": {
+      "persistToken": true,
+      "mqtt": {
+        "endpoint": "mqtt.relayr.io"
+      }
+    }
+};
 
-chai.use(sinonChai);
-chai.use(chaiPromise);
+let testUserClassInstance = new UserClass(testUser.config);
 
 describe('Main', function() {
+    beforeEach(function(){
+        sinon.stub(User.prototype, "getUserInfo").resolves(testUser);
+        sinon.spy(oauthMock, 'login');
+        sinon.spy(oauthMock, 'logout');
+    });
+
+    afterEach(function(){
+        oauthMock.login.restore();
+        oauthMock.logout.restore();
+        User.prototype.getUserInfo.restore();
+    });
+
 
     it('should export Device class under device', function() {        
         expect(Device).to.be.equal(DeviceClass);    
@@ -46,24 +69,6 @@ describe('Main', function() {
         expect(Transmitter).to.be.equal(TransmitterClass);    
     });
 
-    describe('#init', function() {
-        let oldAjaxConfig;
-        beforeEach(function() {
-            oldAjaxConfig = ajax.options;
-        });
-
-        afterEach(function() {
-            ajax.options = oldAjaxConfig;
-        });
-
-        it('should add ajax config to the ajax singelton', function() {
-            main.init({ id: 'fake-project-id' }, {
-                ajax: { url: 'my-special-url' }
-            });
-
-            expect(ajax.options.url).to.equal('my-special-url');
-        });
-    });
 
     describe('#authorize', function() {
         beforeEach(function() {
@@ -75,17 +80,28 @@ describe('Main', function() {
         describe('no optionalToken is provided', function() {
             it('should login', function() {
                 main.authorize();
-
-                expect(oauthMock.login).to.have.beenCalled;
+                expect(oauthMock.login).to.have.been.called;         
             });
 
-            it('should update user with the user informaiton', function(done) {
-                expect(main.authorize()).to.eventually.to.have.property('getUserInfo').notify(done);
+            it('should ask to verify the token', function(){
+                sinon.spy(main, '_verifyToken');     
+                main.authorize();       
+                expect(main._verifyToken).to.have.been.called;
+                main._verifyToken.restore();
+
+            });
+
+            it('should return newly created user instance', function(done) {
+                main.authorize().then((response) => {
+                    console.log("new userish", response.prototype)
+                    expect(response).to.deep.equal(testUserClassInstance);
+                    done();
+                }).catch((err)=>{console.log(err)});
             });
 
             it('should populate the new token', function(done) {
                 main.authorize().then(() => {
-                    expect(ajax.options.token).to.be.equal('fake-token');
+                    expect(ajax.options.token).to.be.equal('notoken');
                     done();
                 });
             });
@@ -97,21 +113,51 @@ describe('Main', function() {
             });
 
             it('should not login', function() {
-                expect(oauthMock.login).to.not.have.beenCalled;
+                expect(oauthMock.login).to.not.have.been.called;
             });
 
             it('should set the token', function() {
                 expect(ajax.options.token).to.be.equal('fake-provided-token');
             });
         });
+
+        describe('#_verifyToken', function(done) {
+            it('should logout if attempt to get userInfo fails', function() {
+                let verifyUser = new User();
+                let badRequest = {
+                    "status": 401               
+                }
+                User.prototype.getUserInfo.restore();
+                sinon.stub(User.prototype, "getUserInfo").onCall(0).rejects(badRequest);
+                main.authorize().then(()=>{
+                    expect(oauthMock.logout).to.have.been.called;
+                    done();
+                });
+            });
+        });
     });
 
+
     describe('#logout', function() {
+        it('should throw an error if the user is already logged out', function() {        
+            main.logout();
+            var fn = function() {
+                main.logout();
+            };
+            expect(fn).to.throw(Error);
+        });
+
         it('should log the user out', function() {
+            main.init({
+                id: 'fake-project-id'
+            });
+            main.authorize();
+            
             main.logout();
 
-            expect(oauthMock.logout).to.have.beenCalledOnce;
+            expect(oauthMock.logout).to.have.been.calledOnce;
         });
+
     });
 
     describe('#getConfig', function() {
@@ -140,11 +186,16 @@ describe('Main', function() {
             main.init({
                 id: 'fake-project-id'
             });
-            main.authorize('fake-token');
+            
+            testUserClassInstance.token = 'fake-token';
         });
 
-        it('should return the current user', function() {
-            expect(main.getCurrentUser()).to.be.an.instanceof(UserClass);
+        it('should return the current user', function(done){
+            main.authorize('fake-token').then(()=>{
+                expect(main.getCurrentUser()).to.deep.equal(testUserClassInstance);
+                done();
+            }).catch((err)=>{console.log(err)});
+            
         });
     });
 
@@ -183,5 +234,29 @@ describe('Main', function() {
             expect(fn).to.throw(Error);
         });
 
+    });
+
+    describe('#init', function() {
+        let oldAjaxConfig;
+        beforeEach(function() {
+            oldAjaxConfig = ajax.options;
+        });
+
+        afterEach(function() {
+            ajax.options = oldAjaxConfig;
+            main.init({ id: 'fake-project-id' }, {
+                ajax: null
+            });
+
+        });
+
+        it('should add ajax config to the ajax singelton', function() {
+
+            main.init({ id: 'fake-project-id' }, {
+                ajax: { url: 'my-special-url' }
+            });
+
+            expect(ajax.options.url).to.equal('my-special-url');
+        });
     });
 });
