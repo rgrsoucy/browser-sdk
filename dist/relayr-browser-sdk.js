@@ -1,4 +1,4 @@
-//Latest build: 09-26-16 15:46
+//Latest build: 09-26-16 15:48
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -2183,7 +2183,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.id = rawDevice.id;
 	            this.ajax = new (_get__('Ajax'))({
 	                uri: config.ajax.dataUri,
-	                token: config.ajax.token
+	                token: _get__('ajax').options.token
 	            });
 	        }
 
@@ -2331,6 +2331,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        switch (variableName) {
 	            case 'Ajax':
 	                return _ajax2.default;
+
+	            case 'ajax':
+	                return _ajax.ajax;
 
 	            case 'sampleCalculator':
 	                return _sampleCalculator2.default;
