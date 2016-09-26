@@ -1,4 +1,4 @@
-import Ajax from '../../tools/ajax.js';
+import Ajax, { ajax } from '../../tools/ajax.js';
 import sampleCalculator from './sampleCalculator';
 import DeviceHistoryPoints from './DeviceHistoryPoints';
 
@@ -7,7 +7,7 @@ export default class DeviceHistory {
         this.id = rawDevice.id;
         this.ajax = new Ajax({
             uri: config.ajax.dataUri,
-            token: config.ajax.token
+            token: ajax.options.token
         });
     }
 
