@@ -1,6 +1,6 @@
 {
     "name": "relayr-browser-sdk",
-    "version": "2.0.20",
+    "version": "2.0.21",
     "description": "The relayr browser sdk",
     "main": "dist/relayr-browser-sdk.min.js",
     "scripts": {
