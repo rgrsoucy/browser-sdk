@@ -29,11 +29,16 @@ main.__Rewire__('Oauth2', function() {
 });
 
 let testUser = {
-    "config": {
-      "persistToken": true,
-      "mqtt": {
-        "endpoint": "mqtt.relayr.io"
-      }
+    config: {
+        persistToken: true,
+        mqtt: {
+            endpoint: 'mqtt.relayr.io'
+        },
+        ajax: {
+            dataUri: 'data-api.relayr.io',
+            protocol: 'https://',
+            uri: 'api.relayr.io'
+        }
     }
 };
 
@@ -80,29 +85,26 @@ describe('Main', function() {
         describe('no optionalToken is provided', function() {
             it('should login', function() {
                 main.authorize();
-                expect(oauthMock.login).to.have.been.called;         
+                expect(oauthMock.login).to.have.been.called;
             });
 
             it('should ask to verify the token', function(){
-                sinon.spy(main, '_verifyToken');     
-                main.authorize();       
+                sinon.spy(main, '_verifyToken');
+                main.authorize();
                 expect(main._verifyToken).to.have.been.called;
                 main._verifyToken.restore();
 
             });
 
-            it('should return newly created user instance', function(done) {
-                main.authorize().then((response) => {
-                    console.log("new userish", response.prototype)
+            it('should return newly created user instance', function() {
+                return main.authorize().then((response) => {
                     expect(response).to.deep.equal(testUserClassInstance);
-                    done();
-                }).catch((err)=>{console.log(err)});
+                });
             });
 
-            it('should populate the new token', function(done) {
-                main.authorize().then(() => {
+            it('should populate the new token', function() {
+                return main.authorize().then(() => {
                     expect(ajax.options.token).to.be.equal('notoken');
-                    done();
                 });
             });
         });
@@ -125,7 +127,7 @@ describe('Main', function() {
             it('should logout if attempt to get userInfo fails', function() {
                 let verifyUser = new User();
                 let badRequest = {
-                    "status": 401               
+                    "status": 401
                 }
                 User.prototype.getUserInfo.restore();
                 sinon.stub(User.prototype, "getUserInfo").onCall(0).rejects(badRequest);
@@ -139,7 +141,7 @@ describe('Main', function() {
 
 
     describe('#logout', function() {
-        it('should throw an error if the user is already logged out', function() {        
+        it('should throw an error if the user is already logged out', function() {
             main.logout();
             var fn = function() {
                 main.logout();
@@ -152,7 +154,7 @@ describe('Main', function() {
                 id: 'fake-project-id'
             });
             main.authorize();
-            
+
             main.logout();
 
             expect(oauthMock.logout).to.have.been.calledOnce;
@@ -186,7 +188,7 @@ describe('Main', function() {
             main.init({
                 id: 'fake-project-id'
             });
-            
+
             testUserClassInstance.token = 'fake-token';
         });
 
@@ -194,8 +196,8 @@ describe('Main', function() {
             main.authorize('fake-token').then(()=>{
                 expect(main.getCurrentUser()).to.deep.equal(testUserClassInstance);
                 done();
-            }).catch((err)=>{console.log(err)});
-            
+            });
+
         });
     });
 

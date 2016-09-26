@@ -15,8 +15,8 @@ global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 const fakeConfig = {
     ajax: {
-        protocol:'http://',
-        uri: 'test-data.example.com',
+        protocol: 'http://',
+        dataUri: 'data.test-data.example.com',
         token: '12345',
         tokenType: 'Bearer'
     }
@@ -47,7 +47,7 @@ describe('DeviceHistory', function() {
         it('should get data from the data url', function() {
             deviceHistoryInstance.getHistoricalData();
 
-            expect(this.requests[0].url).to.contain('http://test-data.example.com/history/devices/fakeDeviceId');
+            expect(this.requests[0].url).to.contain('https://data.test-data.example.com/history/devices/fakeDeviceId');
         });
 
         it('should request data from the specified device', function() {

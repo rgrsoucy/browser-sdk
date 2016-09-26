@@ -16,7 +16,12 @@ const config = {
     persistToken: true,
     mqtt: {
         endpoint: 'mqtt.relayr.io'
-    }
+    },
+    ajax: {
+        uri: 'api.relayr.io',
+        dataUri: 'data-api.relayr.io',
+        protocol: 'https://'
+     }
 };
 
 let currentUser;
