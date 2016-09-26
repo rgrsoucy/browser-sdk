@@ -3,3 +3,4 @@
 NB!) Token is no longer available under config.ajax.token is now accessible under user.userInfo.token.
 
 2.0.14) alert when trying to log out when not logged in, verifying token when authorizing
+2.0.15) Bugfix) Fixes regression so getHistoricalData is pointing to correct sub domain
