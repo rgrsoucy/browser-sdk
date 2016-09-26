@@ -1,4 +1,4 @@
-//Latest build: 09-12-16 15:47
+//Latest build: 09-26-16 15:31
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -120,6 +120,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        persistToken: true,
 	        mqtt: {
 	            endpoint: 'mqtt.relayr.io'
+	        },
+	        ajax: {
+	            uri: 'api.relayr.io',
+	            dataUri: 'data-api.relayr.io',
+	            protocol: 'https://'
 	        }
 	    };
 
@@ -2176,7 +2181,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _classCallCheck(this, DeviceHistory);
 
 	            this.id = rawDevice.id;
-	            this.ajax = new (_get__('Ajax'))(config.ajax);
+	            this.ajax = new (_get__('Ajax'))({
+	                uri: config.ajax.dataUri,
+	                token: config.ajax.token
+	            });
 	        }
 
 	        _createClass(DeviceHistory, [{
