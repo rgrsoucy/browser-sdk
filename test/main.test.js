@@ -35,7 +35,7 @@ let testUser = {
             endpoint: 'mqtt.relayr.io'
         },
         ajax: {
-            dataUri: 'data-api.relayr.io',
+            dataUri: 'data.relayr.io',
             protocol: 'https://',
             uri: 'api.relayr.io'
         }
@@ -216,12 +216,12 @@ describe('Main', function() {
                     protocol: 'https://',
                     tokenType: 'Bearer',
                     token: 'fake-token',
-                    dataUri: 'data-api.relayr.io',
+                    dataUri: 'data.relayr.io',
             }};
 
             let ajaxConfig = {
                                 uri: 'kittens.com',
-                                dataUri: 'data-api.relayr.io',
+                                dataUri: 'data.relayr.io',
                                 protocol: 'https://',
                                 token: 'fake-token'
                             }

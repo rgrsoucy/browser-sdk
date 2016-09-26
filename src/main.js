@@ -19,7 +19,7 @@ const config = {
     },
     ajax: {
         uri: 'api.relayr.io',
-        dataUri: 'data-api.relayr.io',
+        dataUri: 'data.relayr.io',
         protocol: 'https://'
      }
 };
