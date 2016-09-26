@@ -169,7 +169,7 @@ describe('User', function() {
             }).then((devices) => {
                 expect(devices[0]).to.have.property('rawDevice');
                 done();
-            }).catch(e => console.log(e));
+            });
 
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
