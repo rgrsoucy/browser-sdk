@@ -55,6 +55,9 @@ node {
             git push origin master
             git push --follow-tags
             ;;
+        *)
+            echo "No build and tag for this branch";
+            ;;
     esac
   """
 }
