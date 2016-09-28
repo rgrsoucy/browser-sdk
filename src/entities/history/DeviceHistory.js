@@ -12,7 +12,7 @@ export default class DeviceHistory {
     }
 
     getHistoricalData(opts = {}) {
-        let { limit = 1000, offset = 0, end, start, sample, periode } = opts;
+        let { limit = 1000, offset = 0, end, start, sample, periode, meaning, path } = opts;
         let queryParams = {};
 
         if (periode && periode.length > 0) {
@@ -32,6 +32,13 @@ export default class DeviceHistory {
         if (start) {
             queryParams.start = start.getTime();
         }
+        if (meaning) {
+            queryParams.meaning = meaning;
+        }
+        if (path) {
+            queryParams.path = path;
+        }
+
 
         queryParams.offset = offset;
         queryParams.limit = limit;

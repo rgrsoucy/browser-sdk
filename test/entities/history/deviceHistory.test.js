@@ -97,6 +97,22 @@ describe('DeviceHistory', function() {
                 expect(this.requests[0].url).to.contain('limit=99');
             });
 
+            it('should pass meaning query parameter', function() {
+                deviceHistoryInstance.getHistoricalData({
+                    meaning: 'something'
+                });
+
+                expect(this.requests[0].url).to.contain('meaning=something');
+            });
+
+            it('should pass path query parameter', function() {
+                deviceHistoryInstance.getHistoricalData({
+                    path: 'some-path'
+                });
+
+                expect(this.requests[0].url).to.contain('path=some-path');
+            });
+
             it('should default not to contain sample, start, end as query parames', function() {
                 deviceHistoryInstance.getHistoricalData({});
 
