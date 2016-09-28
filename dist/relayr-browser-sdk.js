@@ -1,4 +1,4 @@
-//Latest build: 09-26-16 16:07
+//Latest build: 09-28-16 08:12
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -2201,6 +2201,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var start = opts.start;
 	                var sample = opts.sample;
 	                var periode = opts.periode;
+	                var meaning = opts.meaning;
+	                var path = opts.path;
 
 	                var queryParams = {};
 
@@ -2220,6 +2222,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 	                if (start) {
 	                    queryParams.start = start.getTime();
+	                }
+	                if (meaning) {
+	                    queryParams.meaning = meaning;
+	                }
+	                if (path) {
+	                    queryParams.path = path;
 	                }
 
 	                queryParams.offset = offset;
