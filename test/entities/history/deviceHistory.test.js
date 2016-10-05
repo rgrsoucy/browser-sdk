@@ -16,7 +16,7 @@ global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 const fakeConfig = {
     ajax: {
         protocol: 'http://',
-        dataUri: 'data.test-data.example.com',
+        uri: 'test-api.example.com',
         token: '12345',
         tokenType: 'Bearer'
     }
@@ -44,10 +44,10 @@ describe('DeviceHistory', function() {
     });
 
     describe('#getHistoricalData', function() {
-        it('should get data from the data url', function() {
+        it('should get data from the url', function() {
             deviceHistoryInstance.getHistoricalData();
 
-            expect(this.requests[0].url).to.contain('https://data.test-data.example.com/history/devices/fakeDeviceId');
+            expect(this.requests[0].url).to.contain('https://test-api.example.com/devices/fakeDeviceId/aggregated-readings');
         });
 
         it('should request data from the specified device', function() {
@@ -57,28 +57,28 @@ describe('DeviceHistory', function() {
         });
 
         describe('parameters', function() {
-            it('should set end as end UNIX ms', function() {
+            it('should set end as end ISO', function() {
                 deviceHistoryInstance.getHistoricalData({
                     end: new Date('1985-10-25T13:30:00.000Z')
                 });
 
-                expect(this.requests[0].url).to.contain('end=499095000000');
+                expect(this.requests[0].url).to.contain('end=1985-10-25T13%3A30%3A00.000Z');
             });
 
-            it('should set start as end UNIX ms', function() {
+            it('should set start as start ISO', function() {
                 deviceHistoryInstance.getHistoricalData({
                     start: new Date('1955-11-04T13:30:00.000Z')
                 });
 
-                expect(this.requests[0].url).to.contain('start=-446812200000');
+                expect(this.requests[0].url).to.contain('start=1955-11-04T13%3A30%3A00.000Z');
             });
 
-            it('should pass sample time as query parameter', function() {
+            it('should pass sample time as interval query parameter', function() {
                 deviceHistoryInstance.getHistoricalData({
                     sample: '1h'
                 });
 
-                expect(this.requests[0].url).to.contain('sample=1h');
+                expect(this.requests[0].url).to.contain('interval=1h');
             });
 
             it('should pass offset as query parameter', function() {
@@ -143,9 +143,9 @@ describe('DeviceHistory', function() {
                         periode: '1m'
                     });
 
-                    expect(this.requests[0].url).to.contain('start=' + (new Date('1955-09-05T13:30:00.000Z')).getTime());
-                    expect(this.requests[0].url).to.contain('end=' + (new Date('1955-10-05T13:30:00.000Z')).getTime());
-                    expect(this.requests[0].url).to.contain('sample=1h');
+                    expect(this.requests[0].url).to.contain('start=' + ('1955-09-05T13%3A30%3A00.000Z'));
+                    expect(this.requests[0].url).to.contain('end=' + ('1955-10-05T13%3A30%3A00.000Z'));
+                    expect(this.requests[0].url).to.contain('interval=1h');
                 });
 
                 it('1 day, it should set start -> end to 1 day and sampling to 1h', function() {
@@ -153,9 +153,9 @@ describe('DeviceHistory', function() {
                         periode: '1d'
                     });
 
-                    expect(this.requests[0].url).to.contain('start=' + (new Date('1955-10-04T13:30:00.000Z')).getTime());
-                    expect(this.requests[0].url).to.contain('end=' + (new Date('1955-10-05T13:30:00.000Z')).getTime());
-                    expect(this.requests[0].url).to.contain('sample=1m');
+                    expect(this.requests[0].url).to.contain('start=' + ('1955-10-04T13%3A30%3A00.000Z'));
+                    expect(this.requests[0].url).to.contain('end=' + ('1955-10-05T13%3A30%3A00.000Z'));
+                    expect(this.requests[0].url).to.contain('interval=1m');
                 });
             });
 
@@ -164,7 +164,9 @@ describe('DeviceHistory', function() {
                     let historyResponse;
                     beforeEach(function(done) {
                         deviceHistoryInstance.getHistoricalData({
-                            periode: '1m'
+                            periode: '1m',
+                            meaning: 'fake-meaning',
+                            path: 'fake-path'
                         }).then((obj) => {
                             historyResponse = obj;
                             done();
@@ -179,25 +181,15 @@ describe('DeviceHistory', function() {
                         expect(historyResponse.response).to.be.deep.equal(DeviceHistoryFixture);
                     });
 
-                    it('should contain the device Id', function() {
-                        expect(historyResponse.points.get('fake-meaning', 'fake-path').id).to.be.equal('fake-history-device-id');
-                    });
-
-
                     it('should have all the points from one reading', function() {
-                        expect(historyResponse.points.get('fake-meaning', 'fake-path').points[0]).to.be.an('object');
-                        expect(historyResponse.points.get('fake-meaning', 'fake-path').points[0]).to.deep.equal({
-                            timestamp: 1465552800000,
-                            value: 49.2680925420364
+                        console.log(historyResponse.points.get('fake-meaning', 'fake-path'));
+                        expect(historyResponse.points.get('fake-meaning', 'fake-path')[0]).to.be.an('object');
+                        expect(historyResponse.points.get('fake-meaning', 'fake-path')[0]).to.deep.equal({
+                            timestamp: '2016-09-06T19:00:00.000Z',
+                            avg: 93.07814412491575,
+                            max: 93.07814412491575,
+                            min: 93.07814412491575
                         });
-                    });
-
-                    it('should work when the reading does not have a path', function() {
-                        expect(historyResponse.points.get('fake-meaning', null).id).to.be.equal('fake-history-device-id-no-path');
-                    });
-
-                    it('should work when the reading does not have a meaning', function() {
-                        expect(historyResponse.points.get(null, 'fake-path').id).to.be.equal('fake-history-device-id-no-meaning');
                     });
                 });
 
@@ -232,95 +224,38 @@ describe('DeviceHistory', function() {
                     request.respond(204, {
                         'Content-Type': 'application/json'
                     }, JSON.stringify({
-                        count: 30,
-                        limit: 15,
-                        offset: count * 15,
-                        results: [{
-                            points: [{
-                                timestamp: count,
-                                value: count
-                            }],
-                            meaning: 'fake-meaning',
-                            path: 'fake-path'
-                        }]
+                        data: {
+                            '2016-09-07T03:00:00.000Z': {
+                                avg: 95.54889362741321,
+                                max: 95.54889362741321,
+                                min: 95.54889362741321
+                            },
+                            '2016-09-07T11:00:00.000Z': {
+                                avg: 99.96942368795737,
+                                max: 100,
+                                min: 99.93884737591476
+                            }
+                        }
                     }));
-                    count++;
                 }, 0);
-            }
+            };
         });
 
-        it('should get all pages', function(done) {
-            deviceHistoryInstance.getAllHistoricalData({
+        it('should get all pages', function() {
+            return deviceHistoryInstance.getAllHistoricalData({
                 periode: '1m'
             }).then(() => {
-                expect(this.requests.length).to.equal(2);
-                done();
+                expect(this.requests.length).to.equal(1);
             });
         });
 
-        it('should notify listener on when data is coming in for each page', function(done) {
+        it('should notify listener on when data is coming in for each page', function() {
             var pageListener = sinon.spy();
-            deviceHistoryInstance.getAllHistoricalData({
+            return deviceHistoryInstance.getAllHistoricalData({
                 periode: '1m',
                 onDataReceived: pageListener
             }).then(() => {
-                expect(pageListener).to.have.been.calledTwice;
-                done();
-            });
-        });
-
-        it('should fail the if one of the pages fails', function(done) {
-            let count = 0;
-            requestCb = (request) => {
-                //Needs to be done async
-                setTimeout(function() {
-                    if (count == 1) {
-                        request.respond(404, {
-                            'Content-Type': 'application/json'
-                        }, JSON.stringify({
-                            message: 'oh noes'
-                        }));
-                        return;
-                    }
-                    request.respond(204, {
-                        'Content-Type': 'application/json'
-                    }, JSON.stringify({
-                        count: 30,
-                        limit: 15,
-                        offset: count * 15,
-                        results: [{
-                            points: [{
-                                timestamp: 1,
-                                value: count
-                            }],
-                            meaning: 'fake-meaning',
-                            path: 'fake-path'
-                        }]
-                    }));
-                    count++;
-                }, 0);
-            }
-
-            deviceHistoryInstance.getAllHistoricalData({}).then(() => {}, (data) => {
-                expect(JSON.parse(data.response).message).to.equal('oh noes');
-                done();
-            });
-        });
-
-        it('should append points for each reading for every new page', function(done) {
-            var pageListener = sinon.spy();
-            deviceHistoryInstance.getAllHistoricalData({
-                periode: '1m',
-                onDataReceived: pageListener
-            }).then((response) => {
-                expect(response.points.get('fake-meaning', 'fake-path').points).to.deep.include.members([{
-                    timestamp: 0,
-                    value: 0
-                }, {
-                    timestamp: 1,
-                    value: 1
-                }])
-                done();
+                expect(pageListener).to.have.been.calledOnce;
             });
         });
 
@@ -331,9 +266,9 @@ describe('DeviceHistory', function() {
                 sample: '1d'
             });
 
-            expect(this.requests[0].url).to.contain('sample=');
+            expect(this.requests[0].url).to.contain('interval=');
             expect(this.requests[0].url).to.contain('start=');
             expect(this.requests[0].url).to.contain('end=');
-        })
+        });
     });
 });

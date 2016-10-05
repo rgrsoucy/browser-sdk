@@ -6,14 +6,16 @@ export default class DeviceHistory {
     constructor(rawDevice = {}, config) {
         this.id = rawDevice.id;
         this.ajax = new Ajax({
-            uri: config.ajax.dataUri,
+            uri: config.ajax.uri,
             token: ajax.options.token
         });
     }
 
     getHistoricalData(opts = {}) {
         let { limit = 1000, offset = 0, end, start, sample, periode, meaning, path } = opts;
-        let queryParams = {};
+        let queryParams = {
+            aggregates: 'avg,min,max'
+        };
 
         if (periode && periode.length > 0) {
             let sampleObj = sampleCalculator(periode);
@@ -23,14 +25,14 @@ export default class DeviceHistory {
         }
 
         if (sample !== undefined) {
-            queryParams.sample = sample;
+            queryParams.interval = sample;
         }
 
         if (end) {
-            queryParams.end = end.getTime();
+            queryParams.end = end.toISOString();
         }
         if (start) {
-            queryParams.start = start.getTime();
+            queryParams.start = start.toISOString();
         }
         if (meaning) {
             queryParams.meaning = meaning;
@@ -39,14 +41,13 @@ export default class DeviceHistory {
             queryParams.path = path;
         }
 
-
         queryParams.offset = offset;
         queryParams.limit = limit;
 
         return new Promise((resolve, reject) => {
-            this.ajax.get(`/history/devices/${this.id}`, { queryObj: queryParams }).then(function(response) {
+            this.ajax.get(`/devices/${this.id}/aggregated-readings`, { queryObj: queryParams }).then(function(response) {
                 resolve({
-                    points: new DeviceHistoryPoints(response.results),
+                    points: new DeviceHistoryPoints(response.data, meaning, path),
                     response: response
                 });
             }, reject);
@@ -59,38 +60,22 @@ export default class DeviceHistory {
         let { onDataReceived, periode } = opts;
         onDataReceived = onDataReceived || function() {};
 
-        let hasMore = function(data) {
-            return data.count > data.limit && (data.count - data.offset) > data.limit;
-        };
-
-        let handleResponse = (data, resolve, reject) => {
-            if(data.points && !points) {
+        let handleResponse = (data) => {
+            if (data.points && !points) {
                 points = data.points;
             } else if (data.response && data.response.results) {
                 points.addPoints(data.response.results);
             }
 
             onDataReceived(points);
-
-            if (hasMore(data.response)) {
-                getData({
-                    offset: data.response.offset + data.response.limit
-                }, resolve, reject);
-            } else {
-                resolve({
-                    points: points
-                });
-            }
-        };
-
-        let getData = (opts, resolve, reject) => {
-            this.getHistoricalData(opts).then((data) => {
-                handleResponse(data, resolve, reject);
-            }, reject);
         };
 
         return new Promise((resolve, reject) => {
-            getData(opts, resolve, reject);
+            this.getHistoricalData(opts).then((data) => {
+                handleResponse(data);
+                resolve(data.points);
+            }, reject);
         });
+
     }
 };

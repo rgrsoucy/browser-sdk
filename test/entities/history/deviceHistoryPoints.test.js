@@ -14,53 +14,61 @@ describe('DeviceHistoryPoint', function() {
 
     let deviceHistoryPointsInstance;
     beforeEach(function() {
-        deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.results);
+        deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.data, 'fake-meaning', 'fake-path');
     });
 
     it('should add points on constructions', function() {
-        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').id).to.be.equal('fake-history-device-id');
-    });
-
-    it('should contain the id', function() {
-        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').id).to.be.equal('fake-history-device-id');
+        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path')).to.be.an('Array');
     });
 
     it('should have all the points from one reading', function() {
-        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').points[0]).to.be.an('object');
-        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').points[0]).to.deep.equal({
-            timestamp: 1465552800000,
-            value: 49.2680925420364
+        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path')[0]).to.be.an('object');
+        expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path')[0]).to.deep.equal({
+            avg: 93.07814412491575,
+            max: 93.07814412491575,
+            min: 93.07814412491575,
+            timestamp: '2016-09-06T19:00:00.000Z'
         });
     });
 
     it('should work when the reading does not have a path', function() {
-        expect(deviceHistoryPointsInstance.get('fake-meaning', null).id).to.be.equal('fake-history-device-id-no-path');
+        const deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.data, 'fake-meaning', null);
+        expect(deviceHistoryPointsInstance.get('fake-meaning', null)).to.be.an('Array');
     });
 
     it('should work when the reading does not have a meaning', function() {
-        expect(deviceHistoryPointsInstance.get(null, 'fake-path').id).to.be.equal('fake-history-device-id-no-meaning');
+        const deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.data, null, 'fake-path');
+        expect(deviceHistoryPointsInstance.get(null, 'fake-path')).to.be.an('Array');
     });
 
     describe('#addPoints', function() {
         beforeEach(function() {
-            deviceHistoryPointsInstance.addPoints(deviceHistoryFixture.results);
+            deviceHistoryPointsInstance.addPoints(deviceHistoryFixture.data);
             deviceHistoryPointsInstance.addPoints([{
-                deviceId: 'new-added-last',
-                points: [{
-                    timestamp: 1465552800000,
-                    value: 2
-                }],
-                meaning: 'fake-new-meaning',
-                path: 'null'
-            },]);
+                timestamp: new Date(1465552800000).toISOString(),
+                avg: 2
+            }]);
         });
 
         it('add points to existing points object', function() {
-            expect(deviceHistoryPointsInstance.get('fake-meaning', null).points.length).to.be.equal(2);
-        })
+            expect(deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').length).to.be.equal(11);
+        });
 
-        it('should add new entry if there is not an existing one', function() {
-            expect(deviceHistoryPointsInstance.get('fake-new-meaning', null).points[0].value).to.be.equal(2);
-        })
+        it('should add entry if there is not an existing one', function() {
+            const points = deviceHistoryPointsInstance.get('fake-meaning', 'fake-path');
+            expect(points[0].avg).to.be.equal(2);
+        });
+
+        it('should sort it by date', function() {
+            const deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.data, 'fake-meaning', 'fake-path');
+            const dates = deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').map(({ timestamp }) => timestamp);
+            expect(dates).to.be.deep.equal([
+                '2016-09-06T19:00:00.000Z',
+                '2016-09-07T03:00:00.000Z',
+                '2016-09-07T11:00:00.000Z',
+                '2016-09-07T19:00:00.000Z',
+                '2016-09-08T03:00:00.000Z'
+            ]);
+        });
     });
 });
