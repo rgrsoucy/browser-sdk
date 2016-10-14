@@ -1,20 +1,30 @@
 // getAllModels
 import { ajax } from '../tools/ajax.js';
 
-export
-let cache = {
-    init: () => {
 
-    },
-    public: {
-        toArray: [],
-        toDictionary: {}
-    },
-    clear: () => {
-        cache.public.toArray = [];
-        cache.public.toDictionary = [];
-    }
-};
+function createCache() {
+    var cache = {
+        init: () => {
+
+        },
+        public: {
+            toArray: [],
+            toDictionary: {}
+        },
+        clear: () => {
+            cache.public.toArray = [];
+            cache.public.toDictionary = [];
+        }
+    };
+
+    return cache;
+}
+
+export
+let cache = createCache();
+
+export
+let prototypeCache = createCache();
 
 export
 default class Model {
@@ -37,6 +47,25 @@ default class Model {
                     cache.public.toArray = response.models;
                     this._makeDictionary(cache.public.toArray);
                     resolve(cache.public.toArray);
+                }).catch((error) => {
+                    reject(error);
+                });
+            }
+        });
+    }
+
+    getAllPrototypes() {
+        return new Promise((resolve, reject) => {
+            if (prototypeCache.public.toArray.length > 0) {
+                resolve(prototypeCache.public.toArray);
+            } else {
+                ajax.get('/device-models/prototypes', {
+                    queryObj: 'limit=100000',
+                    contentType: 'application/hal+json'
+                }).then((response) => {
+                    prototypeCache.public.toArray = response.prototypes;
+                    this._makeDictionary(prototypeCache.public.toArray);
+                    resolve(prototypeCache.public.toArray);
                 }).catch((error) => {
                     reject(error);
                 });
