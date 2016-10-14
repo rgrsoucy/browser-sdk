@@ -182,7 +182,6 @@ describe('DeviceHistory', function() {
                     });
 
                     it('should have all the points from one reading', function() {
-                        console.log(historyResponse.points.get('fake-meaning', 'fake-path'));
                         expect(historyResponse.points.get('fake-meaning', 'fake-path')[0]).to.be.an('object');
                         expect(historyResponse.points.get('fake-meaning', 'fake-path')[0]).to.deep.equal({
                             timestamp: '2016-09-06T19:00:00.000Z',
@@ -192,7 +191,6 @@ describe('DeviceHistory', function() {
                         });
                     });
                 });
-
             });
             describe('on failure', function() {
                 it('should reject the promise with error message', function(done) {
@@ -224,18 +222,20 @@ describe('DeviceHistory', function() {
                     request.respond(204, {
                         'Content-Type': 'application/json'
                     }, JSON.stringify({
-                        data: {
-                            '2016-09-07T03:00:00.000Z': {
+                        data: [
+                            {
                                 avg: 95.54889362741321,
                                 max: 95.54889362741321,
-                                min: 95.54889362741321
+                                min: 95.54889362741321,
+                                timestamp: '2016-09-07T03:00:00.000Z'
                             },
-                            '2016-09-07T11:00:00.000Z': {
+                            {
                                 avg: 99.96942368795737,
                                 max: 100,
-                                min: 99.93884737591476
+                                min: 99.93884737591476,
+                                timestamp: '2016-09-07T11:00:00.000Z'
                             }
-                        }
+                        ]
                     }));
                 }, 0);
             };

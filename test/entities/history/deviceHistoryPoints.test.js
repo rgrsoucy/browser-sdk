@@ -56,19 +56,7 @@ describe('DeviceHistoryPoint', function() {
 
         it('should add entry if there is not an existing one', function() {
             const points = deviceHistoryPointsInstance.get('fake-meaning', 'fake-path');
-            expect(points[0].avg).to.be.equal(2);
-        });
-
-        it('should sort it by date', function() {
-            const deviceHistoryPointsInstance = new DeviceHistoryPoints(deviceHistoryFixture.data, 'fake-meaning', 'fake-path');
-            const dates = deviceHistoryPointsInstance.get('fake-meaning', 'fake-path').map(({ timestamp }) => timestamp);
-            expect(dates).to.be.deep.equal([
-                '2016-09-06T19:00:00.000Z',
-                '2016-09-07T03:00:00.000Z',
-                '2016-09-07T11:00:00.000Z',
-                '2016-09-07T19:00:00.000Z',
-                '2016-09-08T03:00:00.000Z'
-            ]);
+            expect(points[points.length - 1].avg).to.be.equal(2);
         });
     });
 });
