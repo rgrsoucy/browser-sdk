@@ -93,6 +93,18 @@ export default class User {
         });
     }
 
+    getMyApps() {
+        return new Promise((resolve, reject) => {
+            this.getUserInfo().then(() => {
+                ajax.get(`/users/${this.userInfo.id}/apps`).then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+            });
+        });
+    }
+
     _getConfig() {
         return this.config;
     }
