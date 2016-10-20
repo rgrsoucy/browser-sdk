@@ -1,4 +1,4 @@
-//Latest build: 09-28-16 08:52
+//Latest build: 10-20-16 12:10
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -105,7 +105,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    exports.Oauth2 = _oauth2.default;
@@ -422,7 +422,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -726,7 +726,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -786,7 +786,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function getMyDevices() {
 	                var _this2 = this;
 
-	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	                return new Promise(function (resolve, reject) {
 	                    _this2.getUserInfo().then(function () {
@@ -809,7 +809,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function searchForDevices() {
 	                var _this3 = this;
 
-	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	                if (!opts.query) {
 	                    throw new Error('Please provide a query object');
@@ -872,6 +872,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            }
 	        }, {
+	            key: 'getMyApps',
+	            value: function getMyApps() {
+	                var _this6 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    _this6.getUserInfo().then(function () {
+	                        _get__('ajax').get('/users/' + _this6.userInfo.id + '/apps').then(function (response) {
+	                            resolve(response);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    });
+	                });
+	            }
+	        }, {
 	            key: '_getConfig',
 	            value: function _getConfig() {
 	                return this.config;
@@ -879,11 +894,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getCachedDevices',
 	            value: function getCachedDevices() {
-	                var _this6 = this;
+	                var _this7 = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    if (_this6.devicesCache) {
-	                        resolve(_this6.devicesCache);
+	                    if (_this7.devicesCache) {
+	                        resolve(_this7.devicesCache);
 	                    } else {
 	                        resolve([]);
 	                    }
@@ -1073,7 +1088,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -1115,9 +1130,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function get(url) {
 	                var _this = this;
 
-	                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
+	                var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
 	                    contentType: 'application/json'
-	                } : arguments[1];
+	                };
 
 	                if (!(url.charAt(0) === '/')) {
 	                    throw new Error('Please provide a url with a leading /');
@@ -1149,9 +1164,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function post(url, body) {
 	                var _this2 = this;
 
-	                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
+	                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
 	                    contentType: 'application/json'
-	                } : arguments[2];
+	                };
 
 	                if (!url.charAt(0) === '/') {
 	                    throw new Error('Please provide a url with a leading /');
@@ -1178,9 +1193,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function patch(url, body) {
 	                var _this3 = this;
 
-	                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
+	                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
 	                    contentType: 'application/json'
-	                } : arguments[2];
+	                };
 
 	                if (!url.charAt(0) === '/') {
 	                    throw new Error('Please provide a url with a leading /');
@@ -1207,9 +1222,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function _delete(url) {
 	                var _this4 = this;
 
-	                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
+	                var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
 	                    contentType: 'application/json'
-	                } : arguments[1];
+	                };
 
 	                if (!url.charAt(0) === '/') {
 	                    throw new Error('Please provide a url with a leading /');
@@ -1507,7 +1522,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -1538,7 +1553,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var Device = function () {
 	        function Device() {
-	            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var rawDevice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	            var config = arguments[1];
 
 	            _classCallCheck(this, Device);
@@ -1681,7 +1696,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'connect',
 	            value: function connect() {
-	                var transport = arguments.length <= 0 || arguments[0] === undefined ? 'mqtt' : arguments[0];
+	                var transport = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'mqtt';
 
 	                var connection = new (_get__('Connection'))();
 	                var getChannel = this.getChannel();
@@ -2146,7 +2161,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -2175,7 +2190,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var DeviceHistory = function () {
 	        function DeviceHistory() {
-	            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	            var rawDevice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	            var config = arguments[1];
 
 	            _classCallCheck(this, DeviceHistory);
@@ -2192,7 +2207,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function getHistoricalData() {
 	                var _this = this;
 
-	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 	                var _opts$limit = opts.limit;
 	                var limit = _opts$limit === undefined ? 1000 : _opts$limit;
 	                var _opts$offset = opts.offset;
@@ -2247,7 +2262,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function getAllHistoricalData() {
 	                var _this2 = this;
 
-	                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	                var points = void 0;
 
@@ -2481,7 +2496,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    var oneHourMs = 1000 * 3600;
@@ -2820,7 +2835,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -3177,7 +3192,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(global,factory){if(true){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));}else if(typeof exports!=="undefined"){factory(exports);}else{var mod={exports:{}};factory(mod.exports);global.mqttws31Min=mod.exports;}})(this,function(exports){"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol?"symbol":typeof obj;};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var Paho=function Paho(){_classCallCheck(this,Paho);//var window = {};
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(global,factory){if(true){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));}else if(typeof exports!=="undefined"){factory(exports);}else{var mod={exports:{}};factory(mod.exports);global.mqttws31Min=mod.exports;}})(this,function(exports){"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var Paho=function Paho(){_classCallCheck(this,Paho);//var window = {};
 	var _Paho={};_Paho.MQTT=function(global){// Private variables below, these are only visible inside the function closure
 	// which is used to define the module.
 	var version="@VERSION@";var buildLevel="@BUILDLEVEL@";/**
@@ -3650,7 +3665,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -3691,7 +3706,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var Model = function () {
 	        function Model() {
-	            var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+	            var id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
 	            var config = arguments[1];
 
 	            _classCallCheck(this, Model);
@@ -3969,7 +3984,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -4235,7 +4250,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
 	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj;
+	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
 	    };
 
 	    function _classCallCheck(instance, Constructor) {
@@ -4351,7 +4366,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/groups/this.id}', patch, opts).then(function (response) {
+	                    _get__('ajax').patch('/groups/' + _this4.id, patch, opts).then(function (response) {
 	                        _this4.owner = response.owner;
 	                        _this4.position = response.position;
 	                        _this4.id = response.id;
