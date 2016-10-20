@@ -80,7 +80,7 @@ default class Group {
         }
 
         return new Promise((resolve, reject) => {
-            ajax.patch(`/groups/this.id}`, patch, opts)
+            ajax.patch(`/groups/${this.id}`, patch, opts)
                 .then((response) => {
                     this.owner = response.owner;
                     this.position = response.position;
