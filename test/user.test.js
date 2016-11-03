@@ -232,7 +232,7 @@ describe('User', function() {
 
     describe('#getMyApps', function() {
 
-        it.only('should return an array of app objects', function () {
+        it('should return an array of app objects', function () {
             var apiResponse = 
                 [{
                     "id": "a1bf392f-0890-445a-b025-3d09316cd356",
