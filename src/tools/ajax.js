@@ -65,7 +65,7 @@ class Ajax {
                 type: 'POST',
                 url: url,
                 body: body,
-                isObject: opts.raw || true,
+                isObject: opts.raw || false,
                 contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
@@ -165,8 +165,7 @@ class Ajax {
                 if (xhrObject.readyState === 4) {
                     if (xhrObject.status > 199 && xhrObject.status < 299) {
                         //2xx success
-                        if (options.isObject) {
-
+                        if (options.isObject && xhrObject.responseText.trim() !== '') {
                             resolve(JSON.parse(xhrObject.responseText));
                         } else {
 
