@@ -102,7 +102,7 @@ default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            ajax.patch(`/devices/${this.id}`, patch, {
+            ajax.post(`/devices/${this.id}/commands`, command, {
                 raw: raw
             })
                 .then((response) => {
