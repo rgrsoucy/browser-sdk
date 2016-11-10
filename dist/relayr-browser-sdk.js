@@ -1,4 +1,4 @@
-//Latest build: 10-20-16 12:10
+//Latest build: 11-10-16 08:57
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -814,12 +814,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!opts.query) {
 	                    throw new Error('Please provide a query object');
 	                }
-	                var _opts$query = opts.query;
-	                var device_name = _opts$query.name;
-	                var device_description = _opts$query.description;
-	                var device_ids = _opts$query.ids;
-	                var model_id = _opts$query.modelId;
-	                var firmware_version = _opts$query.firmwareVersion;
+	                var _opts$query = opts.query,
+	                    device_name = _opts$query.name,
+	                    device_description = _opts$query.description,
+	                    device_ids = _opts$query.ids,
+	                    model_id = _opts$query.modelId,
+	                    firmware_version = _opts$query.firmwareVersion;
 
 	                return new Promise(function (resolve, reject) {
 	                    _get__('ajax').get('/devices', {
@@ -1165,7 +1165,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this2 = this;
 
 	                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
-	                    contentType: 'application/json'
+	                    contentType: 'application/json',
+	                    raw: true
 	                };
 
 	                if (!url.charAt(0) === '/') {
@@ -1174,12 +1175,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!url) throw new Error('Please provide atleast a url');
 	                if (typeof url !== 'string') throw new Error('Please provide a string url');
 
+	                if (opts.raw === false) opts.raw = false;
+	                if (opts.raw === true) opts.raw = true;
 	                return new Promise(function (resolve, reject) {
 	                    var xhrObject = _this2._xhrRequest({
 	                        type: 'POST',
 	                        url: url,
 	                        body: body,
-	                        isObject: opts.raw || true,
+	                        isObject: opts.raw,
 	                        contentType: opts.contentType
 	                    }).then(function (result) {
 	                        resolve(result);
@@ -1284,8 +1287,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        if (xhrObject.readyState === 4) {
 	                            if (xhrObject.status > 199 && xhrObject.status < 299) {
 	                                //2xx success
-	                                if (options.isObject) {
-
+	                                if (options.isObject && xhrObject.responseText.trim() !== '') {
 	                                    resolve(JSON.parse(xhrObject.responseText));
 	                                } else {
 
@@ -1658,7 +1660,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/devices/' + _this3.id, patch, {
+	                    _get__('ajax').post('/devices/' + _this3.id + '/commands', command, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        resolve(response);
@@ -2208,16 +2210,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this = this;
 
 	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	                var _opts$limit = opts.limit;
-	                var limit = _opts$limit === undefined ? 1000 : _opts$limit;
-	                var _opts$offset = opts.offset;
-	                var offset = _opts$offset === undefined ? 0 : _opts$offset;
-	                var end = opts.end;
-	                var start = opts.start;
-	                var sample = opts.sample;
-	                var periode = opts.periode;
-	                var meaning = opts.meaning;
-	                var path = opts.path;
+	                var _opts$limit = opts.limit,
+	                    limit = _opts$limit === undefined ? 1000 : _opts$limit,
+	                    _opts$offset = opts.offset,
+	                    offset = _opts$offset === undefined ? 0 : _opts$offset,
+	                    end = opts.end,
+	                    start = opts.start,
+	                    sample = opts.sample,
+	                    periode = opts.periode,
+	                    meaning = opts.meaning,
+	                    path = opts.path;
 
 	                var queryParams = {};
 
@@ -2266,8 +2268,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var points = void 0;
 
-	                var onDataReceived = opts.onDataReceived;
-	                var periode = opts.periode;
+	                var onDataReceived = opts.onDataReceived,
+	                    periode = opts.periode;
 
 	                onDataReceived = onDataReceived || function () {};
 
