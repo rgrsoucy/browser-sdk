@@ -2209,7 +2209,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                if (periode && periode.length > 0) {
 	                    var sampleObj = _get__('sampleCalculator')(periode);
-	                    sample = sampleObj.sampleSize;
+	                    sample = sample || sampleObj.sampleSize;
 	                    start = sampleObj.start;
 	                    end = sampleObj.end;
 	                }
