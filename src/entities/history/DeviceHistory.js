@@ -19,7 +19,7 @@ export default class DeviceHistory {
 
         if (periode && periode.length > 0) {
             let sampleObj = sampleCalculator(periode);
-            sample = sampleObj.sampleSize;
+            sample = sample || sampleObj.sampleSize;
             start = sampleObj.start;
             end = sampleObj.end;
         }
