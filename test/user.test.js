@@ -159,7 +159,9 @@ describe('User', function() {
 
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
-            }, JSON.stringify([devicesStub]));
+            }, JSON.stringify({
+                data: [devicesStub]
+            }));
         });
 
         it('should be possible to get the devices as classes', function(done) {
@@ -173,7 +175,9 @@ describe('User', function() {
 
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
-            }, JSON.stringify([devicesStub]));
+            }, JSON.stringify({
+                data: [devicesStub]
+            }));
         });
 
         describe('query parameters', () => {
@@ -233,7 +237,7 @@ describe('User', function() {
     describe('#getMyApps', function() {
 
         it('should return an array of app objects', function () {
-            var apiResponse = 
+            var apiResponse =
                 [{
                     "id": "a1bf392f-0890-445a-b025-3d09316cd356",
                     "name": "WB Data Board (WBDB)",
@@ -250,7 +254,7 @@ describe('User', function() {
 
             return userInstance.getMyApps().then((res)=>{
                 expect(res).to.deep.equal(apiResponse);
-                
+
             });
         });
     });
