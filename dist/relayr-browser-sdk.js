@@ -1,4 +1,4 @@
-//Latest build: 11-10-16 09:00
+//Latest build: 11-24-16 12:41
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -831,12 +831,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            firmware_version: firmware_version
 	                        }
 	                    }).then(function (response) {
+	                        var devices = response.data;
+
 	                        if (opts.asClasses) {
-	                            resolve(response.map(function (device) {
+	                            resolve(devices.map(function (device) {
 	                                return new (_get__('Device'))(device, _this3.config);
 	                            }));
 	                        } else {
-	                            resolve(response);
+	                            resolve(devices);
 	                        }
 	                    }, reject);
 	                });
