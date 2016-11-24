@@ -8,3 +8,7 @@ NB!) Token is no longer available under config.ajax.token is now accessible unde
 2.0.21) Bugfix) Fixes so the correct token is used when requesting data for the history API
 2.0.23) Bugfix) Fix so it is possible to filter the meaning/path in the history api
 2.0.24) add functionality to get the list of a user's apps
+
+2.0.28) Refactor/Bugfix) Stops error been thrown on setting meta data, updated to new version of the search api
+NB!) The search API (https://api.relayr.io/devices?device_name=test) has a breaking changes
+ so version older than 2.0.28 will not work new data structure.
