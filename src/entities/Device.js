@@ -283,9 +283,9 @@ default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            ajax.post(`/devices/${this.id}/metadata`, schema)
+            ajax.post(`/devices/${this.id}/metadata`, schema, { raw: false })
                 .then((response) => {
-                    this.metadata = response;
+                    this.metadata = schema;
                     resolve(response);
                 }).catch((error) => {
                     reject(error);
