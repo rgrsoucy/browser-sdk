@@ -1,4 +1,3 @@
-//Latest build: 10-20-16 12:10
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -831,12 +830,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            firmware_version: firmware_version
 	                        }
 	                    }).then(function (response) {
+	                        var devices = response.data;
+
 	                        if (opts.asClasses) {
-	                            resolve(response.map(function (device) {
+	                            resolve(devices.map(function (device) {
 	                                return new (_get__('Device'))(device, _this3.config);
 	                            }));
 	                        } else {
-	                            resolve(response);
+	                            resolve(devices);
 	                        }
 	                    }, reject);
 	                });
@@ -1165,7 +1166,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this2 = this;
 
 	                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
-	                    contentType: 'application/json'
+	                    contentType: 'application/json',
+	                    raw: true
 	                };
 
 	                if (!url.charAt(0) === '/') {
@@ -1174,12 +1176,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!url) throw new Error('Please provide atleast a url');
 	                if (typeof url !== 'string') throw new Error('Please provide a string url');
 
+	                if (opts.raw === false) opts.raw = false;
+	                if (opts.raw === true) opts.raw = true;
 	                return new Promise(function (resolve, reject) {
 	                    var xhrObject = _this2._xhrRequest({
 	                        type: 'POST',
 	                        url: url,
 	                        body: body,
-	                        isObject: opts.raw || true,
+	                        isObject: opts.raw,
 	                        contentType: opts.contentType
 	                    }).then(function (result) {
 	                        resolve(result);
@@ -1284,11 +1288,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        if (xhrObject.readyState === 4) {
 	                            if (xhrObject.status > 199 && xhrObject.status < 299) {
 	                                //2xx success
-	                                if (options.isObject) {
-
+	                                if (options.isObject && xhrObject.responseText.trim() !== '') {
 	                                    resolve(JSON.parse(xhrObject.responseText));
 	                                } else {
-
 	                                    resolve(xhrObject.responseText);
 	                                }
 	                            } else if (xhrObject.status > 399 && xhrObject.status < 499) {
@@ -1658,7 +1660,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/devices/' + _this3.id, patch, {
+	                    _get__('ajax').post('/devices/' + _this3.id + '/commands', command, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        resolve(response);
@@ -1858,8 +1860,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').post('/devices/' + _this11.id + '/metadata', schema).then(function (response) {
-	                        _this11.metadata = response;
+	                    _get__('ajax').post('/devices/' + _this11.id + '/metadata', schema, { raw: false }).then(function (response) {
+	                        _this11.metadata = schema;
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -3660,7 +3662,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.cache = undefined;
+	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.prototypeCache = exports.cache = undefined;
 
 	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
 	        return typeof obj;
@@ -3692,17 +3694,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }();
 
-	    var cache = exports.cache = {
-	        init: function init() {},
-	        public: {
-	            toArray: [],
-	            toDictionary: {}
-	        },
-	        clear: function clear() {
-	            _get__('cache').public.toArray = [];
-	            _get__('cache').public.toDictionary = [];
-	        }
-	    };
+	    function createCache() {
+	        var cache = {
+	            init: function init() {},
+	            public: {
+	                toArray: [],
+	                toDictionary: {}
+	            },
+	            clear: function clear() {
+	                cache.public.toArray = [];
+	                cache.public.toDictionary = [];
+	            }
+	        };
+
+	        return cache;
+	    }
+
+	    var cache = exports.cache = _get__('createCache')();
+
+	    var prototypeCache = exports.prototypeCache = _get__('createCache')();
 
 	    var Model = function () {
 	        function Model() {
@@ -3733,6 +3743,28 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            _get__('cache').public.toArray = response.models;
 	                            _this._makeDictionary(_get__('cache').public.toArray);
 	                            resolve(_get__('cache').public.toArray);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    }
+	                });
+	            }
+	        }, {
+	            key: 'getAllPrototypes',
+	            value: function getAllPrototypes() {
+	                var _this2 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    if (_get__('prototypeCache').public.toArray.length > 0) {
+	                        resolve(_get__('prototypeCache').public.toArray);
+	                    } else {
+	                        _get__('ajax').get('/device-models/prototypes', {
+	                            queryObj: 'limit=100000',
+	                            contentType: 'application/hal+json'
+	                        }).then(function (response) {
+	                            _get__('prototypeCache').public.toArray = response.prototypes;
+	                            _this2._makeDictionary(_get__('prototypeCache').public.toArray);
+	                            resolve(_get__('prototypeCache').public.toArray);
 	                        }).catch(function (error) {
 	                            reject(error);
 	                        });
@@ -3845,11 +3877,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    function _get_original__(variableName) {
 	        switch (variableName) {
+	            case 'createCache':
+	                return createCache;
+
 	            case 'cache':
 	                return cache;
 
 	            case 'ajax':
 	                return _ajax.ajax;
+
+	            case 'prototypeCache':
+	                return prototypeCache;
 	        }
 
 	        return undefined;
