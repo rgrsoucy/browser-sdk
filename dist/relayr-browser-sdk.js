@@ -1,4 +1,3 @@
-//Latest build: 11-24-16 12:41
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -814,12 +813,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!opts.query) {
 	                    throw new Error('Please provide a query object');
 	                }
-	                var _opts$query = opts.query,
-	                    device_name = _opts$query.name,
-	                    device_description = _opts$query.description,
-	                    device_ids = _opts$query.ids,
-	                    model_id = _opts$query.modelId,
-	                    firmware_version = _opts$query.firmwareVersion;
+	                var _opts$query = opts.query;
+	                var device_name = _opts$query.name;
+	                var device_description = _opts$query.description;
+	                var device_ids = _opts$query.ids;
+	                var model_id = _opts$query.modelId;
+	                var firmware_version = _opts$query.firmwareVersion;
 
 	                return new Promise(function (resolve, reject) {
 	                    _get__('ajax').get('/devices', {
@@ -2212,16 +2211,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this = this;
 
 	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	                var _opts$limit = opts.limit,
-	                    limit = _opts$limit === undefined ? 1000 : _opts$limit,
-	                    _opts$offset = opts.offset,
-	                    offset = _opts$offset === undefined ? 0 : _opts$offset,
-	                    end = opts.end,
-	                    start = opts.start,
-	                    sample = opts.sample,
-	                    periode = opts.periode,
-	                    meaning = opts.meaning,
-	                    path = opts.path;
+	                var _opts$limit = opts.limit;
+	                var limit = _opts$limit === undefined ? 1000 : _opts$limit;
+	                var _opts$offset = opts.offset;
+	                var offset = _opts$offset === undefined ? 0 : _opts$offset;
+	                var end = opts.end;
+	                var start = opts.start;
+	                var sample = opts.sample;
+	                var periode = opts.periode;
+	                var meaning = opts.meaning;
+	                var path = opts.path;
 
 	                var queryParams = {};
 
@@ -2270,8 +2269,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var points = void 0;
 
-	                var onDataReceived = opts.onDataReceived,
-	                    periode = opts.periode;
+	                var onDataReceived = opts.onDataReceived;
+	                var periode = opts.periode;
 
 	                onDataReceived = onDataReceived || function () {};
 
