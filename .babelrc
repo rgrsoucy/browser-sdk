@@ -1,8 +1,12 @@
 {
-  "presets": ["es2015", "stage-0"],
-  "plugins": [
-    "rewire",
-    "add-module-exports",
-    "transform-es2015-modules-umd"
-  ]
+    "presets": ["es2015", "stage-0"],
+    "plugins": [
+        "add-module-exports",
+        "transform-es2015-modules-umd"
+    ],
+    "env": {
+        "test": {
+          "plugins": ["rewire"]
+        }
+    }
 }
