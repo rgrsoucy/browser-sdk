@@ -7,3 +7,6 @@ NB!) Token is no longer available under config.ajax.token is now accessible unde
 2.0.18) Bugfix) Fixes regression where the data api URI is wrong
 2.0.21) Bugfix) Fixes so the correct token is used when requesting data for the history API
 2.0.23) Bugfix) Fix so it is possible to filter the meaning/path in the history api
+2.0.24) add functionality to get the list of a user's apps
+2.0.26) Bugfix) Fix so that ajax can respond with empty string and not crash json.parse
+2.0.26) Bugfix) Fix so device.sendCommand sends a post instead of patch

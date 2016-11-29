@@ -270,5 +270,24 @@ describe('Ajax', function() {
         });
     });
 
+    describe('_xhrRequest', function() {
+        it('should return pure responseText when its an isObject but emtpy string coming back', function(done) {
+            ajaxInstance.post('/test', {
+                fakeKey: 'fakeValue'
+            },
+            {
+              raw: true
+            }).then((responseText) => {
+
+              expect(responseText).to.be.deep.equal('').notify(done());
+            });
+
+            this.requests[0].respond(202, {
+                'Content-Type': 'application/json'
+            }, '');
+        });
+
+    });
+
 
 });

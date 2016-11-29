@@ -1,3 +1,4 @@
+//Latest build: 11-29-16 16:12
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -813,12 +814,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!opts.query) {
 	                    throw new Error('Please provide a query object');
 	                }
-	                var _opts$query = opts.query;
-	                var device_name = _opts$query.name;
-	                var device_description = _opts$query.description;
-	                var device_ids = _opts$query.ids;
-	                var model_id = _opts$query.modelId;
-	                var firmware_version = _opts$query.firmwareVersion;
+	                var _opts$query = opts.query,
+	                    device_name = _opts$query.name,
+	                    device_description = _opts$query.description,
+	                    device_ids = _opts$query.ids,
+	                    model_id = _opts$query.modelId,
+	                    firmware_version = _opts$query.firmwareVersion;
 
 	                return new Promise(function (resolve, reject) {
 	                    _get__('ajax').get('/devices', {
@@ -830,12 +831,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            firmware_version: firmware_version
 	                        }
 	                    }).then(function (response) {
+	                        var devices = response.data;
+
 	                        if (opts.asClasses) {
-	                            resolve(response.map(function (device) {
+	                            resolve(devices.map(function (device) {
 	                                return new (_get__('Device'))(device, _this3.config);
 	                            }));
 	                        } else {
-	                            resolve(response);
+	                            resolve(devices);
 	                        }
 	                    }, reject);
 	                });
@@ -871,6 +874,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            }
 	        }, {
+	            key: 'getMyApps',
+	            value: function getMyApps() {
+	                var _this6 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    _this6.getUserInfo().then(function () {
+	                        _get__('ajax').get('/users/' + _this6.userInfo.id + '/apps').then(function (response) {
+	                            resolve(response);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    });
+	                });
+	            }
+	        }, {
 	            key: '_getConfig',
 	            value: function _getConfig() {
 	                return this.config;
@@ -878,11 +896,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getCachedDevices',
 	            value: function getCachedDevices() {
-	                var _this6 = this;
+	                var _this7 = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    if (_this6.devicesCache) {
-	                        resolve(_this6.devicesCache);
+	                    if (_this7.devicesCache) {
+	                        resolve(_this7.devicesCache);
 	                    } else {
 	                        resolve([]);
 	                    }
@@ -1149,7 +1167,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this2 = this;
 
 	                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
-	                    contentType: 'application/json'
+	                    contentType: 'application/json',
+	                    raw: true
 	                };
 
 	                if (!url.charAt(0) === '/') {
@@ -1158,12 +1177,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!url) throw new Error('Please provide atleast a url');
 	                if (typeof url !== 'string') throw new Error('Please provide a string url');
 
+	                if (opts.raw === false) opts.raw = false;
+	                if (opts.raw === true) opts.raw = true;
 	                return new Promise(function (resolve, reject) {
 	                    var xhrObject = _this2._xhrRequest({
 	                        type: 'POST',
 	                        url: url,
 	                        body: body,
-	                        isObject: opts.raw || true,
+	                        isObject: opts.raw,
 	                        contentType: opts.contentType
 	                    }).then(function (result) {
 	                        resolve(result);
@@ -1268,8 +1289,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        if (xhrObject.readyState === 4) {
 	                            if (xhrObject.status > 199 && xhrObject.status < 299) {
 	                                //2xx success
-	                                if (options.isObject) {
-
+	                                if (options.isObject && xhrObject.responseText.trim() !== '') {
 	                                    resolve(JSON.parse(xhrObject.responseText));
 	                                } else {
 
@@ -1642,7 +1662,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/devices/' + _this3.id, patch, {
+	                    _get__('ajax').post('/devices/' + _this3.id + '/commands', command, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        resolve(response);
@@ -2181,7 +2201,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.id = rawDevice.id;
 	            this.ajax = new (_get__('Ajax'))({
-	                uri: config.ajax.uri,
+	                uri: config.ajax.dataUri,
 	                token: _get__('ajax').options.token
 	            });
 	        }
@@ -2192,37 +2212,35 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this = this;
 
 	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	                var _opts$limit = opts.limit;
-	                var limit = _opts$limit === undefined ? 1000 : _opts$limit;
-	                var _opts$offset = opts.offset;
-	                var offset = _opts$offset === undefined ? 0 : _opts$offset;
-	                var end = opts.end;
-	                var start = opts.start;
-	                var sample = opts.sample;
-	                var periode = opts.periode;
-	                var meaning = opts.meaning;
-	                var path = opts.path;
+	                var _opts$limit = opts.limit,
+	                    limit = _opts$limit === undefined ? 1000 : _opts$limit,
+	                    _opts$offset = opts.offset,
+	                    offset = _opts$offset === undefined ? 0 : _opts$offset,
+	                    end = opts.end,
+	                    start = opts.start,
+	                    sample = opts.sample,
+	                    periode = opts.periode,
+	                    meaning = opts.meaning,
+	                    path = opts.path;
 
-	                var queryParams = {
-	                    aggregates: 'avg,min,max'
-	                };
+	                var queryParams = {};
 
 	                if (periode && periode.length > 0) {
 	                    var sampleObj = _get__('sampleCalculator')(periode);
-	                    sample = sample || sampleObj.sampleSize;
+	                    sample = sampleObj.sampleSize;
 	                    start = sampleObj.start;
 	                    end = sampleObj.end;
 	                }
 
 	                if (sample !== undefined) {
-	                    queryParams.interval = sample;
+	                    queryParams.sample = sample;
 	                }
 
 	                if (end) {
-	                    queryParams.end = end.toISOString();
+	                    queryParams.end = end.getTime();
 	                }
 	                if (start) {
-	                    queryParams.start = start.toISOString();
+	                    queryParams.start = start.getTime();
 	                }
 	                if (meaning) {
 	                    queryParams.meaning = meaning;
@@ -2235,9 +2253,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                queryParams.limit = limit;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.get('/devices/' + _this.id + '/aggregated-readings', { queryObj: queryParams }).then(function (response) {
+	                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {
 	                        resolve({
-	                            points: new (_get__('DeviceHistoryPoints'))(response.data, meaning, path),
+	                            points: new (_get__('DeviceHistoryPoints'))(response.results),
 	                            response: response
 	                        });
 	                    }, reject);
@@ -2252,12 +2270,16 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                var points = void 0;
 
-	                var onDataReceived = opts.onDataReceived;
-	                var periode = opts.periode;
+	                var onDataReceived = opts.onDataReceived,
+	                    periode = opts.periode;
 
 	                onDataReceived = onDataReceived || function () {};
 
-	                var handleResponse = function handleResponse(data) {
+	                var hasMore = function hasMore(data) {
+	                    return data.count > data.limit && data.count - data.offset > data.limit;
+	                };
+
+	                var handleResponse = function handleResponse(data, resolve, reject) {
 	                    if (data.points && !points) {
 	                        points = data.points;
 	                    } else if (data.response && data.response.results) {
@@ -2265,13 +2287,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                    onDataReceived(points);
+
+	                    if (hasMore(data.response)) {
+	                        getData({
+	                            offset: data.response.offset + data.response.limit
+	                        }, resolve, reject);
+	                    } else {
+	                        resolve({
+	                            points: points
+	                        });
+	                    }
+	                };
+
+	                var getData = function getData(opts, resolve, reject) {
+	                    _this2.getHistoricalData(opts).then(function (data) {
+	                        handleResponse(data, resolve, reject);
+	                    }, reject);
 	                };
 
 	                return new Promise(function (resolve, reject) {
-	                    _this2.getHistoricalData(opts).then(function (data) {
-	                        handleResponse(data);
-	                        resolve(data.points);
-	                    }, reject);
+	                    getData(opts, resolve, reject);
 	                });
 	            }
 	        }]);
@@ -2717,7 +2752,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    var DeviceHistoryPoints = function () {
-	        function DeviceHistoryPoints(deviceHistory, meaning, path) {
+	        function DeviceHistoryPoints(deviceHistory) {
 	            _classCallCheck(this, DeviceHistoryPoints);
 
 	            if (!deviceHistory) {
@@ -2725,8 +2760,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            this.devicesPoints = {};
-	            this.meaning = meaning;
-	            this.path = path;
 	            this.addPoints(deviceHistory);
 	        }
 
@@ -2735,12 +2768,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function addPoints(deviceHistory) {
 	                var _this = this;
 
-	                deviceHistory.forEach(function (obj) {
-	                    var key = _this._getKey(_this.meaning, _this.path);
-	                    if (!_this.devicesPoints[key]) {
-	                        _this.devicesPoints[key] = [obj];
+	                deviceHistory.forEach(function (res) {
+	                    var key = _this._getKey(res.meaning, res.path);
+	                    if (_this.devicesPoints[key]) {
+	                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);
 	                    } else {
-	                        _this.devicesPoints[key].push(obj);
+	                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);
+	                        delete _this.devicesPoints[key].deviceId;
 	                    }
 	                });
 	            }
@@ -4336,7 +4370,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/groups/this.id}', patch, opts).then(function (response) {
+	                    _get__('ajax').patch('/groups/' + _this4.id, patch, opts).then(function (response) {
 	                        _this4.owner = response.owner;
 	                        _this4.position = response.position;
 	                        _this4.id = response.id;

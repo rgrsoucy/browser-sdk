@@ -58,12 +58,13 @@ export default class User {
                     firmware_version
                 }
             }).then((response) => {
+                const { data: devices } = response;
                 if (opts.asClasses) {
-                    resolve(response.map((device) => {
+                    resolve(devices.map((device) => {
                         return new Device(device, this.config);
                     }));
                 } else {
-                    resolve(response);
+                    resolve(devices);
                 }
             }, reject);
         });
@@ -85,6 +86,18 @@ export default class User {
         return new Promise((resolve, reject) => {
             this.getUserInfo().then(() => {
                 ajax.get(`/users/${this.userInfo.id}/transmitters`).then((response) => {
+                    resolve(response);
+                }).catch((error) => {
+                    reject(error);
+                });
+            });
+        });
+    }
+
+    getMyApps() {
+        return new Promise((resolve, reject) => {
+            this.getUserInfo().then(() => {
+                ajax.get(`/users/${this.userInfo.id}/apps`).then((response) => {
                     resolve(response);
                 }).catch((error) => {
                     reject(error);
