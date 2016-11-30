@@ -1,4 +1,3 @@
-//Latest build: 11-30-16 18:12
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
         define(['exports', './authorization/oauth2', './entities/User', './entities/Device', './entities/Group', './entities/Model', './entities/Transmitter', './tools/ajax', './tools/mqtt'], factory);
