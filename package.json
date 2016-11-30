@@ -1,6 +1,6 @@
 {
     "name": "relayr-browser-sdk",
-    "version": "2.0.31",
+    "version": "2.0.32",
     "description": "The relayr browser sdk",
     "main": "dist/main.js",
     "scripts": {
@@ -13,7 +13,7 @@
         "version:increment": "node_modules/versiony-cli/bin/cli.js package.json --patch",
         "version:fetch": "node_modules/json-package/bin/jso.js v",
         "version:tag": "node_modules/fast-git-tag/bin/gitag",
-        "publish": "./publish"
+        "tag-publish": "./publish"
     },
     "repository": {
         "type": "git",
