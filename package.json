@@ -1,18 +1,19 @@
 {
     "name": "relayr-browser-sdk",
-    "version": "2.0.33",
+    "version": "2.0.30",
     "description": "The relayr browser sdk",
-    "main": "dist/main.js",
+    "main": "dist/relayr-browser-sdk.min.js",
     "scripts": {
         "test": "NODE_ENV=test ./node_modules/mocha/bin/mocha --recursive --compilers js:babel-core/register -r mock-local-storage",
         "cover": "node_modules/.bin/nyc --require babel-core/register node_modules/.bin/mocha ./test",
         "test:watch": "npm run test -- -w",
-        "build:js": "BABEL_ENV=commonjs babel src --out-dir dist",
+        "build:js": "NODE_ENV=production webpack --config webpack.prod.config.js --progress --profile --colors",
         "build:min:js": "NODE_ENV=production DIST=minified webpack --config webpack.prod.config.js --progress --profile --colors",
         "build:min:js:watch": "NODE_ENV=production DIST=minified webpack --config webpack.prod.config.js --progress --profile --colors -w",
         "version:increment": "node_modules/versiony-cli/bin/cli.js package.json --patch",
         "version:fetch": "node_modules/json-package/bin/jso.js v",
-        "version:tag": "node_modules/fast-git-tag/bin/gitag"
+        "version:tag": "node_modules/fast-git-tag/bin/gitag",
+        "publish": "./publish"
     },
     "repository": {
         "type": "git",
