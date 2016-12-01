@@ -124,7 +124,7 @@ export default class User {
             let appsArray = [];
             pubsArray.forEach(
                 function(element, i){
-                    ajax.get(`/publishers/${element.id}/apps`).then(
+                    ajax.get(`/publishers/${element.id}/apps/extended`).then(
                         (response) => {
                             let concatResult = appsArray.concat(response);
                             appsArray = concatResult;
