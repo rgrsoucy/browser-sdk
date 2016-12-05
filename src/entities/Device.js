@@ -1,20 +1,19 @@
 import Ajax, { ajax } from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
 import DeviceHistory from './history/DeviceHistory';
-import {
-    mqtt
-}
-from '../tools/mqtt';
+import MQTT from '../tools/mqtt';
 import Model from './Model';
 
 let sharedChannel = null;
+let mqtt = null;
 
 export
 default class Device {
-    constructor(rawDevice = {}, config) {
+    constructor(rawDevice = {}, config = {}) {
         this.rawDevice = rawDevice;
         this.config = config;
 
+        mqtt = mqtt || new MQTT(config.mqtt);
         this.id = rawDevice.id;
         this.name = rawDevice.name;
         this.modelId = rawDevice.modelId;
