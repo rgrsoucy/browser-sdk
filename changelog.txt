@@ -13,3 +13,4 @@ NB!) Token is no longer available under config.ajax.token is now accessible unde
 NB!) The search API (https://api.relayr.io/devices?device_name=test) has a breaking changes
  so version older than 2.0.28 will not work new data structure.
 2.0.31) Refactor) Builds a non minified target that is consumed as npm dependency
+2.0.35) Bugfix) Mqtt connection picks up custom configuration
