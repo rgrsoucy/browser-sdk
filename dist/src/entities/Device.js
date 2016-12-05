@@ -23,6 +23,8 @@
 
     var _DeviceHistory2 = _interopRequireDefault(_DeviceHistory);
 
+    var _mqtt2 = _interopRequireDefault(_mqtt);
+
     var _Model2 = _interopRequireDefault(_Model);
 
     function _interopRequireDefault(obj) {
@@ -56,17 +58,19 @@
     }();
 
     var sharedChannel = null;
+    var mqtt = null;
 
     var Device = function () {
         function Device() {
             var rawDevice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-            var config = arguments[1];
+            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
             _classCallCheck(this, Device);
 
             this.rawDevice = rawDevice;
             this.config = config;
 
+            mqtt = mqtt || new _mqtt2.default(config.mqtt);
             this.id = rawDevice.id;
             this.name = rawDevice.name;
             this.modelId = rawDevice.modelId;
@@ -213,11 +217,11 @@
                         userName: sharedChannel.credentials.user
                     };
 
-                    _mqtt.mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
+                    mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
                     connection.unsubscribe = function () {
-                        _mqtt.mqtt.unsubscribe(newChannelCredentials.credentials.topic, connection.event);
+                        mqtt.unsubscribe(newChannelCredentials.credentials.topic, connection.event);
                     };
-                    return _mqtt.mqtt.connect(options);
+                    return mqtt.connect(options);
                 };
 
                 return new Promise(function (resolve, reject) {
