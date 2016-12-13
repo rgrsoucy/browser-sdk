@@ -1,4 +1,3 @@
-//Latest build: 11-29-16 16:12
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -2201,7 +2200,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.id = rawDevice.id;
 	            this.ajax = new (_get__('Ajax'))({
-	                uri: config.ajax.dataUri,
+	                uri: config.ajax.uri,
 	                token: _get__('ajax').options.token
 	            });
 	        }
@@ -2223,24 +2222,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    meaning = opts.meaning,
 	                    path = opts.path;
 
-	                var queryParams = {};
+	                var queryParams = {
+	                    aggregates: 'avg,min,max'
+	                };
 
 	                if (periode && periode.length > 0) {
 	                    var sampleObj = _get__('sampleCalculator')(periode);
-	                    sample = sampleObj.sampleSize;
+	                    sample = sample || sampleObj.sampleSize;
 	                    start = sampleObj.start;
 	                    end = sampleObj.end;
 	                }
 
 	                if (sample !== undefined) {
-	                    queryParams.sample = sample;
+	                    queryParams.interval = sample;
 	                }
 
 	                if (end) {
-	                    queryParams.end = end.getTime();
+	                    queryParams.end = end.toISOString();
 	                }
 	                if (start) {
-	                    queryParams.start = start.getTime();
+	                    queryParams.start = start.toISOString();
 	                }
 	                if (meaning) {
 	                    queryParams.meaning = meaning;
@@ -2253,9 +2254,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                queryParams.limit = limit;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {
+	                    _this.ajax.get('/devices/' + _this.id + '/aggregated-readings', { queryObj: queryParams }).then(function (response) {
 	                        resolve({
-	                            points: new (_get__('DeviceHistoryPoints'))(response.results),
+	                            points: new (_get__('DeviceHistoryPoints'))(response.data, meaning, path),
 	                            response: response
 	                        });
 	                    }, reject);
@@ -2275,11 +2276,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                onDataReceived = onDataReceived || function () {};
 
-	                var hasMore = function hasMore(data) {
-	                    return data.count > data.limit && data.count - data.offset > data.limit;
-	                };
-
-	                var handleResponse = function handleResponse(data, resolve, reject) {
+	                var handleResponse = function handleResponse(data) {
 	                    if (data.points && !points) {
 	                        points = data.points;
 	                    } else if (data.response && data.response.results) {
@@ -2287,26 +2284,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                    onDataReceived(points);
-
-	                    if (hasMore(data.response)) {
-	                        getData({
-	                            offset: data.response.offset + data.response.limit
-	                        }, resolve, reject);
-	                    } else {
-	                        resolve({
-	                            points: points
-	                        });
-	                    }
-	                };
-
-	                var getData = function getData(opts, resolve, reject) {
-	                    _this2.getHistoricalData(opts).then(function (data) {
-	                        handleResponse(data, resolve, reject);
-	                    }, reject);
 	                };
 
 	                return new Promise(function (resolve, reject) {
-	                    getData(opts, resolve, reject);
+	                    _this2.getHistoricalData(opts).then(function (data) {
+	                        handleResponse(data);
+	                        resolve(data.points);
+	                    }, reject);
 	                });
 	            }
 	        }]);
@@ -2752,7 +2736,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    var DeviceHistoryPoints = function () {
-	        function DeviceHistoryPoints(deviceHistory) {
+	        function DeviceHistoryPoints(deviceHistory, meaning, path) {
 	            _classCallCheck(this, DeviceHistoryPoints);
 
 	            if (!deviceHistory) {
@@ -2760,6 +2744,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            this.devicesPoints = {};
+	            this.meaning = meaning;
+	            this.path = path;
 	            this.addPoints(deviceHistory);
 	        }
 
@@ -2768,13 +2754,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function addPoints(deviceHistory) {
 	                var _this = this;
 
-	                deviceHistory.forEach(function (res) {
-	                    var key = _this._getKey(res.meaning, res.path);
-	                    if (_this.devicesPoints[key]) {
-	                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);
+	                deviceHistory.forEach(function (obj) {
+	                    var key = _this._getKey(_this.meaning, _this.path);
+	                    if (!_this.devicesPoints[key]) {
+	                        _this.devicesPoints[key] = [obj];
 	                    } else {
-	                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);
-	                        delete _this.devicesPoints[key].deviceId;
+	                        _this.devicesPoints[key].push(obj);
 	                    }
 	                });
 	            }
