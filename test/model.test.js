@@ -1,8 +1,8 @@
-import Model, { cache } from '../src/entities/Model';
+import Model, { cache, prototypeCache } from '../src/entities/Model';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import { relayrMockModels } from './fixtures/models/models.fixture.js';
+import { relayrMockModels, relayrMockPrototypes } from './fixtures/models/models.fixture.js';
 
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 var expect = chai.expect;
@@ -35,6 +35,7 @@ describe('Model', function() {
 
     afterEach(function() {
       cache.clear();
+      prototypeCache.clear();
     });
 
     describe('#getAllModels', function() {
@@ -70,7 +71,6 @@ describe('Model', function() {
                 'Content-Type': 'text/json'
             }, JSON.stringify(sampleModel));
 
-
         });
 
         it('should create a dictionary of models in cache.public.toDictionary', function(done) {
@@ -86,8 +86,51 @@ describe('Model', function() {
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(sampleModel));
+        });
+    });
 
+    describe('#getAllPrototypes', function() {
+        it('should return list of all the users prototypes', function() {
+            let prototypes = relayrMockPrototypes;
 
+            const promise = modelInstance.getAllPrototypes().then((result) => {
+                expect(result).to.include(prototypes.prototypes[0]);
+                expect(this.requests[0].url).to.contain('device-models/prototypes');
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(prototypes));
+
+            return promise;
+        });
+
+        it('should keep a cache after each request', function() {
+            let samplePrototype = relayrMockPrototypes;
+
+            let promise = modelInstance.getAllPrototypes().then(() => modelInstance.getAllPrototypes()).then(() => {
+                expect(prototypeCache.public.toArray[0]).to.deep.equal(samplePrototype.prototypes[0]);
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(samplePrototype));
+
+            return promise;
+        });
+
+        it('should create a dictionary of models in cache.public.toDictionary', function() {
+            let samplePrototype = relayrMockPrototypes;
+
+            let promise = modelInstance.getAllPrototypes().then((result) => {
+                expect(cache.public.toDictionary[samplePrototype.prototypes[0].id]).to.deep.equal(samplePrototype.prototypes[0]);
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify(samplePrototype));
+
+            return promise;
         });
     });
 

@@ -1917,3 +1917,833 @@ let relayrMockModels = {
     "limit": 10,
     "offset": 0
 }
+
+export const relayrMockPrototypes = {
+    "_links": {
+        "self": {
+            "href": "/users/c5a5e1a5-685a-4444-aca5-a075d6a03bf8/device-models/prototypes?limit=100000&offset=0"
+        },
+        "first": {
+            "href": "/users/c5a5e1a5-685a-4444-aca5-a075d6a03bf8/device-models/prototypes?limit=100000&offset=0"
+        }
+    },
+    "prototypes": [
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "32beeb3f-2bcf-4374-a80d-03610e32d096",
+            "name": "No reading, only command/configuration",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [
+                                {
+                                    "name": "ONE COMMand",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "integer",
+                                        "unit": "C",
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    }
+                                }
+                            ],
+                            "readings": [],
+                            "configurations": [
+                                {
+                                    "name": "ONE Configuratoin",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "integer",
+                                        "unit": "C",
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-08-12T11:50:52.922Z",
+            "updatedAt": "2016-08-12T11:50:52.922Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "40099a18-a711-4654-9d72-764aa0d67f3d",
+            "name": "WhiteBox",
+            "productNumber": "",
+            "description": "POE Sensor board",
+            "website": "http://relayr.io",
+            "manufacturer": {
+                "name": "relayr inc",
+                "website": "http://relayr.io",
+                "contactInfo": {
+                    "email": "info@relayr.io"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "proximity",
+                                    "valueSchema": {
+                                        "type": "integer",
+                                        "maximum": 1
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "luminosity",
+                                    "valueSchema": {
+                                        "type": "integer",
+                                        "unit": "lux",
+                                        "maximum": 64000
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "humidity",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "percent"
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "temperature",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "celcius",
+                                        "maximum": 70,
+                                        "minimum": -25
+                                    }
+                                }
+                            ],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-03-02T09:42:31.466Z",
+            "updatedAt": "2016-03-02T09:42:31.466Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "675a1884-8cfd-47b5-bb7f-5b7799960a69",
+            "name": "Jons FORK Complete Prototype",
+            "productNumber": "0001",
+            "description": "A prototype model with tons of things",
+            "website": "https://www.relayr.io/products-services/wunderbar",
+            "manufacturer": {
+                "name": "Relayr",
+                "website": "https://www.relayr.io/",
+                "contactInfo": {
+                    "email": "info@relayr.io",
+                    "phone": "+491792989866"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "https://s3-eu-west-1.amazonaws.com/relayr-ble/sensor_gyro.hex",
+                    "transport": {
+                        "cloud": {
+                            "commands": [
+                                {
+                                    "name": "Command",
+                                    "path": "led",
+                                    "valueSchema": {
+                                        "type": "integer",
+                                        "maximum": 1
+                                    }
+                                },
+                                {
+                                    "name": "Command",
+                                    "path": "yeah",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "maximum": 100
+                                    }
+                                },
+                                {
+                                    "name": "Command",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "time": {
+                                                "type": "integer",
+                                                "unit": "seconds",
+                                                "maximum": 60,
+                                                "minimum": 0
+                                            },
+                                            "shoot": {
+                                                "type": "boolean"
+                                            },
+                                            "distance": {
+                                                "type": "integer",
+                                                "unit": "meters",
+                                                "maximum": 255,
+                                                "minimum": 0
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "name": "Command",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                {
+                                    "name": "Command",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "string"
+                                    }
+                                },
+                                {
+                                    "name": "Command",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "enum": [
+                                            "heat",
+                                            "cool",
+                                            "heat-cool",
+                                            "off"
+                                        ],
+                                        "type": "string"
+                                    }
+                                }
+                            ],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "red": {
+                                                "type": "integer",
+                                                "maximum": 255,
+                                                "minimum": 0
+                                            },
+                                            "blue": {
+                                                "type": "integer",
+                                                "maximum": 255,
+                                                "minimum": 0
+                                            },
+                                            "green": {
+                                                "type": "integer",
+                                                "maximum": 255,
+                                                "minimum": 0
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "celsius",
+                                        "maximum": 100,
+                                        "minimum": -100
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "percentage",
+                                        "maximum": 100
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "cm",
+                                        "maximum": 100
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "lm",
+                                        "maximum": 1000
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "db",
+                                        "maximum": 300
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "maximum": 100,
+                                        "minimum": -100
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "maximum": 100,
+                                        "minimum": -100
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "percent"
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "string"
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "enum": [
+                                            "heat",
+                                            "cool",
+                                            "heat-cool",
+                                            "off"
+                                        ],
+                                        "type": "string"
+                                    }
+                                },
+                                {
+                                    "path": "fan_timer_active",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "x": {
+                                                "type": "number",
+                                                "unit": "degrees_per_second",
+                                                "maximum": 250,
+                                                "minimum": -250
+                                            },
+                                            "y": {
+                                                "type": "number",
+                                                "unit": "degrees_per_second",
+                                                "maximum": 250,
+                                                "minimum": -250
+                                            },
+                                            "z": {
+                                                "type": "number",
+                                                "unit": "degrees_per_second",
+                                                "maximum": 250,
+                                                "minimum": -250
+                                            }
+                                        }
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "Reading",
+                                    "valueSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "x": {
+                                                "type": "number",
+                                                "unit": "g",
+                                                "maximum": 250,
+                                                "minimum": -250
+                                            },
+                                            "y": {
+                                                "type": "number",
+                                                "unit": "g",
+                                                "maximum": 250,
+                                                "minimum": -250
+                                            },
+                                            "z": {
+                                                "type": "number",
+                                                "unit": "g",
+                                                "maximum": 250,
+                                                "minimum": -250
+                                            }
+                                        }
+                                    }
+                                }
+                            ],
+                            "configurations": [
+                                {
+                                    "name": "Configuration",
+                                    "path": "/",
+                                    "valueSchema": {
+                                        "type": "integer",
+                                        "unit": "milliseconds",
+                                        "minimum": 200
+                                    }
+                                },
+                                {
+                                    "name": "Configuration",
+                                    "path": "/",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "cm",
+                                        "minimum": 200
+                                    }
+                                },
+                                {
+                                    "name": "Configuration",
+                                    "path": "/",
+                                    "valueSchema": {
+                                        "type": "boolean"
+                                    }
+                                },
+                                {
+                                    "name": "Configuration",
+                                    "path": "/",
+                                    "valueSchema": {
+                                        "type": "object"
+                                    }
+                                },
+                                {
+                                    "name": "Configuration",
+                                    "path": "/",
+                                    "valueSchema": {
+                                        "type": "string"
+                                    }
+                                },
+                                {
+                                    "name": "Configuration",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "enum": [
+                                            "heat",
+                                            "cool",
+                                            "heat-cool",
+                                            "off"
+                                        ],
+                                        "type": "string"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "repository": "https://github.com/relayr/wunderbar-hardware",
+                    "releaseDate": "2014-10-01",
+                    "releaseNotes": "https://github.com/relayr/wunderbar-hardware/blob/master/README.md",
+                    "documentation": "https://developer.relayr.io/documents/WunderBar/Sensors"
+                }
+            },
+            "createdAt": "2016-05-18T14:45:07.665Z",
+            "updatedAt": "2016-05-18T14:45:21.826Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "2597346e-9b20-4067-9055-27f01426ebd7",
+            "name": "Beerometer",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "party",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "%",
+                                        "maximum": 100,
+                                        "minimum": 0
+                                    }
+                                }
+                            ],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-06-10T10:21:30.725Z",
+            "updatedAt": "2016-06-10T10:21:30.725Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "cb9a0903-32e1-43c0-9342-214872bd9249",
+            "name": "Beerometer",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [
+                                {
+                                    "name": "newBeers",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "string"
+                                    }
+                                }
+                            ],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "beerCold",
+                                    "valueSchema": {
+                                        "type": "integer"
+                                    }
+                                },
+                                {
+                                    "path": "",
+                                    "meaning": "partyLevel",
+                                    "valueSchema": {
+                                        "type": "integer"
+                                    }
+                                }
+                            ],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-06-10T12:39:45.428Z",
+            "updatedAt": "2016-06-10T12:43:39.930Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "28715346-29f3-4c17-9740-c10095499364",
+            "name": "Boolean",
+            "productNumber": "",
+            "description": "boolean",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [
+                                {
+                                    "name": "Boolean",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            ],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "Boolean",
+                                    "valueSchema": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            ],
+                            "configurations": [
+                                {
+                                    "name": "Boolean",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "boolean"
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-08-26T14:12:02.165Z",
+            "updatedAt": "2016-08-26T14:12:02.165Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "5841b6f5-c8c7-46ec-9328-1a3929afdfb8",
+            "name": "newBeer",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [
+                                {
+                                    "name": "newBeer",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "string"
+                                    }
+                                }
+                            ],
+                            "readings": [],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-06-10T13:05:25.300Z",
+            "updatedAt": "2016-06-10T13:06:47.108Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "1ae0808f-b61a-4dc0-b071-d578e6ef0816",
+            "name": "Location",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "location",
+                                    "valueSchema": {
+                                        "type": "object",
+                                        "properties": {
+                                            "latitude": {
+                                                "type": "integer",
+                                                "maximum": 255,
+                                                "minimum": 0
+                                            },
+                                            "longitude": {
+                                                "type": "integer",
+                                                "maximum": 255,
+                                                "minimum": 0
+                                            }
+                                        }
+                                    }
+                                }
+                            ],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-09-02T14:18:51.017Z",
+            "updatedAt": "2016-09-02T14:19:54.371Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "e6158f76-7b35-4534-977e-76d1d5fc135a",
+            "name": "SIMPLE NUMBER IN OUT",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "aoeu",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [
+                                {
+                                    "name": "NUMBER_OUT",
+                                    "path": "",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "NUM",
+                                        "maximum": 3
+                                    }
+                                }
+                            ],
+                            "readings": [
+                                {
+                                    "path": "",
+                                    "meaning": "NUMBER_IN",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "C",
+                                        "maximum": 100
+                                    }
+                                }
+                            ],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-09-09T12:08:18.398Z",
+            "updatedAt": "2016-09-20T08:46:49.743Z"
+        },
+        {
+            "owner": "c5a5e1a5-685a-4444-aca5-a075d6a03bf8",
+            "id": "76b7c303-a5b2-4044-8644-234960afa89d",
+            "name": "---- - - - - - - - - - - - - DELETE MODEL with meaning meaning and path path",
+            "productNumber": "",
+            "description": "",
+            "website": "http://example.com",
+            "manufacturer": {
+                "name": "",
+                "website": "http://example.com",
+                "contactInfo": {
+                    "email": "info@example.com"
+                }
+            },
+            "resources": [],
+            "firmware": {
+                "1.0.0": {
+                    "binaries": "",
+                    "transport": {
+                        "cloud": {
+                            "commands": [],
+                            "readings": [
+                                {
+                                    "path": "meaning",
+                                    "meaning": "meaning",
+                                    "valueSchema": {
+                                        "type": "number",
+                                        "unit": "C",
+                                        "maximum": 100
+                                    }
+                                }
+                            ],
+                            "configurations": []
+                        }
+                    },
+                    "repository": "",
+                    "releaseDate": "",
+                    "releaseNotes": "",
+                    "documentation": ""
+                }
+            },
+            "createdAt": "2016-09-05T07:49:12.613Z",
+            "updatedAt": "2016-10-14T09:49:04.573Z"
+        }
+    ],
+    "limit": 100000,
+    "offset": 0,
+    "count": 10
+};

@@ -79,7 +79,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
+	    exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
 
 	    var _oauth2 = _interopRequireDefault(_oauth);
 
@@ -100,12 +100,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default: obj
 	        };
 	    }
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    exports.Oauth2 = _oauth2.default;
 	    exports.User = _User2.default;
@@ -132,43 +126,43 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var oauth2 = void 0;
 	    var main = {
 	        init: function init(p, customConfig) {
-	            _assign__('project', p);
+	            project = p;
 
 	            if (customConfig) {
-	                Object.assign(_get__('config'), customConfig);
-	                _get__('ajax').options = _get__('config').ajax;
+	                Object.assign(config, customConfig);
+	                _ajax.ajax.options = config.ajax;
 	            }
 	        },
 
 	        authorize: function authorize(optionalToken) {
 	            return new Promise(function (resolve, reject) {
 
-	                if (!_get__('oauth2')) {
-	                    _assign__('oauth2', new (_get__('Oauth2'))({
-	                        protocol: _get__('ajax').options.protocol,
-	                        uri: _get__('ajax').options.uri,
-	                        appId: _get__('project').id,
-	                        redirectURI: _get__('project').redirectURI,
-	                        persist: _get__('config').persistToken
-	                    }));
+	                if (!oauth2) {
+	                    oauth2 = new _oauth2.default({
+	                        protocol: _ajax.ajax.options.protocol,
+	                        uri: _ajax.ajax.options.uri,
+	                        appId: project.id,
+	                        redirectURI: project.redirectURI,
+	                        persist: config.persistToken
+	                    });
 	                }
 	                var token = void 0;
 	                if (!optionalToken) {
-	                    _get__('oauth2').login();
+	                    oauth2.login();
 
-	                    token = _get__('oauth2').token;
+	                    token = oauth2.token;
 	                } else {
 	                    token = optionalToken;
 	                }
 
-	                _get__('ajax').options.token = token;
-	                _assign__('currentUser', new (_get__('User'))(_get__('config')));
+	                _ajax.ajax.options.token = token;
+	                currentUser = new _User2.default(config);
 
-	                _get__('main')._verifyToken(_get__('currentUser')).then(function () {
-	                    resolve(_get__('currentUser'));
+	                main._verifyToken(currentUser).then(function () {
+	                    resolve(currentUser);
 	                }).catch(function (err) {
-	                    _get__('oauth2').logout();
-	                    _get__('oauth2').login();
+	                    oauth2.logout();
+	                    oauth2.login();
 	                });
 	            });
 	        },
@@ -187,212 +181,32 @@ return /******/ (function(modules) { // webpackBootstrap
 	        },
 
 	        logout: function logout() {
-	            if (!!_get__('oauth2')) {
-	                _get__('oauth2').logout();
-	                _assign__('oauth2', null);
+	            if (!!oauth2) {
+	                oauth2.logout();
+	                oauth2 = null;
 	            } else {
 	                throw new Error('You must log in before you can log out');
 	            }
 	        },
 
 	        getConfig: function getConfig() {
-	            return _get__('config');
+	            return config;
 	        },
 
 	        getCurrentUser: function getCurrentUser() {
-	            return _get__('currentUser');
+	            return currentUser;
 	        },
 
 	        customAjax: function customAjax(ajaxConfiguration) {
 	            if (ajaxConfiguration) {
-	                return new (_get__('Ajax'))(ajaxConfiguration);
+	                return new _ajax2.default(ajaxConfiguration);
 	            } else {
 	                throw new Error('Provide the custom configuration to make a new Ajax instance');
 	            }
 	        }
 	    };
 
-	    exports.default = _get__('main');
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'project':
-	                return project;
-
-	            case 'config':
-	                return config;
-
-	            case 'ajax':
-	                return _ajax.ajax;
-
-	            case 'oauth2':
-	                return oauth2;
-
-	            case 'Oauth2':
-	                return _oauth2.default;
-
-	            case 'currentUser':
-	                return currentUser;
-
-	            case 'User':
-	                return _User2.default;
-
-	            case 'main':
-	                return main;
-
-	            case 'Ajax':
-	                return _ajax2.default;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {
-	            case 'project':
-	                return project = _value;
-
-	            case 'oauth2':
-	                return oauth2 = _value;
-
-	            case 'currentUser':
-	                return currentUser = _value;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof main === 'undefined' ? 'undefined' : _typeof(main);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(main, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(main)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    exports.default = main;
 	});
 
 /***/ },
@@ -401,28 +215,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports);
+	        factory(module, exports);
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports);
+	        factory(mod, mod.exports);
 	        global.oauth2 = mod.exports;
 	    }
-	})(this, function (exports) {
+	})(this, function (module, exports) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -471,7 +279,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw Error('OAuth2 a valid app ID must be provided on login');
 	                }
 
-	                var storedToken = localStorage.getItem(_get__('TOKEN_KEY'));
+	                var storedToken = localStorage.getItem(TOKEN_KEY);
 
 	                if (this.shouldPersist && storedToken) {
 	                    this.token = storedToken;
@@ -525,169 +333,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'setToken',
 	            value: function setToken(token) {
-	                localStorage.setItem(_get__('TOKEN_KEY'), this.token);
+	                localStorage.setItem(TOKEN_KEY, this.token);
 	            }
 	        }, {
 	            key: 'logout',
 	            value: function logout() {
-	                localStorage.removeItem(_get__('TOKEN_KEY'));
+	                localStorage.removeItem(TOKEN_KEY);
 	            }
 	        }]);
 
 	        return Oauth2;
 	    }();
 
-	    exports.default = _get__('Oauth2');
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'TOKEN_KEY':
-	                return TOKEN_KEY;
-
-	            case 'Oauth2':
-	                return Oauth2;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Oauth2 === 'undefined' ? 'undefined' : _typeof(Oauth2);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Oauth2, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Oauth2)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    exports.default = Oauth2;
+	    module.exports = exports['default'];
 	});
 
 /***/ },
@@ -696,23 +355,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4), __webpack_require__(5)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4), __webpack_require__(5)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports, require('../tools/ajax.js'), require('./Device'));
+	        factory(module, exports, require('../tools/ajax.js'), require('./Device'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports, global.ajax, global.Device);
+	        factory(mod, mod.exports, global.ajax, global.Device);
 	        global.User = mod.exports;
 	    }
-	})(this, function (exports, _ajax, _Device) {
+	})(this, function (module, exports, _ajax, _Device) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
 	    var _Device2 = _interopRequireDefault(_Device);
 
@@ -721,12 +379,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default: obj
 	        };
 	    }
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -757,7 +409,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _classCallCheck(this, User);
 
 	            this.config = config;
-	            this.token = _get__('ajax').options.token;
+	            this.token = _ajax.ajax.options.token;
 	        }
 
 	        _createClass(User, [{
@@ -769,9 +421,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    if (_this.userInfo) {
 	                        resolve(_this.userInfo);
 	                    } else {
-	                        _get__('ajax').get('/oauth2/user-info').then(function (response) {
+	                        _ajax.ajax.get('/oauth2/user-info').then(function (response) {
 	                            _this.userInfo = Object.assign({}, response, {
-	                                token: _get__('ajax').options.token
+	                                token: _ajax.ajax.options.token
 	                            });
 	                            resolve(_this.userInfo);
 	                        }).catch(function (error) {
@@ -790,10 +442,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                return new Promise(function (resolve, reject) {
 	                    _this2.getUserInfo().then(function () {
 
-	                        _get__('ajax').get('/users/' + _this2.userInfo.id + '/devices').then(function (response) {
+	                        _ajax.ajax.get('/users/' + _this2.userInfo.id + '/devices').then(function (response) {
 	                            if (opts.asClasses) {
 	                                resolve(response.map(function (device) {
-	                                    return new (_get__('Device'))(device, _this2.config);
+	                                    return new _Device2.default(device, _this2.config);
 	                                }));
 	                            } else {
 	                                _this2.devicesCache = response;
@@ -821,7 +473,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    firmware_version = _opts$query.firmwareVersion;
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/devices', {
+	                    _ajax.ajax.get('/devices', {
 	                        queryObj: {
 	                            device_name: device_name,
 	                            device_description: device_description,
@@ -834,7 +486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                        if (opts.asClasses) {
 	                            resolve(devices.map(function (device) {
-	                                return new (_get__('Device'))(device, _this3.config);
+	                                return new _Device2.default(device, _this3.config);
 	                            }));
 	                        } else {
 	                            resolve(devices);
@@ -849,7 +501,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return new Promise(function (resolve, reject) {
 	                    _this4.getUserInfo().then(function () {
-	                        _get__('ajax').get('/users/' + _this4.userInfo.id + '/groups').then(function (response) {
+	                        _ajax.ajax.get('/users/' + _this4.userInfo.id + '/groups').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -864,7 +516,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return new Promise(function (resolve, reject) {
 	                    _this5.getUserInfo().then(function () {
-	                        _get__('ajax').get('/users/' + _this5.userInfo.id + '/transmitters').then(function (response) {
+	                        _ajax.ajax.get('/users/' + _this5.userInfo.id + '/transmitters').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -879,7 +531,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                return new Promise(function (resolve, reject) {
 	                    _this6.getUserInfo().then(function () {
-	                        _get__('ajax').get('/users/' + _this6.userInfo.id + '/apps').then(function (response) {
+	                        _ajax.ajax.get('/users/' + _this6.userInfo.id + '/apps').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -911,156 +563,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    exports.default = User;
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'ajax':
-	                return _ajax.ajax;
-
-	            case 'Device':
-	                return _Device2.default;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof User === 'undefined' ? 'undefined' : _typeof(User);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(User, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(User)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    module.exports = exports['default'];
 	});
 
 /***/ },
@@ -1085,12 +588,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -1291,7 +788,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	                                if (options.isObject && xhrObject.responseText.trim() !== '') {
 	                                    resolve(JSON.parse(xhrObject.responseText));
 	                                } else {
-
 	                                    resolve(xhrObject.responseText);
 	                                }
 	                            } else if (xhrObject.status > 399 && xhrObject.status < 499) {
@@ -1332,156 +828,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return Ajax;
 	    }();
 
-	    var ajax = exports.ajax = new (_get__('Ajax'))({});
+	    var ajax = exports.ajax = new Ajax({});
 
-	    exports.default = _get__('Ajax');
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'Ajax':
-	                return Ajax;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Ajax === 'undefined' ? 'undefined' : _typeof(Ajax);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Ajax, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Ajax)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    exports.default = Ajax;
 	});
 
 /***/ },
@@ -1490,23 +839,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4), __webpack_require__(6), __webpack_require__(7), __webpack_require__(10), __webpack_require__(12)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4), __webpack_require__(6), __webpack_require__(7), __webpack_require__(10), __webpack_require__(12)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports, require('../tools/ajax.js'), require('../tools/connection.js'), require('./history/DeviceHistory'), require('../tools/mqtt'), require('./Model'));
+	        factory(module, exports, require('../tools/ajax.js'), require('../tools/connection.js'), require('./history/DeviceHistory'), require('../tools/mqtt'), require('./Model'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports, global.ajax, global.connection, global.DeviceHistory, global.mqtt, global.Model);
+	        factory(mod, mod.exports, global.ajax, global.connection, global.DeviceHistory, global.mqtt, global.Model);
 	        global.Device = mod.exports;
 	    }
-	})(this, function (exports, _ajax, _connection, _DeviceHistory, _mqtt, _Model) {
+	})(this, function (module, exports, _ajax, _connection, _DeviceHistory, _mqtt, _Model) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
 	    var _ajax2 = _interopRequireDefault(_ajax);
 
@@ -1521,12 +869,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default: obj
 	        };
 	    }
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -1567,11 +909,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this.id = rawDevice.id;
 	            this.name = rawDevice.name;
 	            this.modelId = rawDevice.modelId;
-	            this.model = new (_get__('Model'))(this.modelId, config);
+	            this.model = new _Model2.default(this.modelId, config);
 	            this.description = rawDevice.description;
 	            this.owner = rawDevice.owner;
 	            this.openToPublic = rawDevice.public;
-	            this.history = new (_get__('DeviceHistory'))(rawDevice, config);
+	            this.history = new _DeviceHistory2.default(rawDevice, config);
 	            this.configurations = [];
 	            this.commands = [];
 	            this.metadata = {};
@@ -1597,7 +939,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/devices/' + _this.id, patch, {
+	                    _ajax.ajax.patch('/devices/' + _this.id, patch, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        _this.name = response.name;
@@ -1626,7 +968,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!this.id) {
 	                    throw new Error('Provid a device id');
 	                }
-	                return _get__('ajax').get('/devices/' + this.id + '/readings');
+	                return _ajax.ajax.get('/devices/' + this.id + '/readings');
 	            }
 	        }, {
 	            key: 'deleteDevice',
@@ -1637,7 +979,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').delete('/devices/' + _this2.id).then(function (response) {
+	                    _ajax.ajax.delete('/devices/' + _this2.id).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1661,7 +1003,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').post('/devices/' + _this3.id + '/commands', command, {
+	                    _ajax.ajax.post('/devices/' + _this3.id + '/commands', command, {
 	                        raw: raw
 	                    }).then(function (response) {
 	                        resolve(response);
@@ -1684,10 +1026,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            deviceId: _this4.id,
 	                            transport: transport || 'mqtt'
 	                        };
-	                        _get__('ajax').post('/channels', body).then(function (response) {
+	                        _ajax.ajax.post('/channels', body).then(function (response) {
 	                            _this4._channelCredentials = response;
-	                            if (!_get__('sharedChannel')) {
-	                                _assign__('sharedChannel', _this4._channelCredentials);
+	                            if (!sharedChannel) {
+	                                sharedChannel = _this4._channelCredentials;
 	                            }
 	                            resolve(response);
 	                        }).catch(function (error) {
@@ -1701,20 +1043,20 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function connect() {
 	                var transport = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'mqtt';
 
-	                var connection = new (_get__('Connection'))();
+	                var connection = new _connection2.default();
 	                var getChannel = this.getChannel();
 
 	                var subscribeMqtt = function subscribeMqtt(newChannelCredentials) {
 	                    var options = {
-	                        password: _get__('sharedChannel').credentials.password,
-	                        userName: _get__('sharedChannel').credentials.user
+	                        password: sharedChannel.credentials.password,
+	                        userName: sharedChannel.credentials.user
 	                    };
 
-	                    _get__('mqtt').subscribe(newChannelCredentials.credentials.topic, connection.event);
+	                    _mqtt.mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
 	                    connection.unsubscribe = function () {
-	                        _get__('mqtt').unsubscribe(newChannelCredentials.credentials.topic, connection.event);
+	                        _mqtt.mqtt.unsubscribe(newChannelCredentials.credentials.topic, connection.event);
 	                    };
-	                    return _get__('mqtt').connect(options);
+	                    return _mqtt.mqtt.connect(options);
 	                };
 
 	                return new Promise(function (resolve, reject) {
@@ -1732,7 +1074,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/devices/' + _this5.id + '/state').then(function (response) {
+	                    _ajax.ajax.get('/devices/' + _this5.id + '/state').then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1749,7 +1091,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/devices/' + _this6.id + '/configurations').then(function (response) {
+	                    _ajax.ajax.get('/devices/' + _this6.id + '/configurations').then(function (response) {
 	                        _this6.configurations = response;
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1776,7 +1118,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').post('/devices/' + _this7.id + '/configurations', schema).then(function (response) {
+	                    _ajax.ajax.post('/devices/' + _this7.id + '/configurations', schema).then(function (response) {
 	                        _this7.configurations.push(response);
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1794,7 +1136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the deviceId during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/devices/' + _this8.id + '/commands').then(function (response) {
+	                    _ajax.ajax.get('/devices/' + _this8.id + '/commands').then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1820,7 +1162,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').post('/devices/' + _this9.id + '/commands', schema).then(function (response) {
+	                    _ajax.ajax.post('/devices/' + _this9.id + '/commands', schema).then(function (response) {
 	                        _this9.commands.push(response);
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1838,7 +1180,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the deviceId during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/devices/' + _this10.id + '/metadata').then(function (response) {
+	                    _ajax.ajax.get('/devices/' + _this10.id + '/metadata').then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1861,8 +1203,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').post('/devices/' + _this11.id + '/metadata', schema).then(function (response) {
-	                        _this11.metadata = response;
+	                    _ajax.ajax.post('/devices/' + _this11.id + '/metadata', schema, { raw: false }).then(function (response) {
+	                        _this11.metadata = schema;
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -1880,7 +1222,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the userId during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').delete('/devices/' + _this12.id + '/metadata').then(function (response) {
+	                    _ajax.ajax.delete('/devices/' + _this12.id + '/metadata').then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -1895,171 +1237,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    exports.default = Device;
 	    ;
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'Model':
-	                return _Model2.default;
-
-	            case 'DeviceHistory':
-	                return _DeviceHistory2.default;
-
-	            case 'ajax':
-	                return _ajax.ajax;
-
-	            case 'sharedChannel':
-	                return sharedChannel;
-
-	            case 'Connection':
-	                return _connection2.default;
-
-	            case 'mqtt':
-	                return _mqtt.mqtt;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {
-	            case 'sharedChannel':
-	                return sharedChannel = _value;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Device === 'undefined' ? 'undefined' : _typeof(Device);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Device, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Device)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    module.exports = exports['default'];
 	});
 
 /***/ },
@@ -2131,23 +1309,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4), __webpack_require__(8), __webpack_require__(9)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4), __webpack_require__(8), __webpack_require__(9)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports, require('../../tools/ajax.js'), require('./sampleCalculator'), require('./DeviceHistoryPoints'));
+	        factory(module, exports, require('../../tools/ajax.js'), require('./sampleCalculator'), require('./DeviceHistoryPoints'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports, global.ajax, global.sampleCalculator, global.DeviceHistoryPoints);
+	        factory(mod, mod.exports, global.ajax, global.sampleCalculator, global.DeviceHistoryPoints);
 	        global.DeviceHistory = mod.exports;
 	    }
-	})(this, function (exports, _ajax, _sampleCalculator, _DeviceHistoryPoints) {
+	})(this, function (module, exports, _ajax, _sampleCalculator, _DeviceHistoryPoints) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
 
 	    var _ajax2 = _interopRequireDefault(_ajax);
 
@@ -2160,12 +1337,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default: obj
 	        };
 	    }
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -2199,9 +1370,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	            _classCallCheck(this, DeviceHistory);
 
 	            this.id = rawDevice.id;
-	            this.ajax = new (_get__('Ajax'))({
-	                uri: config.ajax.uri,
-	                token: _get__('ajax').options.token
+	            this.ajax = new _ajax2.default({
+	                uri: config.ajax.dataUri,
+	                token: _ajax.ajax.options.token
 	            });
 	        }
 
@@ -2222,26 +1393,24 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    meaning = opts.meaning,
 	                    path = opts.path;
 
-	                var queryParams = {
-	                    aggregates: 'avg,min,max'
-	                };
+	                var queryParams = {};
 
 	                if (periode && periode.length > 0) {
-	                    var sampleObj = _get__('sampleCalculator')(periode);
-	                    sample = sample || sampleObj.sampleSize;
+	                    var sampleObj = (0, _sampleCalculator2.default)(periode);
+	                    sample = sampleObj.sampleSize;
 	                    start = sampleObj.start;
 	                    end = sampleObj.end;
 	                }
 
 	                if (sample !== undefined) {
-	                    queryParams.interval = sample;
+	                    queryParams.sample = sample;
 	                }
 
 	                if (end) {
-	                    queryParams.end = end.toISOString();
+	                    queryParams.end = end.getTime();
 	                }
 	                if (start) {
-	                    queryParams.start = start.toISOString();
+	                    queryParams.start = start.getTime();
 	                }
 	                if (meaning) {
 	                    queryParams.meaning = meaning;
@@ -2254,9 +1423,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                queryParams.limit = limit;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.get('/devices/' + _this.id + '/aggregated-readings', { queryObj: queryParams }).then(function (response) {
+	                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {
 	                        resolve({
-	                            points: new (_get__('DeviceHistoryPoints'))(response.data, meaning, path),
+	                            points: new _DeviceHistoryPoints2.default(response.results),
 	                            response: response
 	                        });
 	                    }, reject);
@@ -2276,7 +1445,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                onDataReceived = onDataReceived || function () {};
 
-	                var handleResponse = function handleResponse(data) {
+	                var hasMore = function hasMore(data) {
+	                    return data.count > data.limit && data.count - data.offset > data.limit;
+	                };
+
+	                var handleResponse = function handleResponse(data, resolve, reject) {
 	                    if (data.points && !points) {
 	                        points = data.points;
 	                    } else if (data.response && data.response.results) {
@@ -2284,13 +1457,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                    onDataReceived(points);
+
+	                    if (hasMore(data.response)) {
+	                        getData({
+	                            offset: data.response.offset + data.response.limit
+	                        }, resolve, reject);
+	                    } else {
+	                        resolve({
+	                            points: points
+	                        });
+	                    }
+	                };
+
+	                var getData = function getData(opts, resolve, reject) {
+	                    _this2.getHistoricalData(opts).then(function (data) {
+	                        handleResponse(data, resolve, reject);
+	                    }, reject);
 	                };
 
 	                return new Promise(function (resolve, reject) {
-	                    _this2.getHistoricalData(opts).then(function (data) {
-	                        handleResponse(data);
-	                        resolve(data.points);
-	                    }, reject);
+	                    getData(opts, resolve, reject);
 	                });
 	            }
 	        }]);
@@ -2300,162 +1486,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    exports.default = DeviceHistory;
 	    ;
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'Ajax':
-	                return _ajax2.default;
-
-	            case 'ajax':
-	                return _ajax.ajax;
-
-	            case 'sampleCalculator':
-	                return _sampleCalculator2.default;
-
-	            case 'DeviceHistoryPoints':
-	                return _DeviceHistoryPoints2.default;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof DeviceHistory === 'undefined' ? 'undefined' : _typeof(DeviceHistory);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(DeviceHistory, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(DeviceHistory)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    module.exports = exports['default'];
 	});
 
 /***/ },
@@ -2464,29 +1495,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports);
+	        factory(module, exports);
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports);
+	        factory(mod, mod.exports);
 	        global.sampleCalculator = mod.exports;
 	    }
-	})(this, function (exports) {
+	})(this, function (module, exports) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
-
 	    var oneHourMs = 1000 * 3600;
 	    var daysInMonth = function daysInMonth() {
 	        var d = new Date();
@@ -2502,23 +1526,23 @@ return /******/ (function(modules) { // webpackBootstrap
 	        var sampleSize = null;
 	        switch (timeframeStr) {
 	            case '1h':
-	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs'));
+	                startDate = new Date(obj.end.getTime() - oneHourMs);
 	                sampleSize = '1m';
 	                break;
 	            case '5h':
-	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 5);
+	                startDate = new Date(obj.end.getTime() - oneHourMs * 5);
 	                sampleSize = '1m';
 	                break;
 	            case '1d':
-	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24);
+	                startDate = new Date(obj.end.getTime() - oneHourMs * 24);
 	                sampleSize = '1m';
 	                break;
 	            case '1w':
-	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24 * 7);
+	                startDate = new Date(obj.end.getTime() - oneHourMs * 24 * 7);
 	                sampleSize = '1h';
 	                break;
 	            case '1m':
-	                startDate = new Date(obj.end.getTime() - _get__('oneHourMs') * 24 * _get__('daysInMonth')());
+	                startDate = new Date(obj.end.getTime() - oneHourMs * 24 * daysInMonth());
 	                sampleSize = '1h';
 	                break;
 	            case '1y':
@@ -2532,160 +1556,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return obj;
 	    };
 
-	    exports.default = _get__('calculateTimeframe');
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'oneHourMs':
-	                return oneHourMs;
-
-	            case 'daysInMonth':
-	                return daysInMonth;
-
-	            case 'calculateTimeframe':
-	                return calculateTimeframe;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof calculateTimeframe === 'undefined' ? 'undefined' : _typeof(calculateTimeframe);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(calculateTimeframe, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(calculateTimeframe)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    exports.default = calculateTimeframe;
+	    module.exports = exports['default'];
 	});
 
 /***/ },
@@ -2736,7 +1608,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    var DeviceHistoryPoints = function () {
-	        function DeviceHistoryPoints(deviceHistory, meaning, path) {
+	        function DeviceHistoryPoints(deviceHistory) {
 	            _classCallCheck(this, DeviceHistoryPoints);
 
 	            if (!deviceHistory) {
@@ -2744,8 +1616,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            this.devicesPoints = {};
-	            this.meaning = meaning;
-	            this.path = path;
 	            this.addPoints(deviceHistory);
 	        }
 
@@ -2754,12 +1624,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function addPoints(deviceHistory) {
 	                var _this = this;
 
-	                deviceHistory.forEach(function (obj) {
-	                    var key = _this._getKey(_this.meaning, _this.path);
-	                    if (!_this.devicesPoints[key]) {
-	                        _this.devicesPoints[key] = [obj];
+	                deviceHistory.forEach(function (res) {
+	                    var key = _this._getKey(res.meaning, res.path);
+	                    if (_this.devicesPoints[key]) {
+	                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);
 	                    } else {
-	                        _this.devicesPoints[key].push(obj);
+	                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);
+	                        delete _this.devicesPoints[key].deviceId;
 	                    }
 	                });
 	            }
@@ -2811,7 +1682,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.mqtt = undefined;
+	    exports.mqtt = undefined;
 
 	    var _mqttws31Min2 = _interopRequireDefault(_mqttws31Min);
 
@@ -2820,12 +1691,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	            default: obj
 	        };
 	    }
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -2874,7 +1739,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            this._topics = {};
 
 	            try {
-	                this.paho = new (_get__('Paho'))();
+	                this.paho = new _mqttws31Min2.default();
 	                this._initClient();
 	            } catch (e) {
 	                //Caught when window is not present
@@ -3022,166 +1887,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	        return Mqtt;
 	    }();
 
-	    var mqtt = exports.mqtt = new (_get__('Mqtt'))();
+	    var mqtt = exports.mqtt = new Mqtt();
 
-	    exports.default = _get__('Mqtt');
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'Paho':
-	                return _mqttws31Min2.default;
-
-	            case 'Mqtt':
-	                return Mqtt;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Mqtt === 'undefined' ? 'undefined' : _typeof(Mqtt);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Mqtt, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Mqtt)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    exports.default = Mqtt;
 	});
 
 /***/ },
 /* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
-	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(global,factory){if(true){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));}else if(typeof exports!=="undefined"){factory(exports);}else{var mod={exports:{}};factory(mod.exports);global.mqttws31Min=mod.exports;}})(this,function(exports){"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var Paho=function Paho(){_classCallCheck(this,Paho);//var window = {};
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function(global,factory){if(true){!(__WEBPACK_AMD_DEFINE_ARRAY__ = [module,exports], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));}else if(typeof exports!=="undefined"){factory(module,exports);}else{var mod={exports:{}};factory(mod,mod.exports);global.mqttws31Min=mod.exports;}})(this,function(module,exports){"use strict";Object.defineProperty(exports,"__esModule",{value:true});var _typeof=typeof Symbol==="function"&&typeof Symbol.iterator==="symbol"?function(obj){return typeof obj;}:function(obj){return obj&&typeof Symbol==="function"&&obj.constructor===Symbol&&obj!==Symbol.prototype?"symbol":typeof obj;};function _classCallCheck(instance,Constructor){if(!(instance instanceof Constructor)){throw new TypeError("Cannot call a class as a function");}}var Paho=function Paho(){_classCallCheck(this,Paho);//var window = {};
 	var _Paho={};_Paho.MQTT=function(global){// Private variables below, these are only visible inside the function closure
 	// which is used to define the module.
 	var version="@VERSION@";var buildLevel="@BUILDLEVEL@";/**
@@ -3625,7 +2340,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	             *                     This is only set on messages received from the server.
 	             *
 	             */var Message=function Message(newPayload){var payload;if(typeof newPayload==="string"||newPayload instanceof ArrayBuffer||newPayload instanceof Int8Array||newPayload instanceof Uint8Array||newPayload instanceof Int16Array||newPayload instanceof Uint16Array||newPayload instanceof Int32Array||newPayload instanceof Uint32Array||newPayload instanceof Float32Array||newPayload instanceof Float64Array){payload=newPayload;}else{throw format(ERROR.INVALID_ARGUMENT,[newPayload,"newPayload"]);}this._getPayloadString=function(){if(typeof payload==="string")return payload;else return parseUTF8(payload,0,payload.length);};this._getPayloadBytes=function(){if(typeof payload==="string"){var buffer=new ArrayBuffer(UTF8Length(payload));var byteStream=new Uint8Array(buffer);stringToUTF8(payload,byteStream,0);return byteStream;}else{return payload;};};var destinationName=undefined;this._getDestinationName=function(){return destinationName;};this._setDestinationName=function(newDestinationName){if(typeof newDestinationName==="string")destinationName=newDestinationName;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newDestinationName,"newDestinationName"]));};var qos=0;this._getQos=function(){return qos;};this._setQos=function(newQos){if(newQos===0||newQos===1||newQos===2)qos=newQos;else throw new Error("Invalid argument:"+newQos);};var retained=false;this._getRetained=function(){return retained;};this._setRetained=function(newRetained){if(typeof newRetained==="boolean")retained=newRetained;else throw new Error(format(ERROR.INVALID_ARGUMENT,[newRetained,"newRetained"]));};var duplicate=false;this._getDuplicate=function(){return duplicate;};this._setDuplicate=function(newDuplicate){duplicate=newDuplicate;};};Message.prototype={get payloadString(){return this._getPayloadString();},get payloadBytes(){return this._getPayloadBytes();},get destinationName(){return this._getDestinationName();},set destinationName(newDestinationName){this._setDestinationName(newDestinationName);},get qos(){return this._getQos();},set qos(newQos){this._setQos(newQos);},get retained(){return this._getRetained();},set retained(newRetained){this._setRetained(newRetained);},get duplicate(){return this._getDuplicate();},set duplicate(newDuplicate){this._setDuplicate(newDuplicate);}};// Module contents.
-	return{Client:Client,Message:Message};}(window);return _Paho;};exports.default=_get__("Paho");var _RewiredData__=Object.create(null);var INTENTIONAL_UNDEFINED='__INTENTIONAL_UNDEFINED__';var _RewireAPI__={};(function(){function addPropertyToAPIObject(name,value){Object.defineProperty(_RewireAPI__,name,{value:value,enumerable:false,configurable:true});}addPropertyToAPIObject('__get__',_get__);addPropertyToAPIObject('__GetDependency__',_get__);addPropertyToAPIObject('__Rewire__',_set__);addPropertyToAPIObject('__set__',_set__);addPropertyToAPIObject('__reset__',_reset__);addPropertyToAPIObject('__ResetDependency__',_reset__);addPropertyToAPIObject('__with__',_with__);})();function _get__(variableName){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _get_original__(variableName);}else{var value=_RewiredData__[variableName];if(value===INTENTIONAL_UNDEFINED){return undefined;}else{return value;}}}function _get_original__(variableName){switch(variableName){case"Paho":return Paho;}return undefined;}function _assign__(variableName,value){if(_RewiredData__===undefined||_RewiredData__[variableName]===undefined){return _set_original__(variableName,value);}else{return _RewiredData__[variableName]=value;}}function _set_original__(variableName,_value){switch(variableName){}return undefined;}function _update_operation__(operation,variableName,prefix){var oldValue=_get__(variableName);var newValue=operation==='++'?oldValue+1:oldValue-1;_assign__(variableName,newValue);return prefix?newValue:oldValue;}function _set__(variableName,value){if((typeof variableName==="undefined"?"undefined":_typeof(variableName))==='object'){Object.keys(variableName).forEach(function(name){_RewiredData__[name]=variableName[name];});}else{if(value===undefined){_RewiredData__[variableName]=INTENTIONAL_UNDEFINED;}else{_RewiredData__[variableName]=value;}return function(){_reset__(variableName);};}}function _reset__(variableName){delete _RewiredData__[variableName];}function _with__(object){var rewiredVariableNames=Object.keys(object);var previousValues={};function reset(){rewiredVariableNames.forEach(function(variableName){_RewiredData__[variableName]=previousValues[variableName];});}return function(callback){rewiredVariableNames.forEach(function(variableName){previousValues[variableName]=_RewiredData__[variableName];_RewiredData__[variableName]=object[variableName];});var result=callback();if(!!result&&typeof result.then=='function'){result.then(reset).catch(reset);}else{reset();}return result;};}var _typeOfOriginalExport=typeof Paho==="undefined"?"undefined":_typeof(Paho);function addNonEnumerableProperty(name,value){Object.defineProperty(Paho,name,{value:value,enumerable:false,configurable:true});}if((_typeOfOriginalExport==='object'||_typeOfOriginalExport==='function')&&Object.isExtensible(Paho)){addNonEnumerableProperty('__get__',_get__);addNonEnumerableProperty('__GetDependency__',_get__);addNonEnumerableProperty('__Rewire__',_set__);addNonEnumerableProperty('__set__',_set__);addNonEnumerableProperty('__reset__',_reset__);addNonEnumerableProperty('__ResetDependency__',_reset__);addNonEnumerableProperty('__with__',_with__);addNonEnumerableProperty('__RewireAPI__',_RewireAPI__);}exports.__get__=_get__;exports.__GetDependency__=_get__;exports.__Rewire__=_set__;exports.__set__=_set__;exports.__ResetDependency__=_reset__;exports.__RewireAPI__=_RewireAPI__;});
+	return{Client:Client,Message:Message};}(window);return _Paho;};exports.default=Paho;module.exports=exports["default"];});
 
 /***/ },
 /* 12 */
@@ -3649,13 +2364,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = exports.cache = undefined;
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
+	    exports.prototypeCache = exports.cache = undefined;
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -3681,17 +2390,25 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }();
 
-	    var cache = exports.cache = {
-	        init: function init() {},
-	        public: {
-	            toArray: [],
-	            toDictionary: {}
-	        },
-	        clear: function clear() {
-	            _get__('cache').public.toArray = [];
-	            _get__('cache').public.toDictionary = [];
-	        }
-	    };
+	    function createCache() {
+	        var cache = {
+	            init: function init() {},
+	            public: {
+	                toArray: [],
+	                toDictionary: {}
+	            },
+	            clear: function clear() {
+	                cache.public.toArray = [];
+	                cache.public.toDictionary = [];
+	            }
+	        };
+
+	        return cache;
+	    }
+
+	    var cache = exports.cache = createCache();
+
+	    var prototypeCache = exports.prototypeCache = createCache();
 
 	    var Model = function () {
 	        function Model() {
@@ -3712,16 +2429,38 @@ return /******/ (function(modules) { // webpackBootstrap
 	                var _this = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    if (_get__('cache').public.toArray.length > 0) {
-	                        resolve(_get__('cache').public.toArray);
+	                    if (cache.public.toArray.length > 0) {
+	                        resolve(cache.public.toArray);
 	                    } else {
-	                        _get__('ajax').get('/device-models', {
+	                        _ajax.ajax.get('/device-models', {
 	                            queryObj: 'limit=100000',
 	                            contentType: 'application/hal+json'
 	                        }).then(function (response) {
-	                            _get__('cache').public.toArray = response.models;
-	                            _this._makeDictionary(_get__('cache').public.toArray);
-	                            resolve(_get__('cache').public.toArray);
+	                            cache.public.toArray = response.models;
+	                            _this._makeDictionary(cache.public.toArray);
+	                            resolve(cache.public.toArray);
+	                        }).catch(function (error) {
+	                            reject(error);
+	                        });
+	                    }
+	                });
+	            }
+	        }, {
+	            key: 'getAllPrototypes',
+	            value: function getAllPrototypes() {
+	                var _this2 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    if (prototypeCache.public.toArray.length > 0) {
+	                        resolve(prototypeCache.public.toArray);
+	                    } else {
+	                        _ajax.ajax.get('/device-models/prototypes', {
+	                            queryObj: 'limit=100000',
+	                            contentType: 'application/hal+json'
+	                        }).then(function (response) {
+	                            prototypeCache.public.toArray = response.prototypes;
+	                            _this2._makeDictionary(prototypeCache.public.toArray);
+	                            resolve(prototypeCache.public.toArray);
 	                        }).catch(function (error) {
 	                            reject(error);
 	                        });
@@ -3735,17 +2474,17 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    id = this.id;
 	                }
 
-	                if (_get__('cache').public.toDictionary[id]) {
+	                if (cache.public.toDictionary[id]) {
 	                    return new Promise(function (resolve, reject) {
-	                        resolve(_get__('cache').public.toDictionary[id]);
+	                        resolve(cache.public.toDictionary[id]);
 	                    });
 	                } else {
 	                    return new Promise(function (resolve, reject) {
-	                        _get__('ajax').get('/device-models/' + id, {
+	                        _ajax.ajax.get('/device-models/' + id, {
 	                            contentType: 'application/hal+json'
 	                        }).then(function (model) {
-	                            _get__('cache').public.toArray.push(model);
-	                            _get__('cache').public.toDictionary[id] = model;
+	                            cache.public.toArray.push(model);
+	                            cache.public.toDictionary[id] = model;
 	                            resolve(model);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -3756,8 +2495,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: '_getModelById',
 	            value: function _getModelById(id) {
-	                if (_get__('cache').public.toArray.length > 0) {
-	                    return _get__('cache').public.toDictionary[id] || null;
+	                if (cache.public.toArray.length > 0) {
+	                    return cache.public.toDictionary[id] || null;
 	                } else {
 	                    return null;
 	                }
@@ -3765,12 +2504,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: '_getPublicModelsFromArray',
 	            value: function _getPublicModelsFromArray() {
-	                return _get__('cache').public.toArray || [];
+	                return cache.public.toArray || [];
 	            }
 	        }, {
 	            key: '_getPublicModelsFromDictionary',
 	            value: function _getPublicModelsFromDictionary() {
-	                return _get__('cache').public.toDictionary || [];
+	                return cache.public.toDictionary || [];
 	            }
 	        }, {
 	            key: '_makeDictionary',
@@ -3778,15 +2517,15 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (!modelsArray) {
 	                    return;
 	                }
-	                if (!_get__('cache').public.toDictionary) _get__('cache').public.toDictionary = {};
+	                if (!cache.public.toDictionary) cache.public.toDictionary = {};
 	                var len = modelsArray.length;
 	                var i = 0;
 	                while (len--) {
 	                    var model = modelsArray[i];
-	                    _get__('cache').public.toDictionary[model.id] = model;
+	                    cache.public.toDictionary[model.id] = model;
 	                    i++;
 	                }
-	                return _get__('cache').public.toDictionary;
+	                return cache.public.toDictionary;
 	            }
 	        }]);
 
@@ -3794,156 +2533,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    exports.default = Model;
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'cache':
-	                return cache;
-
-	            case 'ajax':
-	                return _ajax.ajax;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Model === 'undefined' ? 'undefined' : _typeof(Model);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Model, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Model)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
 	});
 
 /***/ },
@@ -3952,29 +2541,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports, require('../tools/ajax.js'));
+	        factory(module, exports, require('../tools/ajax.js'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports, global.ajax);
+	        factory(mod, mod.exports, global.ajax);
 	        global.Transmitter = mod.exports;
 	    }
-	})(this, function (exports, _ajax) {
+	})(this, function (module, exports, _ajax) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -4021,7 +2603,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').delete('/transmitters/' + _this.id, opts).then(function (response) {
+	                    _ajax.ajax.delete('/transmitters/' + _this.id, opts).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -4049,7 +2631,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
+	                    _ajax.ajax.patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
 	                        _this2.id = response.id, _this2.secret = response.secret, _this2.name = response.name, _this2.topic = response.topic, _this2.owner = response.owner, _this2.integrationType = response.integrationType, resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -4063,153 +2645,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    exports.default = Transmitter;
 	    ;
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'ajax':
-	                return _ajax.ajax;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Transmitter === 'undefined' ? 'undefined' : _typeof(Transmitter);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Transmitter, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Transmitter)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    module.exports = exports['default'];
 	});
 
 /***/ },
@@ -4218,29 +2654,22 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports, require('../tools/ajax.js'));
+	        factory(module, exports, require('../tools/ajax.js'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports, global.ajax);
+	        factory(mod, mod.exports, global.ajax);
 	        global.Group = mod.exports;
 	    }
-	})(this, function (exports, _ajax) {
+	})(this, function (module, exports, _ajax) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.__RewireAPI__ = exports.__ResetDependency__ = exports.__set__ = exports.__Rewire__ = exports.__GetDependency__ = exports.__get__ = undefined;
-
-	    var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) {
-	        return typeof obj;
-	    } : function (obj) {
-	        return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj;
-	    };
 
 	    function _classCallCheck(instance, Constructor) {
 	        if (!(instance instanceof Constructor)) {
@@ -4295,7 +2724,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the group id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/groups/' + _this.id).then(function (response) {
+	                    _ajax.ajax.get('/groups/' + _this.id).then(function (response) {
 	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -4311,7 +2740,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the group id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').get('/groups/' + _this2.id).then(function (response) {
+	                    _ajax.ajax.get('/groups/' + _this2.id).then(function (response) {
 	                        resolve(response.devices);
 	                    }).catch(function (error) {
 	                        reject(error);
@@ -4327,7 +2756,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    throw new Error('Provide the group id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').delete('/groups/' + _this3.id, opts).then(function (response) {
+	                    _ajax.ajax.delete('/groups/' + _this3.id, opts).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -4355,7 +2784,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                }
 
 	                return new Promise(function (resolve, reject) {
-	                    _get__('ajax').patch('/groups/' + _this4.id, patch, opts).then(function (response) {
+	                    _ajax.ajax.patch('/groups/' + _this4.id, patch, opts).then(function (response) {
 	                        _this4.owner = response.owner;
 	                        _this4.position = response.position;
 	                        _this4.id = response.id;
@@ -4374,153 +2803,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    exports.default = Group;
 	    ;
-
-	    var _RewiredData__ = Object.create(null);
-
-	    var INTENTIONAL_UNDEFINED = '__INTENTIONAL_UNDEFINED__';
-	    var _RewireAPI__ = {};
-
-	    (function () {
-	        function addPropertyToAPIObject(name, value) {
-	            Object.defineProperty(_RewireAPI__, name, {
-	                value: value,
-	                enumerable: false,
-	                configurable: true
-	            });
-	        }
-
-	        addPropertyToAPIObject('__get__', _get__);
-	        addPropertyToAPIObject('__GetDependency__', _get__);
-	        addPropertyToAPIObject('__Rewire__', _set__);
-	        addPropertyToAPIObject('__set__', _set__);
-	        addPropertyToAPIObject('__reset__', _reset__);
-	        addPropertyToAPIObject('__ResetDependency__', _reset__);
-	        addPropertyToAPIObject('__with__', _with__);
-	    })();
-
-	    function _get__(variableName) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _get_original__(variableName);
-	        } else {
-	            var value = _RewiredData__[variableName];
-
-	            if (value === INTENTIONAL_UNDEFINED) {
-	                return undefined;
-	            } else {
-	                return value;
-	            }
-	        }
-	    }
-
-	    function _get_original__(variableName) {
-	        switch (variableName) {
-	            case 'ajax':
-	                return _ajax.ajax;
-	        }
-
-	        return undefined;
-	    }
-
-	    function _assign__(variableName, value) {
-	        if (_RewiredData__ === undefined || _RewiredData__[variableName] === undefined) {
-	            return _set_original__(variableName, value);
-	        } else {
-	            return _RewiredData__[variableName] = value;
-	        }
-	    }
-
-	    function _set_original__(variableName, _value) {
-	        switch (variableName) {}
-
-	        return undefined;
-	    }
-
-	    function _update_operation__(operation, variableName, prefix) {
-	        var oldValue = _get__(variableName);
-
-	        var newValue = operation === '++' ? oldValue + 1 : oldValue - 1;
-
-	        _assign__(variableName, newValue);
-
-	        return prefix ? newValue : oldValue;
-	    }
-
-	    function _set__(variableName, value) {
-	        if ((typeof variableName === 'undefined' ? 'undefined' : _typeof(variableName)) === 'object') {
-	            Object.keys(variableName).forEach(function (name) {
-	                _RewiredData__[name] = variableName[name];
-	            });
-	        } else {
-	            if (value === undefined) {
-	                _RewiredData__[variableName] = INTENTIONAL_UNDEFINED;
-	            } else {
-	                _RewiredData__[variableName] = value;
-	            }
-
-	            return function () {
-	                _reset__(variableName);
-	            };
-	        }
-	    }
-
-	    function _reset__(variableName) {
-	        delete _RewiredData__[variableName];
-	    }
-
-	    function _with__(object) {
-	        var rewiredVariableNames = Object.keys(object);
-	        var previousValues = {};
-
-	        function reset() {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                _RewiredData__[variableName] = previousValues[variableName];
-	            });
-	        }
-
-	        return function (callback) {
-	            rewiredVariableNames.forEach(function (variableName) {
-	                previousValues[variableName] = _RewiredData__[variableName];
-	                _RewiredData__[variableName] = object[variableName];
-	            });
-	            var result = callback();
-
-	            if (!!result && typeof result.then == 'function') {
-	                result.then(reset).catch(reset);
-	            } else {
-	                reset();
-	            }
-
-	            return result;
-	        };
-	    }
-
-	    var _typeOfOriginalExport = typeof Group === 'undefined' ? 'undefined' : _typeof(Group);
-
-	    function addNonEnumerableProperty(name, value) {
-	        Object.defineProperty(Group, name, {
-	            value: value,
-	            enumerable: false,
-	            configurable: true
-	        });
-	    }
-
-	    if ((_typeOfOriginalExport === 'object' || _typeOfOriginalExport === 'function') && Object.isExtensible(Group)) {
-	        addNonEnumerableProperty('__get__', _get__);
-	        addNonEnumerableProperty('__GetDependency__', _get__);
-	        addNonEnumerableProperty('__Rewire__', _set__);
-	        addNonEnumerableProperty('__set__', _set__);
-	        addNonEnumerableProperty('__reset__', _reset__);
-	        addNonEnumerableProperty('__ResetDependency__', _reset__);
-	        addNonEnumerableProperty('__with__', _with__);
-	        addNonEnumerableProperty('__RewireAPI__', _RewireAPI__);
-	    }
-
-	    exports.__get__ = _get__;
-	    exports.__GetDependency__ = _get__;
-	    exports.__Rewire__ = _set__;
-	    exports.__set__ = _set__;
-	    exports.__ResetDependency__ = _reset__;
-	    exports.__RewireAPI__ = _RewireAPI__;
+	    module.exports = exports['default'];
 	});
 
 /***/ }

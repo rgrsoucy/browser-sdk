@@ -171,7 +171,6 @@ class Ajax {
                         if (options.isObject && xhrObject.responseText.trim() !== '') {
                             resolve(JSON.parse(xhrObject.responseText));
                         } else {
-
                             resolve(xhrObject.responseText);
                         }
                     } else if (xhrObject.status > 399 && xhrObject.status < 499) {
