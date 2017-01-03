@@ -62,7 +62,7 @@
 
             this.id = rawDevice.id;
             this.ajax = new _ajax2.default({
-                uri: config.ajax.dataUri,
+                uri: config.ajax.uri,
                 token: _ajax.ajax.options.token
             });
         }
@@ -84,24 +84,26 @@
                     meaning = opts.meaning,
                     path = opts.path;
 
-                var queryParams = {};
+                var queryParams = {
+                    aggregates: 'avg,min,max'
+                };
 
                 if (periode && periode.length > 0) {
                     var sampleObj = (0, _sampleCalculator2.default)(periode);
-                    sample = sampleObj.sampleSize;
+                    sample = sample || sampleObj.sampleSize;
                     start = sampleObj.start;
                     end = sampleObj.end;
                 }
 
                 if (sample !== undefined) {
-                    queryParams.sample = sample;
+                    queryParams.interval = sample;
                 }
 
                 if (end) {
-                    queryParams.end = end.getTime();
+                    queryParams.end = end.toISOString();
                 }
                 if (start) {
-                    queryParams.start = start.getTime();
+                    queryParams.start = start.toISOString();
                 }
                 if (meaning) {
                     queryParams.meaning = meaning;
@@ -114,9 +116,9 @@
                 queryParams.limit = limit;
 
                 return new Promise(function (resolve, reject) {
-                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {
+                    _this.ajax.get('/devices/' + _this.id + '/aggregated-readings', { queryObj: queryParams }).then(function (response) {
                         resolve({
-                            points: new _DeviceHistoryPoints2.default(response.results),
+                            points: new _DeviceHistoryPoints2.default(response.data, meaning, path),
                             response: response
                         });
                     }, reject);
@@ -136,11 +138,7 @@
 
                 onDataReceived = onDataReceived || function () {};
 
-                var hasMore = function hasMore(data) {
-                    return data.count > data.limit && data.count - data.offset > data.limit;
-                };
-
-                var handleResponse = function handleResponse(data, resolve, reject) {
+                var handleResponse = function handleResponse(data) {
                     if (data.points && !points) {
                         points = data.points;
                     } else if (data.response && data.response.results) {
@@ -148,26 +146,13 @@
                     }
 
                     onDataReceived(points);
-
-                    if (hasMore(data.response)) {
-                        getData({
-                            offset: data.response.offset + data.response.limit
-                        }, resolve, reject);
-                    } else {
-                        resolve({
-                            points: points
-                        });
-                    }
-                };
-
-                var getData = function getData(opts, resolve, reject) {
-                    _this2.getHistoricalData(opts).then(function (data) {
-                        handleResponse(data, resolve, reject);
-                    }, reject);
                 };
 
                 return new Promise(function (resolve, reject) {
-                    getData(opts, resolve, reject);
+                    _this2.getHistoricalData(opts).then(function (data) {
+                        handleResponse(data);
+                        resolve(data.points);
+                    }, reject);
                 });
             }
         }]);

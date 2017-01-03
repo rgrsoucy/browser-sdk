@@ -42,7 +42,7 @@
     }();
 
     var DeviceHistoryPoints = function () {
-        function DeviceHistoryPoints(deviceHistory) {
+        function DeviceHistoryPoints(deviceHistory, meaning, path) {
             _classCallCheck(this, DeviceHistoryPoints);
 
             if (!deviceHistory) {
@@ -50,6 +50,8 @@
             }
 
             this.devicesPoints = {};
+            this.meaning = meaning;
+            this.path = path;
             this.addPoints(deviceHistory);
         }
 
@@ -58,13 +60,12 @@
             value: function addPoints(deviceHistory) {
                 var _this = this;
 
-                deviceHistory.forEach(function (res) {
-                    var key = _this._getKey(res.meaning, res.path);
-                    if (_this.devicesPoints[key]) {
-                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);
+                deviceHistory.forEach(function (obj) {
+                    var key = _this._getKey(_this.meaning, _this.path);
+                    if (!_this.devicesPoints[key]) {
+                        _this.devicesPoints[key] = [obj];
                     } else {
-                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);
-                        delete _this.devicesPoints[key].deviceId;
+                        _this.devicesPoints[key].push(obj);
                     }
                 });
             }
