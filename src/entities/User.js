@@ -119,7 +119,7 @@ export default class User {
         });                        
     }
 
-    getPublisherApps(pubsArray){
+    _getPublisherApps(pubsArray){
         return new Promise((resolve, reject) => {
             let appsArray = [];
             pubsArray.forEach(
