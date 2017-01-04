@@ -254,7 +254,7 @@ describe('User', function() {
             userInstance.userInfo = userStub;
             // sinon.stub(ajax, 'get').resolves(apiResponse);
             sinon.stub(userInstance, 'getMyPublishers').resolves(apiPublishers);
-            sinon.stub(userInstance, 'getPublisherApps').resolves(apiResponse);
+            sinon.stub(userInstance, '_getPublisherApps').resolves(apiResponse);
 
             return userInstance.getMyApps().then((res)=>{
                 expect(res).to.deep.equal(apiResponse);
@@ -262,7 +262,7 @@ describe('User', function() {
             });
         });
     });
-    describe('#getPublisherApps', function() {
+    describe('#_getPublisherApps', function() {
 
         it('should return an array of app objects', function () {
             var apiResponse = 
@@ -287,7 +287,7 @@ describe('User', function() {
             userInstance.userInfo = userStub;
             sinon.stub(ajax, 'get').resolves(apiResponse);
 
-            return userInstance.getPublisherApps(apiPublishers).then((res)=>{
+            return userInstance._getPublisherApps(apiPublishers).then((res)=>{
                 expect(res).to.deep.equal(doubleResponse);
                 
             });

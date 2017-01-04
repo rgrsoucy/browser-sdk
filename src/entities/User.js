@@ -96,7 +96,7 @@ export default class User {
     getMyApps() {
         return new Promise((resolve, reject) => {
             this.getMyPublishers().then((res)=>{
-                this.getPublisherApps(res).then((res2)=>{
+                this._getPublisherApps(res).then((res2)=>{
                     resolve(res2);
                 }, (err)=>{reject(err)}
                 );
