@@ -58,12 +58,13 @@ export default class User {
                     firmware_version
                 }
             }).then((response) => {
+                const { data: devices } = response;
                 if (opts.asClasses) {
-                    resolve(response.map((device) => {
+                    resolve(devices.map((device) => {
                         return new Device(device, this.config);
                     }));
                 } else {
-                    resolve(response);
+                    resolve(devices);
                 }
             }, reject);
         });

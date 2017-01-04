@@ -52,7 +52,8 @@ class Ajax {
 
 
     post(url, body, opts = {
-        contentType: 'application/json'
+        contentType: 'application/json',
+        raw: true
     }) {
         if (!url.charAt(0) === '/') {
             throw new Error('Please provide a url with a leading /');
@@ -60,12 +61,14 @@ class Ajax {
         if (!url) throw new Error('Please provide atleast a url');
         if (typeof(url) !== 'string') throw new Error('Please provide a string url');
 
+        if (opts.raw === false) opts.raw = false;
+        if (opts.raw === true) opts.raw = true;
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
                 type: 'POST',
                 url: url,
                 body: body,
-                isObject: opts.raw || true,
+                isObject: opts.raw,
                 contentType: opts.contentType
             }).then((result) => {
                 resolve(result);
@@ -165,11 +168,9 @@ class Ajax {
                 if (xhrObject.readyState === 4) {
                     if (xhrObject.status > 199 && xhrObject.status < 299) {
                         //2xx success
-                        if (options.isObject) {
-
+                        if (options.isObject && xhrObject.responseText.trim() !== '') {
                             resolve(JSON.parse(xhrObject.responseText));
                         } else {
-
                             resolve(xhrObject.responseText);
                         }
                     } else if (xhrObject.status > 399 && xhrObject.status < 499) {

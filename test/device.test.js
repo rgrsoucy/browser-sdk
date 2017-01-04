@@ -672,9 +672,7 @@ describe('Device', function() {
             expect(fn).to.throw(Error);
         });
 
-        it('should replace the previous metadata with the one you just set', function(done) {
-            let response;
-
+        it('should does not return a meta data object', function(done) {
             deviceInstance.metadata = {
                 data: 'this that or the other thing'
             };
@@ -684,9 +682,23 @@ describe('Device', function() {
                 done();
             });
 
+            this.requests[0].respond(204, null, ' no content ');
+        });
+
+        it('should replace the previous metadata with the one you just set', function(done) {
+
+            deviceInstance.metadata = {
+                data: 'this that or the other thing'
+            };
+
+            deviceInstance.setDeviceMetadata(meta).then(() => {
+                expect(deviceInstance.metadata).to.deep.equal(meta);
+                done();
+            });
+
             this.requests[0].respond(204, {
                 'Content-Type': 'text/json'
-            }, JSON.stringify(meta));
+            }, null);
 
         });
 
