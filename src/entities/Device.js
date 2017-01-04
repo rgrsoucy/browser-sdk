@@ -1,20 +1,19 @@
 import Ajax, { ajax } from '../tools/ajax.js';
 import Connection from '../tools/connection.js';
 import DeviceHistory from './history/DeviceHistory';
-import {
-    mqtt
-}
-from '../tools/mqtt';
+import MQTT from '../tools/mqtt';
 import Model from './Model';
 
 let sharedChannel = null;
+let mqtt = null;
 
 export
 default class Device {
-    constructor(rawDevice = {}, config) {
+    constructor(rawDevice = {}, config = {}) {
         this.rawDevice = rawDevice;
         this.config = config;
 
+        mqtt = mqtt || new MQTT(config.mqtt);
         this.id = rawDevice.id;
         this.name = rawDevice.name;
         this.modelId = rawDevice.modelId;
@@ -102,7 +101,7 @@ default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            ajax.patch(`/devices/${this.id}`, patch, {
+            ajax.post(`/devices/${this.id}/commands`, command, {
                 raw: raw
             })
                 .then((response) => {
@@ -283,9 +282,9 @@ default class Device {
         }
 
         return new Promise((resolve, reject) => {
-            ajax.post(`/devices/${this.id}/metadata`, schema)
+            ajax.post(`/devices/${this.id}/metadata`, schema, { raw: false })
                 .then((response) => {
-                    this.metadata = response;
+                    this.metadata = schema;
                     resolve(response);
                 }).catch((error) => {
                     reject(error);
