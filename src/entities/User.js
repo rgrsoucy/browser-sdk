@@ -1,5 +1,8 @@
 import { ajax } from '../tools/ajax.js';
 import Device from './Device';
+import App from './App';
+import Group from './Group';
+import Transmitter from './Transmitter';
 
 export default class User {
     constructor(config) {
@@ -98,7 +101,13 @@ export default class User {
         return new Promise((resolve, reject) => {
             this.getMyPublishers().then((res)=>{
                 this._getPublisherApps(res).then((res2)=>{
-                    resolve(res2);
+                    if (opts.asClasses) {
+                        resolve(res2.map((item) => {
+                            return new App(item, this.config);
+                        }));
+                    } else {
+                        resolve(res2);
+                    }
                 }, (err)=>{reject(err)}
                 );
             }, (err)=>{reject(err)
