@@ -97,7 +97,7 @@ export default class User {
         });
     }
 
-    getMyApps() {
+    getMyApps(opts = {}) {
         return new Promise((resolve, reject) => {
             this.getMyPublishers().then((res)=>{
                 this._getPublisherApps(res).then((res2)=>{
