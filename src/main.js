@@ -3,13 +3,14 @@ import User from './entities/User';
 import Device from './entities/Device';
 import Group from './entities/Group';
 import Model from './entities/Model';
+import App from './entities/App';
 import Transmitter from './entities/Transmitter';
 import Ajax, { ajax } from './tools/ajax';
 
 import { mqtt } from './tools/mqtt';
 
 export {
-    Oauth2, User, Device, Group, Model, Transmitter
+    Oauth2, User, Device, Group, Model, App, Transmitter
 };
 
 const config = {
