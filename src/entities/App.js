@@ -25,6 +25,7 @@ export default class App {
         return new Promise((resolve, reject) => {
             ajax.post('/apps', postBody)
             .then((response) => {
+                this.appId = response.id;
                 this.name = response.name;
                 this.publisher = response.publisher;
                 this.redirectUri = response.redirectUri;
