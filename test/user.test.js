@@ -249,8 +249,16 @@ describe('User', function() {
                     "description": "it's a thing"
                 }]
 
+            var apiPublishers = [{
+                    "id":123
+                },
+                {
+                    "id":456
+                }]
             userInstance.userInfo = userStub;
-            sinon.stub(ajax, 'get').resolves(apiResponse);
+            // sinon.stub(ajax, 'get').resolves(apiResponse);
+            sinon.stub(userInstance, 'getMyPublishers').resolves(apiPublishers);
+            sinon.stub(userInstance, '_getPublisherApps').resolves(apiResponse);
 
             return userInstance.getMyApps().then((res)=>{
                 expect(res).to.deep.equal(apiResponse);
@@ -258,4 +266,35 @@ describe('User', function() {
             });
         });
     });
+    describe('#_getPublisherApps', function() {
+
+        it('should return an array of app objects', function () {
+            var apiResponse = 
+                [{
+                    "id": "a1bf392f-0890-445a-b025-3d09316cd356",
+                    "name": "WB Data Board (WBDB)",
+                    "description": "The first APP to read the WB Sensors"
+                },
+                {
+                    "id": "aaaaaaaa",
+                    "name": "fakething",
+                    "description": "it's a thing"
+                }]
+            var doubleResponse = apiResponse.concat(apiResponse);
+
+            var apiPublishers = [{
+                    "id":123
+                },
+                {
+                    "id":456
+                }]
+            userInstance.userInfo = userStub;
+            sinon.stub(ajax, 'get').resolves(apiResponse);
+
+            return userInstance._getPublisherApps(apiPublishers).then((res)=>{
+                expect(res).to.deep.equal(doubleResponse);
+                
+            });
+        });
+    });    
 });

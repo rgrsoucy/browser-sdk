@@ -96,13 +96,48 @@ export default class User {
 
     getMyApps() {
         return new Promise((resolve, reject) => {
+            this.getMyPublishers().then((res)=>{
+                this._getPublisherApps(res).then((res2)=>{
+                    resolve(res2);
+                }, (err)=>{reject(err)}
+                );
+            }, (err)=>{reject(err)
+            });
+        });
+    }
+
+    getMyPublishers(){
+        return new Promise((resolve, reject) => {
             this.getUserInfo().then(() => {
-                ajax.get(`/users/${this.userInfo.id}/apps`).then((response) => {
+                ajax.get(`/users/${this.userInfo.id}/publishers`)
+                .then((response) => {
                     resolve(response);
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     reject(error);
                 });
             });
+        });                        
+    }
+
+    _getPublisherApps(pubsArray){
+        return new Promise((resolve, reject) => {
+            let appsArray = [];
+            pubsArray.forEach(
+                function(element, i){
+                    ajax.get(`/publishers/${element.id}/apps/extended`).then(
+                        (response) => {
+                            let concatResult = appsArray.concat(response);
+                            appsArray = concatResult;
+                            if (i===pubsArray.length-1){
+                                resolve(appsArray);
+                            }
+                        }).catch((err)=>{
+                            return err
+                        }
+                    );
+                }
+            );
         });
     }
 
