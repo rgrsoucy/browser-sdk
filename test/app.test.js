@@ -10,11 +10,13 @@ chai.use(sinonChai);
 let appInstance;
 let fakeConfig;
 const myAppStub = sinon.stub();//generic stub
+const myAppSpy = sinon.spy();//generic stub
 App.__Rewire__('ajax', {
                 url: 'fakeURL',
                 token: '12345',
                 tokenType: 'Bearer',
-                patch:myAppStub
+                patch:myAppStub,
+                delete: myAppSpy
             });
 
 describe('App', function() {
@@ -89,5 +91,21 @@ describe('App', function() {
             });
             
         });
+    });
+
+    describe.only('#deleteApp', function() {
+        it('should hit the delete endpoint', function() {
+            appInstance.deleteApp();
+            expect(myAppSpy).to.be.called.once;
+        });
+
+        it('should throw an error if no id present', function() {
+            appInstance.appId = null;
+            var fn = function() {
+                appInstance.deleteApp();
+            };
+            expect(fn).to.throw(Error);
+        });
+
     });
 });
