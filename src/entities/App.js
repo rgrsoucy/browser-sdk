@@ -11,8 +11,8 @@ export default class App {
         this.description = config.description;
     }
 
-    updateApp(appId, patchBody) {
-        if (!appId) {
+    updateApp(patchBody) {
+        if (!this.appId) {
             throw new Error('Please provide an appId');
         } else if (!(patchBody)) {
             throw new Error('Provide a patch of parameters to update');
