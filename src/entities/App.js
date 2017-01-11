@@ -10,8 +10,31 @@ export default class App {
         this.description = config.description;
     }
 
-    newApp() {
+    newApp(postBody) {
         //POST /apps, (name, publisher, redirectUri, description)
+        if (!(postBody)) {
+            throw new Error('Provide a body of parameters to post');
+        } else if (
+            !(postBody.hasOwnProperty('name')) && 
+            !(postBody.hasOwnProperty('publisher')) &&
+            !(postBody.hasOwnProperty('redirectUri')) &&
+            !(postBody.hasOwnProperty('description'))) {
+            throw new Error('Provide a body with parameters name, description, redirectUri, and publisher for the App');
+        }
+        
+        return new Promise((resolve, reject) => {
+            ajax.post('/apps', postBody)
+            .then((response) => {
+                this.name = response.name;
+                this.publisher = response.publisher;
+                this.redirectUri = response.redirectUri;
+                this.description = response.description;
+                resolve(response);
+            })
+            .catch((error) => {
+                reject(error);
+            });
+        });
     }
 
     deleteApp() {

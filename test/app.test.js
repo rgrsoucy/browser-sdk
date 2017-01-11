@@ -16,7 +16,8 @@ App.__Rewire__('ajax', {
                 token: '12345',
                 tokenType: 'Bearer',
                 patch:myAppStub,
-                delete: myAppSpy
+                delete: myAppSpy,
+                post: myAppSpy
             });
 
 describe('App', function() {
@@ -107,6 +108,27 @@ describe('App', function() {
             };
             expect(fn).to.throw(Error);
         });
+    });
 
+    describe('#newApp', function() {
+        let body = {
+            name:'fakename',
+            description:'something fake',
+            redirectUri:'www.fakeyourmom.com',
+            publisher:'fakePub'
+        };
+
+        it('should hit the post endpoint', function() {
+            appInstance.newApp(body);
+            expect(myAppSpy).to.be.called.once;
+        });
+
+        it('should throw an error if no id present', function() {
+            appInstance.appId = null;
+            var fn = function() {
+                appInstance.newApp();
+            };
+            expect(fn).to.throw(Error);
+        });
     });
 });
