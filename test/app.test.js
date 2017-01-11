@@ -78,7 +78,8 @@ describe('App', function() {
                 name:'fake',
                 publisher:'fake'
             };
-            appInstance.updateApp('fakeId', body).then((res) => {
+
+            appInstance.updateApp(body).then((res) => {
                 expect(appInstance).to.deep.equal({
                     config:fakeConfig,
                     name:'fake',
@@ -93,7 +94,7 @@ describe('App', function() {
         });
     });
 
-    describe.only('#deleteApp', function() {
+    describe('#deleteApp', function() {
         it('should hit the delete endpoint', function() {
             appInstance.deleteApp();
             expect(myAppSpy).to.be.called.once;

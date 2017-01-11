@@ -45,7 +45,7 @@ export default class App {
             }
         }
         return new Promise((resolve, reject) => {
-            ajax.patch(`/apps/${appId}`, patchBody)
+            ajax.patch(`/apps/${this.appId}`, patchBody)
             .then((response) => {
                 this.name = response.name;
                 this.publisher = response.publisher;
