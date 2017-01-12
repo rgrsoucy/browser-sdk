@@ -20,7 +20,7 @@ Publisher.__Rewire__('ajax', {
                 post: myPublisherSpy
             });
 
-describe.only('Publisher', function() {
+describe('Publisher', function() {
     beforeEach(function() {
         fakeConfig = {
             name:'initial fake name',
@@ -77,7 +77,7 @@ describe.only('Publisher', function() {
         it('should successfully update publisherInstance based on the response', function(done) {
             let body = {
                 name:'fake',
-                publisher:'fake'
+                owner:'fake'
             };
 
             publisherInstance.updatePublisher(body).then((res) => {
