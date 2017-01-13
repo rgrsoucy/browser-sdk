@@ -273,13 +273,11 @@ describe('User', function() {
             var apiResponse =
                 [{
                     "id": "a1bf392f-0890-445a-b025-3d09316cd356",
-                    "name": "WB Data Board (WBDB)",
-                    "description": "The first APP to read the WB Sensors"
+                    "name": "WB Data Board (WBDB)"
                 },
                 {
                     "id": "aaaaaaaa",
-                    "name": "fakething",
-                    "description": "it's a thing"
+                    "name": "fakething"
                 }]
 
             var apiPublishers = [{
@@ -289,12 +287,12 @@ describe('User', function() {
                     "id":456
                 }]
             userInstance.userInfo = userStub;
-            // sinon.stub(ajax, 'get').resolves(apiResponse);
+            sinon.stub(ajax, 'get').resolves(apiResponse);
 
-            return userInstance.getMyApps().then((res)=>{
+            return userInstance.getMyPublishers().then((res)=>{
                 expect(res).to.deep.equal(apiResponse);
-
             });
+            ajax.get.restore();
         });
     });
     describe('#_getPublisherApps', function() {
@@ -320,7 +318,7 @@ describe('User', function() {
                     "id":456
                 }]
             userInstance.userInfo = userStub;
-            sinon.stub(ajax, 'get').resolves(apiResponse);
+            ajax.get.resolves(apiResponse);
 
             return userInstance._getPublisherApps(apiPublishers).then((res)=>{
                 expect(res).to.deep.equal(doubleResponse);
