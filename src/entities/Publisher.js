@@ -35,7 +35,7 @@ export default class Publisher {
     deletePublisher() {
         //DELETE /publishers/{publisherId}
         if (!(this.publisherId)) {
-            throw new Error('Provide the device id during instantiation');
+            throw new Error('Provide the publisher id during instantiation');
         }
         return new Promise((resolve, reject) => {
             ajax.delete(`/publishers/${this.publisherId}`)
