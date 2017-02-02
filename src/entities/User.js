@@ -1,6 +1,7 @@
 import { ajax } from '../tools/ajax.js';
 import Device from './Device';
 import App from './App';
+import Publisher from './Publisher';
 import Group from './Group';
 import Transmitter from './Transmitter';
 
@@ -115,11 +116,18 @@ export default class User {
         });
     }
 
-    getMyPublishers(){
+    getMyPublishers(opts = {}){
         return new Promise((resolve, reject) => {
             this.getUserInfo().then(() => {
                 ajax.get(`/users/${this.userInfo.id}/publishers`)
                 .then((response) => {
+                    if (opts.asClasses) {
+                        resolve(response.map((item) => {
+                            return new Publisher(item, this.config);
+                        }));
+                    } else {
+                        resolve(response);
+                    }
                     resolve(response);
                 })
                 .catch((error) => {

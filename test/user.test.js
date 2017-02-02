@@ -266,6 +266,35 @@ describe('User', function() {
             });
         });
     });
+
+    describe('#getMyPublishers', function() {
+
+        it('should return an array of Publisher objects', function () {
+            var apiResponse =
+                [{
+                    "id": "a1bf392f-0890-445a-b025-3d09316cd356",
+                    "name": "WB Data Board (WBDB)"
+                },
+                {
+                    "id": "aaaaaaaa",
+                    "name": "fakething"
+                }]
+
+            var apiPublishers = [{
+                    "id":123
+                },
+                {
+                    "id":456
+                }]
+            userInstance.userInfo = userStub;
+            sinon.stub(ajax, 'get').resolves(apiResponse);
+
+            return userInstance.getMyPublishers().then((res)=>{
+                expect(res).to.deep.equal(apiResponse);
+            });
+            ajax.get.restore();
+        });
+    });
     describe('#_getPublisherApps', function() {
 
         it('should return an array of app objects', function () {
@@ -289,7 +318,7 @@ describe('User', function() {
                     "id":456
                 }]
             userInstance.userInfo = userStub;
-            sinon.stub(ajax, 'get').resolves(apiResponse);
+            ajax.get.resolves(apiResponse);
 
             return userInstance._getPublisherApps(apiPublishers).then((res)=>{
                 expect(res).to.deep.equal(doubleResponse);
