@@ -1,5 +1,9 @@
 import { ajax } from '../tools/ajax.js';
 import Device from './Device';
+import App from './App';
+import Publisher from './Publisher';
+import Group from './Group';
+import Transmitter from './Transmitter';
 
 export default class User {
     constructor(config) {
@@ -94,15 +98,63 @@ export default class User {
         });
     }
 
-    getMyApps() {
+    getMyApps(opts = {}) {
+        return new Promise((resolve, reject) => {
+            this.getMyPublishers().then((res)=>{
+                this._getPublisherApps(res).then((res2)=>{
+                    if (opts.asClasses) {
+                        resolve(res2.map((item) => {
+                            return new App(item, this.config);
+                        }));
+                    } else {
+                        resolve(res2);
+                    }
+                }, (err)=>{reject(err)}
+                );
+            }, (err)=>{reject(err)
+            });
+        });
+    }
+
+    getMyPublishers(opts = {}){
         return new Promise((resolve, reject) => {
             this.getUserInfo().then(() => {
-                ajax.get(`/users/${this.userInfo.id}/apps`).then((response) => {
+                ajax.get(`/users/${this.userInfo.id}/publishers`)
+                .then((response) => {
+                    if (opts.asClasses) {
+                        resolve(response.map((item) => {
+                            return new Publisher(item, this.config);
+                        }));
+                    } else {
+                        resolve(response);
+                    }
                     resolve(response);
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     reject(error);
                 });
             });
+        });                        
+    }
+
+    _getPublisherApps(pubsArray){
+        return new Promise((resolve, reject) => {
+            let appsArray = [];
+            pubsArray.forEach(
+                function(element, i){
+                    ajax.get(`/publishers/${element.id}/apps/extended`).then(
+                        (response) => {
+                            let concatResult = appsArray.concat(response);
+                            appsArray = concatResult;
+                            if (i===pubsArray.length-1){
+                                resolve(appsArray);
+                            }
+                        }).catch((err)=>{
+                            return err
+                        }
+                    );
+                }
+            );
         });
     }
 

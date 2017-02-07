@@ -1,10 +1,12 @@
 import main, {
-    User, Device, Model, Group, Transmitter
+    User, Device, Model, Group, App, Transmitter, Publisher
 }
 from '../src/main';
 import DeviceClass from '../src/entities/Device';
 import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
+import AppClass from '../src/entities/App';
+import PublisherClass from '../src/entities/Publisher';
 import UserClass from '../src/entities/User';
 import TransmitterClass from '../src/entities/Transmitter';
 import { ajax } from '../src/tools/ajax';
@@ -62,15 +64,23 @@ describe('Main', function() {
         expect(Device).to.be.equal(DeviceClass);    
     });
 
-    it('should export Group class under device', function() {        
+    it('should export Group class under group', function() {        
         expect(Group).to.be.equal(GroupClass);    
     });
 
-    it('should export Model class under device', function() {        
+    it('should export Model class under model', function() {        
         expect(Model).to.be.equal(ModelClass);    
     });
 
-    it('should export Transmitter class under device', function() {        
+    it('should export App class under App', function() {        
+        expect(App).to.be.equal(AppClass);    
+    });
+
+    it('should export Publisher class under Publisher', function() {        
+        expect(Publisher).to.be.equal(PublisherClass);    
+    });
+
+    it('should export Transmitter class under transmitter', function() {        
         expect(Transmitter).to.be.equal(TransmitterClass);    
     });
 
