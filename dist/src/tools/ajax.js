@@ -56,9 +56,9 @@
             value: function get(url) {
                 var _this = this;
 
-                var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
                     contentType: 'application/json'
-                };
+                } : arguments[1];
 
                 if (!(url.charAt(0) === '/')) {
                     throw new Error('Please provide a url with a leading /');
@@ -90,10 +90,10 @@
             value: function post(url, body) {
                 var _this2 = this;
 
-                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
+                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
                     contentType: 'application/json',
                     raw: true
-                };
+                } : arguments[2];
 
                 if (!url.charAt(0) === '/') {
                     throw new Error('Please provide a url with a leading /');
@@ -122,9 +122,9 @@
             value: function patch(url, body) {
                 var _this3 = this;
 
-                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
+                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
                     contentType: 'application/json'
-                };
+                } : arguments[2];
 
                 if (!url.charAt(0) === '/') {
                     throw new Error('Please provide a url with a leading /');
@@ -151,9 +151,9 @@
             value: function _delete(url) {
                 var _this4 = this;
 
-                var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
+                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
                     contentType: 'application/json'
-                };
+                } : arguments[1];
 
                 if (!url.charAt(0) === '/') {
                     throw new Error('Please provide a url with a leading /');

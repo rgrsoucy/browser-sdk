@@ -1,22 +1,22 @@
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
-        define(['exports', './authorization/oauth2', './entities/User', './entities/Device', './entities/Group', './entities/Model', './entities/Transmitter', './tools/ajax', './tools/mqtt'], factory);
+        define(['exports', './authorization/oauth2', './entities/User', './entities/Device', './entities/Group', './entities/Model', './entities/App', './entities/Transmitter', './entities/Publisher', './tools/ajax', './tools/mqtt'], factory);
     } else if (typeof exports !== "undefined") {
-        factory(exports, require('./authorization/oauth2'), require('./entities/User'), require('./entities/Device'), require('./entities/Group'), require('./entities/Model'), require('./entities/Transmitter'), require('./tools/ajax'), require('./tools/mqtt'));
+        factory(exports, require('./authorization/oauth2'), require('./entities/User'), require('./entities/Device'), require('./entities/Group'), require('./entities/Model'), require('./entities/App'), require('./entities/Transmitter'), require('./entities/Publisher'), require('./tools/ajax'), require('./tools/mqtt'));
     } else {
         var mod = {
             exports: {}
         };
-        factory(mod.exports, global.oauth2, global.User, global.Device, global.Group, global.Model, global.Transmitter, global.ajax, global.mqtt);
+        factory(mod.exports, global.oauth2, global.User, global.Device, global.Group, global.Model, global.App, global.Transmitter, global.Publisher, global.ajax, global.mqtt);
         global.main = mod.exports;
     }
-})(this, function (exports, _oauth, _User, _Device, _Group, _Model, _Transmitter, _ajax, _mqtt) {
+})(this, function (exports, _oauth, _User, _Device, _Group, _Model, _App, _Transmitter, _Publisher, _ajax, _mqtt) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
         value: true
     });
-    exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
+    exports.Publisher = exports.Transmitter = exports.App = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
 
     var _oauth2 = _interopRequireDefault(_oauth);
 
@@ -28,7 +28,11 @@
 
     var _Model2 = _interopRequireDefault(_Model);
 
+    var _App2 = _interopRequireDefault(_App);
+
     var _Transmitter2 = _interopRequireDefault(_Transmitter);
+
+    var _Publisher2 = _interopRequireDefault(_Publisher);
 
     var _ajax2 = _interopRequireDefault(_ajax);
 
@@ -43,7 +47,9 @@
     exports.Device = _Device2.default;
     exports.Group = _Group2.default;
     exports.Model = _Model2.default;
+    exports.App = _App2.default;
     exports.Transmitter = _Transmitter2.default;
+    exports.Publisher = _Publisher2.default;
 
 
     var config = {

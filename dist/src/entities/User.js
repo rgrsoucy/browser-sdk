@@ -1,16 +1,16 @@
 (function (global, factory) {
     if (typeof define === "function" && define.amd) {
-        define(['module', 'exports', '../tools/ajax.js', './Device'], factory);
+        define(['module', 'exports', '../tools/ajax.js', './Device', './App', './Publisher', './Group', './Transmitter'], factory);
     } else if (typeof exports !== "undefined") {
-        factory(module, exports, require('../tools/ajax.js'), require('./Device'));
+        factory(module, exports, require('../tools/ajax.js'), require('./Device'), require('./App'), require('./Publisher'), require('./Group'), require('./Transmitter'));
     } else {
         var mod = {
             exports: {}
         };
-        factory(mod, mod.exports, global.ajax, global.Device);
+        factory(mod, mod.exports, global.ajax, global.Device, global.App, global.Publisher, global.Group, global.Transmitter);
         global.User = mod.exports;
     }
-})(this, function (module, exports, _ajax, _Device) {
+})(this, function (module, exports, _ajax, _Device, _App, _Publisher, _Group, _Transmitter) {
     'use strict';
 
     Object.defineProperty(exports, "__esModule", {
@@ -18,6 +18,14 @@
     });
 
     var _Device2 = _interopRequireDefault(_Device);
+
+    var _App2 = _interopRequireDefault(_App);
+
+    var _Publisher2 = _interopRequireDefault(_Publisher);
+
+    var _Group2 = _interopRequireDefault(_Group);
+
+    var _Transmitter2 = _interopRequireDefault(_Transmitter);
 
     function _interopRequireDefault(obj) {
         return obj && obj.__esModule ? obj : {
@@ -82,7 +90,7 @@
             value: function getMyDevices() {
                 var _this2 = this;
 
-                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
                 return new Promise(function (resolve, reject) {
                     _this2.getUserInfo().then(function () {
@@ -105,17 +113,17 @@
             value: function searchForDevices() {
                 var _this3 = this;
 
-                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
 
                 if (!opts.query) {
                     throw new Error('Please provide a query object');
                 }
-                var _opts$query = opts.query,
-                    device_name = _opts$query.name,
-                    device_description = _opts$query.description,
-                    device_ids = _opts$query.ids,
-                    model_id = _opts$query.modelId,
-                    firmware_version = _opts$query.firmwareVersion;
+                var _opts$query = opts.query;
+                var device_name = _opts$query.name;
+                var device_description = _opts$query.description;
+                var device_ids = _opts$query.ids;
+                var model_id = _opts$query.modelId;
+                var firmware_version = _opts$query.firmwareVersion;
 
                 return new Promise(function (resolve, reject) {
                     _ajax.ajax.get('/devices', {
@@ -174,12 +182,64 @@
             value: function getMyApps() {
                 var _this6 = this;
 
+                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
                 return new Promise(function (resolve, reject) {
-                    _this6.getUserInfo().then(function () {
-                        _ajax.ajax.get('/users/' + _this6.userInfo.id + '/apps').then(function (response) {
+                    _this6.getMyPublishers().then(function (res) {
+                        _this6._getPublisherApps(res).then(function (res2) {
+                            if (opts.asClasses) {
+                                resolve(res2.map(function (item) {
+                                    return new _App2.default(item, _this6.config);
+                                }));
+                            } else {
+                                resolve(res2);
+                            }
+                        }, function (err) {
+                            reject(err);
+                        });
+                    }, function (err) {
+                        reject(err);
+                    });
+                });
+            }
+        }, {
+            key: 'getMyPublishers',
+            value: function getMyPublishers() {
+                var _this7 = this;
+
+                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+
+                return new Promise(function (resolve, reject) {
+                    _this7.getUserInfo().then(function () {
+                        _ajax.ajax.get('/users/' + _this7.userInfo.id + '/publishers').then(function (response) {
+                            if (opts.asClasses) {
+                                resolve(response.map(function (item) {
+                                    return new _Publisher2.default(item, _this7.config);
+                                }));
+                            } else {
+                                resolve(response);
+                            }
                             resolve(response);
                         }).catch(function (error) {
                             reject(error);
+                        });
+                    });
+                });
+            }
+        }, {
+            key: '_getPublisherApps',
+            value: function _getPublisherApps(pubsArray) {
+                return new Promise(function (resolve, reject) {
+                    var appsArray = [];
+                    pubsArray.forEach(function (element, i) {
+                        _ajax.ajax.get('/publishers/' + element.id + '/apps/extended').then(function (response) {
+                            var concatResult = appsArray.concat(response);
+                            appsArray = concatResult;
+                            if (i === pubsArray.length - 1) {
+                                resolve(appsArray);
+                            }
+                        }).catch(function (err) {
+                            return err;
                         });
                     });
                 });
@@ -192,11 +252,11 @@
         }, {
             key: 'getCachedDevices',
             value: function getCachedDevices() {
-                var _this7 = this;
+                var _this8 = this;
 
                 return new Promise(function (resolve, reject) {
-                    if (_this7.devicesCache) {
-                        resolve(_this7.devicesCache);
+                    if (_this8.devicesCache) {
+                        resolve(_this8.devicesCache);
                     } else {
                         resolve([]);
                     }
