@@ -51,9 +51,15 @@ export default class User {
         if (!opts.query) {
             throw new Error('Please provide a query object');
         }
-        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version } = opts.query;
+        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version} = opts.query;
+
+        let {page_number} = opts.query;
+        if (page_number==undefined) {
+            page_number = 0;
+        }
+
         return new Promise((resolve, reject) => {
-            ajax.get('/devices', {
+            ajax.get('/devices?page_number='+page_number, {
                 queryObj: {
                     device_name,
                     device_description,
@@ -62,14 +68,26 @@ export default class User {
                     firmware_version
                 }
             }).then((response) => {
-                const { data: devices } = response;
-                if (opts.asClasses) {
-                    resolve(devices.map((device) => {
-                        return new Device(device, this.config);
-                    }));
-                } else {
-                    resolve(devices);
+                const { data: devices, links: links} = response;
+                let nextLink = "";
+
+                if (links != undefined && links.next != undefined) {
+                    nextLink = links.next;
                 }
+
+                let devicesData = {};
+                devicesData.nextLink = nextLink;
+
+                if (opts.asClasses) {
+                    result.devicesData = devices.map((device) => {
+                        return new Device(device, this.config);
+                    });
+
+                } else {
+                    devicesData.devices = devices;
+                }
+
+                resolve(devicesData);
             }, reject);
         });
     }
