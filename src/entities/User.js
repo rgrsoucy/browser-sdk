@@ -51,7 +51,16 @@ export default class User {
         if (!opts.query) {
             throw new Error('Please provide a query object');
         }
-        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version } = opts.query;
+        const {
+            name: device_name,
+            description: device_description,
+            ids: device_ids,
+            modelId: model_id,
+            firmwareVersion: firmware_version,
+            owner,
+            sharedOnly
+        } = opts.query;
+
         return new Promise((resolve, reject) => {
             ajax.get('/devices', {
                 queryObj: {
@@ -59,7 +68,9 @@ export default class User {
                     device_description,
                     device_ids,
                     model_id,
-                    firmware_version
+                    firmware_version,
+                    owner,
+                    sharedOnly
                 }
             }).then((response) => {
                 const { data: devices } = response;
@@ -134,7 +145,7 @@ export default class User {
                     reject(error);
                 });
             });
-        });                        
+        });
     }
 
     _getPublisherApps(pubsArray){
