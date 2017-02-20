@@ -53,19 +53,20 @@ export default class User {
         }
         const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version} = opts.query;
 
-        let {page_number} = opts.query;
-        if (page_number==undefined) {
+        let page_number = opts.query.page_number;
+        if (page_number == undefined || page_number == "") {
             page_number = 0;
         }
 
         return new Promise((resolve, reject) => {
-            ajax.get('/devices?page_number='+page_number, {
+            ajax.get('/devices', {
                 queryObj: {
                     device_name,
                     device_description,
                     device_ids,
                     model_id,
-                    firmware_version
+                    firmware_version,
+                    page_number
                 }
             }).then((response) => {
                 const { data: devices, links: links} = response;
