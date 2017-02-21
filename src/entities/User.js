@@ -70,17 +70,12 @@ export default class User {
                 }
             }).then((response) => {
                 const { data: devices, links: links} = response;
-                let nextLink = "";
-
-                if (links != undefined && links.next != undefined) {
-                    nextLink = links.next;
-                }
 
                 let devicesData = {};
-                devicesData.nextLink = nextLink;
+                devicesData.links = links;
 
                 if (opts.asClasses) {
-                    result.devicesData = devices.map((device) => {
+                    devicesData.devices = devices.map((device) => {
                         return new Device(device, this.config);
                     });
 
