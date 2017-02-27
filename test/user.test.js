@@ -152,8 +152,8 @@ describe('User', function() {
         it('should resolve promise with found devices', function(done) {
             userInstance.searchForDevices({
                 query: { name: 'testur' }
-            }).then((devices) => {
-                expect(devices).to.deep.equal([devicesStub]);
+            }).then((result) => {
+                expect(result.devices[0]).to.deep.equal(devicesStub);
                 done();
             });
 
@@ -168,8 +168,8 @@ describe('User', function() {
             userInstance.searchForDevices({
                 query: { name: 'testur' },
                 asClasses: true,
-            }).then((devices) => {
-                expect(devices[0]).to.have.property('rawDevice');
+            }).then((result) => {
+                expect(result.devices[0]).to.have.property('rawDevice');
                 done();
             });
 

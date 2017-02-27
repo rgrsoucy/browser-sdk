@@ -47,32 +47,32 @@ export default class User {
         });
     }
 
-    searchForDevices(opts = {}) {
+    searchForDevices(opts = {}, url) {
         if (!opts.query) {
             throw new Error('Please provide a query object');
         }
         const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version} = opts.query;
 
-        let page_number = opts.query.page_number;
-        if (page_number == undefined || page_number == "") {
-            page_number = 0;
+        if (url==undefined || url.length<=0) {
+            url = "/devices"
         }
 
         return new Promise((resolve, reject) => {
-            ajax.get('/devices', {
+            ajax.get(url, {
                 queryObj: {
                     device_name,
                     device_description,
                     device_ids,
                     model_id,
-                    firmware_version,
-                    page_number
+                    firmware_version
                 }
             }).then((response) => {
-                const { data: devices, links: links} = response;
+                const { data: devices, links} = response;
 
                 let devicesData = {};
-                devicesData.links = links;
+                if(links) {
+                    devicesData.links = links;
+                }
 
                 if (opts.asClasses) {
                     devicesData.devices = devices.map((device) => {
