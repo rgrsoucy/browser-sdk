@@ -180,14 +180,6 @@ describe('Ajax', function() {
                 expect(this.requests[0].url).to.not.contain('?');
             });
 
-
-            it('should throw an error if the url doesnt have a leading /', function() {
-
-                var fn = function() {
-                    ajaxInstance.get('test', true, {});
-                };
-                expect(fn).to.throw(Error);
-            });
         });
     });
 
@@ -239,15 +231,6 @@ describe('Ajax', function() {
             expect(ajaxInstance._xhrRequest(config, null)).to.eventually.be.rejected.notify(done);
             this.requests[0].respond(500, {});
         });
-
-        it('should throw an error if the url doesnt have a leading /', function() {
-
-            var fn = function() {
-                ajaxInstance.get('test', true, {});
-            };
-            expect(fn).to.throw(Error);
-        });
-
     });
 
     describe('#patch', function() {
@@ -259,14 +242,6 @@ describe('Ajax', function() {
             expect(this.requests[0].requestBody).to.be.deep.equal(JSON.stringify({
                 fakeKey: 'fakeValue'
             }));
-        });
-
-        it('should throw an error if the url doesnt have a leading /', function() {
-
-            var fn = function() {
-                ajaxInstance.get('test', true, {});
-            };
-            expect(fn).to.throw(Error);
         });
     });
 
@@ -286,7 +261,6 @@ describe('Ajax', function() {
                 'Content-Type': 'application/json'
             }, '');
         });
-
     });
 
 

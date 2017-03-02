@@ -74,6 +74,51 @@ export default class User {
         });
     }
 
+    //extended version of searchForDevices function
+    //parameters: opts: device search options
+    //            nextPageURL: url which is used to retreived devices
+    //return    : {devices: array of found devices, links: link for the next page of devices}
+    searchForDevicesEx(opts = {}, nextPageURL) {
+        if (!opts.query) {
+            throw new Error('Please provide a query object');
+        }
+        
+        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version } = opts.query;
+        
+        if (nextPageURL==undefined || nextPageURL.length<=0) {
+             nextPageURL = "/devices"
+        }
+        
+        return new Promise((resolve, reject) => {
+            ajax.get(nextPageURL, {
+                queryObj: {
+                    device_name,
+                    device_description,
+                    device_ids,
+                    model_id,
+                    firmware_version
+                }
+            }).then((response) => {
+                const { data: devices, links} = response;
+
+                let devicesData = {};
+                if(links) {
+                    devicesData.links = links;
+                }
+
+                if (opts.asClasses) {
+                    devicesData.devices = devices.map((device) => {
+                          return new Device(device, this.config);
+                    });
+                } else {
+                    devicesData.devices = devices;
+                }
+
+                resolve(devicesData);
+            }, reject);
+        });
+    }
+
     getMyGroups() {
         return new Promise((resolve, reject) => {
             this.getUserInfo().then(() => {
