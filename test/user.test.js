@@ -202,6 +202,77 @@ describe('User', function() {
         });
     });
 
+
+    describe('#searchForDevicesEx', function() {
+        it('should search for devices', function() {
+            userInstance.searchForDevicesEx({
+                query: { name: 'testur' }
+            });
+
+            expect(this.requests[0].url).to.have.string('.io/devices');
+        });
+
+        it('should throw an error if no search object has been provided', function() {
+            let fn = function() {
+                userInstance.searchForDevicesEx({});
+            };
+            expect(fn).to.throw(Error);
+        });
+
+        it('should resolve promise with found devices', function(done) {
+            userInstance.searchForDevicesEx({
+                query: { name: 'testur' }
+            }).then((result) => {
+                expect(result.devices).to.deep.equal([devicesStub]);
+                done();
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify({
+                data: [devicesStub]
+            }));
+        });
+
+        it('should be possible to get the devices as classes', function(done) {
+            userInstance.searchForDevicesEx({
+                query: { name: 'testur' },
+                asClasses: true,
+            }).then((result) => {
+                expect(result.devices[0]).to.have.property('rawDevice');
+                done();
+            });
+
+            this.requests[0].respond(200, {
+                'Content-Type': 'text/json'
+            }, JSON.stringify({
+                data: [devicesStub]
+            }));
+        });
+
+        describe('query parameters', () => {
+            it('should create a query object with correct properties', function() {
+                userInstance.searchForDevicesEx({
+                    query: {
+                        name: 'test-name',
+                        description: 'test-description',
+                        ids: ['my-id', 'my-second-id'],
+                        modelId: 'my-model-id',
+                        firmwareVersion: 'my-firmware'
+                    }
+                });
+
+                const URL = this.requests[0].url;
+                expect(URL).to.have.string('device_name=test-name');
+                expect(URL).to.have.string('device_description=test-description');
+                expect(URL).to.have.string('device_ids=my-id%2Cmy-second-id');
+                expect(URL).to.have.string('model_id=my-model-id');
+                expect(URL).to.have.string('firmware_version=my-firmware');
+            });
+        });
+    });
+
+
     describe('#getCachedDevices', function() {
 
         it('should return an empty array when there is no cache of devices', function (done) {
