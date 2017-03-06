@@ -62,8 +62,8 @@
 
     var Device = function () {
         function Device() {
-            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-            var config = arguments.length <= 1 || arguments[1] === undefined ? {} : arguments[1];
+            var rawDevice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
             _classCallCheck(this, Device);
 
@@ -206,7 +206,7 @@
         }, {
             key: 'connect',
             value: function connect() {
-                var transport = arguments.length <= 0 || arguments[0] === undefined ? 'mqtt' : arguments[0];
+                var transport = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : 'mqtt';
 
                 var connection = new _connection2.default();
                 var getChannel = this.getChannel();
