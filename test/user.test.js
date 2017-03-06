@@ -190,7 +190,7 @@ describe('User', function() {
                         modelId: 'my-model-id',
                         firmwareVersion: 'my-firmware',
                         owner: 'a-user-uuid',
-                        sharedOnly: true
+                        shared: 'by-me'
                     }
                 });
 
@@ -201,7 +201,7 @@ describe('User', function() {
                 expect(URL).to.have.string('model_id=my-model-id');
                 expect(URL).to.have.string('firmware_version=my-firmware');
                 expect(URL).to.have.string('owner=a-user-uuid');
-                expect(URL).to.have.string('sharedOnly=true');
+                expect(URL).to.have.string('shared=by-me');
             });
         });
     });

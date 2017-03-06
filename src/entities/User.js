@@ -58,7 +58,7 @@ export default class User {
             modelId: model_id,
             firmwareVersion: firmware_version,
             owner,
-            sharedOnly
+            shared
         } = opts.query;
 
         return new Promise((resolve, reject) => {
@@ -70,7 +70,7 @@ export default class User {
                     model_id,
                     firmware_version,
                     owner,
-                    sharedOnly
+                    shared
                 }
             }).then((response) => {
                 const { data: devices } = response;
@@ -93,13 +93,13 @@ export default class User {
         if (!opts.query) {
             throw new Error('Please provide a query object');
         }
-        
-        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version } = opts.query;
-        
+
+        const { name: device_name, description: device_description, ids: device_ids, modelId: model_id, firmwareVersion: firmware_version, owner, shared } = opts.query;
+
         if (nextPageURL==undefined || nextPageURL.length<=0) {
              nextPageURL = "/devices"
         }
-        
+
         return new Promise((resolve, reject) => {
             ajax.get(nextPageURL, {
                 queryObj: {
@@ -107,7 +107,9 @@ export default class User {
                     device_description,
                     device_ids,
                     model_id,
-                    firmware_version
+                    firmware_version,
+                    owner,
+                    shared
                 }
             }).then((response) => {
                 const { data: devices, links} = response;
