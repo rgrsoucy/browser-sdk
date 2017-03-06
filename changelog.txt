@@ -17,6 +17,5 @@ NB!) The search API (https://api.relayr.io/devices?device_name=test) has a break
 2.0.36) Feature) Replaced history api with new aggregated data api.
 NB!) The historical data has breaking changes, has a new object type from points object. That returns min,max and avg. Replace .value with .avg for same behavior.
 2.0.38) Feature) Added publishers and App class. Also merged some parts of dev into master for the last time as Dev will be removed from branches.
-
-2.0.39) Feature) Added extended version of searchForDevices function searchForDevicesEx to support paggination. searchForDevices is now depricated
+2.0.40) Feature) Added extended version of searchForDevices function searchForDevicesEx to support paggination. searchForDevices is now depricated
 
