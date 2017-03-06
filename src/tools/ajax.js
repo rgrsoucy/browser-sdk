@@ -1,4 +1,3 @@
-
 let instance = null;
 
 class Ajax {
@@ -24,17 +23,16 @@ class Ajax {
     get(url, opts = {
         contentType: 'application/json'
     }) {
-        if (!(url.charAt(0) === '/')) {
-            throw new Error('Please provide a url with a leading /');
-        }
-
         if (!url) {
             throw new Error('Please provide atleast a url');
         }
         if (typeof(url) !== 'string') {
             throw new Error('Please provide a string url');
         }
-        url += this._serializeQueryStr(opts.queryObj);
+
+        let isFirstQuery = !(url.indexOf("?")>-1);
+
+        url += this._serializeQueryStr(opts.queryObj, isFirstQuery);
 
         return new Promise((resolve, reject) => {
             var xhrObject = this._xhrRequest({
@@ -50,12 +48,11 @@ class Ajax {
         });
     }
 
-
     post(url, body, opts = {
         contentType: 'application/json',
         raw: true
     }) {
-        if (!url.charAt(0) === '/') {
+        if (!(url.charAt(0) === '/')) {
             throw new Error('Please provide a url with a leading /');
         }
         if (!url) throw new Error('Please provide atleast a url');
@@ -81,7 +78,7 @@ class Ajax {
     patch(url, body, opts = {
         contentType: 'application/json'
     }) {
-        if (!url.charAt(0) === '/') {
+        if (!(url.charAt(0) === '/')) {
             throw new Error('Please provide a url with a leading /');
         }
         if (!url) throw new Error('Please provide atleast a url');
@@ -106,7 +103,7 @@ class Ajax {
     delete(url, opts = {
         contentType: 'application/json'
     }) {
-        if (!url.charAt(0) === '/') {
+        if (!(url.charAt(0) === '/')) {
             throw new Error('Please provide a url with a leading /');
         }
         if (!url) throw new Error('Please provide atleast a url');
@@ -127,7 +124,7 @@ class Ajax {
     }
 
 
-    _serializeQueryStr(obj) {
+    _serializeQueryStr(obj, firstQuery=true) {
         if (!obj  || Object.keys(obj).length === 0) {
             return '';
         }
@@ -142,7 +139,13 @@ class Ajax {
         if (queries.length === 0) {
             return '';
         }
-        return '?' + queries.join('&');
+
+        let separator = "&";
+        if (firstQuery) {
+            separator = "?";
+        }
+
+        return separator + queries.join('&');
     }
 
 
@@ -152,15 +155,22 @@ class Ajax {
 
         xhrObject = new XMLHttpRequest();
 
+        let url = "";
+
+        if (options.url.charAt(0) !== '/') {
+            url = options.url;
+        } else {
+            url = `${this.options.protocol}${this.options.uri}${options.url}`;
+        }
+
         xhrObject.open(
             options.type,
-            `${this.options.protocol}${this.options.uri}${options.url}`,
+            url,
             true
         );
 
         xhrObject.setRequestHeader('Authorization', this.options.token);
         xhrObject.setRequestHeader('Content-Type', options.contentType);
-
 
         return new Promise((resolve, reject) => {
 
