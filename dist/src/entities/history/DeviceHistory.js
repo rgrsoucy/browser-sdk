@@ -55,7 +55,7 @@
 
     var DeviceHistory = function () {
         function DeviceHistory() {
-            var rawDevice = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+            var rawDevice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
             var config = arguments[1];
 
             _classCallCheck(this, DeviceHistory);
@@ -72,17 +72,17 @@
             value: function getHistoricalData() {
                 var _this = this;
 
-                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
-                var _opts$limit = opts.limit;
-                var limit = _opts$limit === undefined ? 1000 : _opts$limit;
-                var _opts$offset = opts.offset;
-                var offset = _opts$offset === undefined ? 0 : _opts$offset;
-                var end = opts.end;
-                var start = opts.start;
-                var sample = opts.sample;
-                var periode = opts.periode;
-                var meaning = opts.meaning;
-                var path = opts.path;
+                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+                var _opts$limit = opts.limit,
+                    limit = _opts$limit === undefined ? 1000 : _opts$limit,
+                    _opts$offset = opts.offset,
+                    offset = _opts$offset === undefined ? 0 : _opts$offset,
+                    end = opts.end,
+                    start = opts.start,
+                    sample = opts.sample,
+                    periode = opts.periode,
+                    meaning = opts.meaning,
+                    path = opts.path;
 
                 var queryParams = {
                     aggregates: 'avg,min,max'
@@ -129,12 +129,12 @@
             value: function getAllHistoricalData() {
                 var _this2 = this;
 
-                var opts = arguments.length <= 0 || arguments[0] === undefined ? {} : arguments[0];
+                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
                 var points = void 0;
 
-                var onDataReceived = opts.onDataReceived;
-                var periode = opts.periode;
+                var onDataReceived = opts.onDataReceived,
+                    periode = opts.periode;
 
                 onDataReceived = onDataReceived || function () {};
 

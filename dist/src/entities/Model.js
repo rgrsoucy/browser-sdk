@@ -64,7 +64,7 @@
 
     var Model = function () {
         function Model() {
-            var id = arguments.length <= 0 || arguments[0] === undefined ? null : arguments[0];
+            var id = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : null;
             var config = arguments[1];
 
             _classCallCheck(this, Model);

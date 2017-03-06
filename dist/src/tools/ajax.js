@@ -56,13 +56,9 @@
             value: function get(url) {
                 var _this = this;
 
-                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
+                var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
                     contentType: 'application/json'
-                } : arguments[1];
-
-                if (!(url.charAt(0) === '/')) {
-                    throw new Error('Please provide a url with a leading /');
-                }
+                };
 
                 if (!url) {
                     throw new Error('Please provide atleast a url');
@@ -70,7 +66,10 @@
                 if (typeof url !== 'string') {
                     throw new Error('Please provide a string url');
                 }
-                url += this._serializeQueryStr(opts.queryObj);
+
+                var isFirstQuery = !(url.indexOf("?") > -1);
+
+                url += this._serializeQueryStr(opts.queryObj, isFirstQuery);
 
                 return new Promise(function (resolve, reject) {
                     var xhrObject = _this._xhrRequest({
@@ -90,12 +89,12 @@
             value: function post(url, body) {
                 var _this2 = this;
 
-                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
+                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
                     contentType: 'application/json',
                     raw: true
-                } : arguments[2];
+                };
 
-                if (!url.charAt(0) === '/') {
+                if (!(url.charAt(0) === '/')) {
                     throw new Error('Please provide a url with a leading /');
                 }
                 if (!url) throw new Error('Please provide atleast a url');
@@ -122,11 +121,11 @@
             value: function patch(url, body) {
                 var _this3 = this;
 
-                var opts = arguments.length <= 2 || arguments[2] === undefined ? {
+                var opts = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {
                     contentType: 'application/json'
-                } : arguments[2];
+                };
 
-                if (!url.charAt(0) === '/') {
+                if (!(url.charAt(0) === '/')) {
                     throw new Error('Please provide a url with a leading /');
                 }
                 if (!url) throw new Error('Please provide atleast a url');
@@ -151,11 +150,11 @@
             value: function _delete(url) {
                 var _this4 = this;
 
-                var opts = arguments.length <= 1 || arguments[1] === undefined ? {
+                var opts = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {
                     contentType: 'application/json'
-                } : arguments[1];
+                };
 
-                if (!url.charAt(0) === '/') {
+                if (!(url.charAt(0) === '/')) {
                     throw new Error('Please provide a url with a leading /');
                 }
                 if (!url) throw new Error('Please provide atleast a url');
@@ -176,6 +175,8 @@
         }, {
             key: '_serializeQueryStr',
             value: function _serializeQueryStr(obj) {
+                var firstQuery = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
                 if (!obj || Object.keys(obj).length === 0) {
                     return '';
                 }
@@ -192,7 +193,13 @@
                 if (queries.length === 0) {
                     return '';
                 }
-                return '?' + queries.join('&');
+
+                var separator = "&";
+                if (firstQuery) {
+                    separator = "?";
+                }
+
+                return separator + queries.join('&');
             }
         }, {
             key: '_xhrRequest',
@@ -202,7 +209,15 @@
 
                 xhrObject = new XMLHttpRequest();
 
-                xhrObject.open(options.type, '' + this.options.protocol + this.options.uri + options.url, true);
+                var url = "";
+
+                if (options.url.charAt(0) !== '/') {
+                    url = options.url;
+                } else {
+                    url = '' + this.options.protocol + this.options.uri + options.url;
+                }
+
+                xhrObject.open(options.type, url, true);
 
                 xhrObject.setRequestHeader('Authorization', this.options.token);
                 xhrObject.setRequestHeader('Content-Type', options.contentType);
