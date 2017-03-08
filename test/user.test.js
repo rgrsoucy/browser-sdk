@@ -188,7 +188,9 @@ describe('User', function() {
                         description: 'test-description',
                         ids: ['my-id', 'my-second-id'],
                         modelId: 'my-model-id',
-                        firmwareVersion: 'my-firmware'
+                        firmwareVersion: 'my-firmware',
+                        owner: 'a-user-uuid',
+                        shared: 'by-me'
                     }
                 });
 
@@ -198,6 +200,8 @@ describe('User', function() {
                 expect(URL).to.have.string('device_ids=my-id%2Cmy-second-id');
                 expect(URL).to.have.string('model_id=my-model-id');
                 expect(URL).to.have.string('firmware_version=my-firmware');
+                expect(URL).to.have.string('owner=a-user-uuid');
+                expect(URL).to.have.string('shared=by-me');
             });
         });
     });
@@ -369,7 +373,7 @@ describe('User', function() {
     describe('#_getPublisherApps', function() {
 
         it('should return an array of app objects', function () {
-            var apiResponse = 
+            var apiResponse =
                 [{
                     "id": "a1bf392f-0890-445a-b025-3d09316cd356",
                     "name": "WB Data Board (WBDB)",
@@ -393,8 +397,8 @@ describe('User', function() {
 
             return userInstance._getPublisherApps(apiPublishers).then((res)=>{
                 expect(res).to.deep.equal(doubleResponse);
-                
+
             });
         });
-    });    
+    });
 });
