@@ -123,7 +123,10 @@
                     device_description = _opts$query.description,
                     device_ids = _opts$query.ids,
                     model_id = _opts$query.modelId,
-                    firmware_version = _opts$query.firmwareVersion;
+                    firmware_version = _opts$query.firmwareVersion,
+                    owner = _opts$query.owner,
+                    shared = _opts$query.shared;
+
 
                 return new Promise(function (resolve, reject) {
                     _ajax.ajax.get('/devices', {
@@ -132,7 +135,9 @@
                             device_description: device_description,
                             device_ids: device_ids,
                             model_id: model_id,
-                            firmware_version: firmware_version
+                            firmware_version: firmware_version,
+                            owner: owner,
+                            shared: shared
                         }
                     }).then(function (response) {
                         var devices = response.data;
@@ -164,7 +169,9 @@
                     device_description = _opts$query2.description,
                     device_ids = _opts$query2.ids,
                     model_id = _opts$query2.modelId,
-                    firmware_version = _opts$query2.firmwareVersion;
+                    firmware_version = _opts$query2.firmwareVersion,
+                    owner = _opts$query2.owner,
+                    shared = _opts$query2.shared;
 
 
                 if (nextPageURL == undefined || nextPageURL.length <= 0) {
@@ -178,7 +185,9 @@
                             device_description: device_description,
                             device_ids: device_ids,
                             model_id: model_id,
-                            firmware_version: firmware_version
+                            firmware_version: firmware_version,
+                            owner: owner,
+                            shared: shared
                         }
                     }).then(function (response) {
                         var devices = response.data,
