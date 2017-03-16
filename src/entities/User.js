@@ -112,10 +112,13 @@ export default class User {
                     shared
                 }
             }).then((response) => {
-                const { data: devices, links} = response;
+                const { data: devices, links, count } = response;
 
-                let devicesData = {};
-                if(links) {
+                let devicesData = {
+                    count
+                };
+
+                if (links) {
                     devicesData.links = links;
                 }
 
