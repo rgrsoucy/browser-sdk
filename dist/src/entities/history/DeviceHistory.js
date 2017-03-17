@@ -85,7 +85,7 @@
                     path = opts.path;
 
                 var queryParams = {
-                    aggregates: 'avg,min,max'
+                    aggregates: opts.aggregates || 'avg,min,max'
                 };
 
                 if (periode && periode.length > 0) {

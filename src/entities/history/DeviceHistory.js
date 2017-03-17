@@ -14,7 +14,7 @@ export default class DeviceHistory {
     getHistoricalData(opts = {}) {
         let { limit = 1000, offset = 0, end, start, sample, periode, meaning, path } = opts;
         let queryParams = {
-            aggregates: 'avg,min,max'
+            aggregates: opts.aggregates || 'avg,min,max'
         };
 
         if (periode && periode.length > 0) {

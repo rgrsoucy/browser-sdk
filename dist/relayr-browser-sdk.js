@@ -63,23 +63,23 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(3), __webpack_require__(5), __webpack_require__(14), __webpack_require__(12), __webpack_require__(13), __webpack_require__(4), __webpack_require__(10)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [exports, __webpack_require__(2), __webpack_require__(3), __webpack_require__(5), __webpack_require__(15), __webpack_require__(12), __webpack_require__(13), __webpack_require__(16), __webpack_require__(14), __webpack_require__(4), __webpack_require__(10)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(exports, require('./authorization/oauth2'), require('./entities/User'), require('./entities/Device'), require('./entities/Group'), require('./entities/Model'), require('./entities/Transmitter'), require('./tools/ajax'), require('./tools/mqtt'));
+	        factory(exports, require('./authorization/oauth2'), require('./entities/User'), require('./entities/Device'), require('./entities/Group'), require('./entities/Model'), require('./entities/App'), require('./entities/Transmitter'), require('./entities/Publisher'), require('./tools/ajax'), require('./tools/mqtt'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod.exports, global.oauth2, global.User, global.Device, global.Group, global.Model, global.Transmitter, global.ajax, global.mqtt);
+	        factory(mod.exports, global.oauth2, global.User, global.Device, global.Group, global.Model, global.App, global.Transmitter, global.Publisher, global.ajax, global.mqtt);
 	        global.main = mod.exports;
 	    }
-	})(this, function (exports, _oauth, _User, _Device, _Group, _Model, _Transmitter, _ajax, _mqtt) {
+	})(this, function (exports, _oauth, _User, _Device, _Group, _Model, _App, _Transmitter, _Publisher, _ajax, _mqtt) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
 	        value: true
 	    });
-	    exports.Transmitter = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
+	    exports.Publisher = exports.Transmitter = exports.App = exports.Model = exports.Group = exports.Device = exports.User = exports.Oauth2 = undefined;
 
 	    var _oauth2 = _interopRequireDefault(_oauth);
 
@@ -91,7 +91,11 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var _Model2 = _interopRequireDefault(_Model);
 
+	    var _App2 = _interopRequireDefault(_App);
+
 	    var _Transmitter2 = _interopRequireDefault(_Transmitter);
+
+	    var _Publisher2 = _interopRequireDefault(_Publisher);
 
 	    var _ajax2 = _interopRequireDefault(_ajax);
 
@@ -106,7 +110,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	    exports.Device = _Device2.default;
 	    exports.Group = _Group2.default;
 	    exports.Model = _Model2.default;
+	    exports.App = _App2.default;
 	    exports.Transmitter = _Transmitter2.default;
+	    exports.Publisher = _Publisher2.default;
 
 
 	    var config = {
@@ -355,17 +361,17 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
 	    if (true) {
-	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4), __webpack_require__(5)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4), __webpack_require__(5), __webpack_require__(13), __webpack_require__(14), __webpack_require__(15), __webpack_require__(16)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
 	    } else if (typeof exports !== "undefined") {
-	        factory(module, exports, require('../tools/ajax.js'), require('./Device'));
+	        factory(module, exports, require('../tools/ajax.js'), require('./Device'), require('./App'), require('./Publisher'), require('./Group'), require('./Transmitter'));
 	    } else {
 	        var mod = {
 	            exports: {}
 	        };
-	        factory(mod, mod.exports, global.ajax, global.Device);
+	        factory(mod, mod.exports, global.ajax, global.Device, global.App, global.Publisher, global.Group, global.Transmitter);
 	        global.User = mod.exports;
 	    }
-	})(this, function (module, exports, _ajax, _Device) {
+	})(this, function (module, exports, _ajax, _Device, _App, _Publisher, _Group, _Transmitter) {
 	    'use strict';
 
 	    Object.defineProperty(exports, "__esModule", {
@@ -373,6 +379,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    });
 
 	    var _Device2 = _interopRequireDefault(_Device);
+
+	    var _App2 = _interopRequireDefault(_App);
+
+	    var _Publisher2 = _interopRequireDefault(_Publisher);
+
+	    var _Group2 = _interopRequireDefault(_Group);
+
+	    var _Transmitter2 = _interopRequireDefault(_Transmitter);
 
 	    function _interopRequireDefault(obj) {
 	        return obj && obj.__esModule ? obj : {
@@ -470,7 +484,10 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    device_description = _opts$query.description,
 	                    device_ids = _opts$query.ids,
 	                    model_id = _opts$query.modelId,
-	                    firmware_version = _opts$query.firmwareVersion;
+	                    firmware_version = _opts$query.firmwareVersion,
+	                    owner = _opts$query.owner,
+	                    shared = _opts$query.shared;
+
 
 	                return new Promise(function (resolve, reject) {
 	                    _ajax.ajax.get('/devices', {
@@ -479,7 +496,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                            device_description: device_description,
 	                            device_ids: device_ids,
 	                            model_id: model_id,
-	                            firmware_version: firmware_version
+	                            firmware_version: firmware_version,
+	                            owner: owner,
+	                            shared: shared
 	                        }
 	                    }).then(function (response) {
 	                        var devices = response.data;
@@ -495,13 +514,76 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            }
 	        }, {
-	            key: 'getMyGroups',
-	            value: function getMyGroups() {
+	            key: 'searchForDevicesEx',
+	            value: function searchForDevicesEx() {
 	                var _this4 = this;
 
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+	                var nextPageURL = arguments[1];
+
+	                if (!opts.query) {
+	                    throw new Error('Please provide a query object');
+	                }
+
+	                var _opts$query2 = opts.query,
+	                    device_name = _opts$query2.name,
+	                    device_description = _opts$query2.description,
+	                    device_ids = _opts$query2.ids,
+	                    model_id = _opts$query2.modelId,
+	                    firmware_version = _opts$query2.firmwareVersion,
+	                    owner = _opts$query2.owner,
+	                    shared = _opts$query2.shared;
+
+
+	                if (nextPageURL == undefined || nextPageURL.length <= 0) {
+	                    nextPageURL = "/devices";
+	                }
+
 	                return new Promise(function (resolve, reject) {
-	                    _this4.getUserInfo().then(function () {
-	                        _ajax.ajax.get('/users/' + _this4.userInfo.id + '/groups').then(function (response) {
+	                    _ajax.ajax.get(nextPageURL, {
+	                        queryObj: {
+	                            device_name: device_name,
+	                            device_description: device_description,
+	                            device_ids: device_ids,
+	                            model_id: model_id,
+	                            firmware_version: firmware_version,
+	                            owner: owner,
+	                            shared: shared
+	                        }
+	                    }).then(function (response) {
+	                        var devices = response.data,
+	                            links = response.links,
+	                            count = response.count;
+
+
+	                        var devicesData = {
+	                            count: count
+	                        };
+
+	                        if (links) {
+	                            devicesData.links = links;
+	                        }
+
+	                        if (opts.asClasses) {
+	                            devicesData.devices = devices.map(function (device) {
+	                                return new _Device2.default(device, _this4.config);
+	                            });
+	                        } else {
+	                            devicesData.devices = devices;
+	                        }
+
+	                        resolve(devicesData);
+	                    }, reject);
+	                });
+	            }
+	        }, {
+	            key: 'getMyGroups',
+	            value: function getMyGroups() {
+	                var _this5 = this;
+
+	                return new Promise(function (resolve, reject) {
+	                    _this5.getUserInfo().then(function () {
+	                        _ajax.ajax.get('/users/' + _this5.userInfo.id + '/groups').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -512,11 +594,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getMyTransmitters',
 	            value: function getMyTransmitters() {
-	                var _this5 = this;
+	                var _this6 = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this5.getUserInfo().then(function () {
-	                        _ajax.ajax.get('/users/' + _this5.userInfo.id + '/transmitters').then(function (response) {
+	                    _this6.getUserInfo().then(function () {
+	                        _ajax.ajax.get('/users/' + _this6.userInfo.id + '/transmitters').then(function (response) {
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
@@ -527,14 +609,66 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getMyApps',
 	            value: function getMyApps() {
-	                var _this6 = this;
+	                var _this7 = this;
+
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
 	                return new Promise(function (resolve, reject) {
-	                    _this6.getUserInfo().then(function () {
-	                        _ajax.ajax.get('/users/' + _this6.userInfo.id + '/apps').then(function (response) {
+	                    _this7.getMyPublishers().then(function (res) {
+	                        _this7._getPublisherApps(res).then(function (res2) {
+	                            if (opts.asClasses) {
+	                                resolve(res2.map(function (item) {
+	                                    return new _App2.default(item, _this7.config);
+	                                }));
+	                            } else {
+	                                resolve(res2);
+	                            }
+	                        }, function (err) {
+	                            reject(err);
+	                        });
+	                    }, function (err) {
+	                        reject(err);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'getMyPublishers',
+	            value: function getMyPublishers() {
+	                var _this8 = this;
+
+	                var opts = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+	                return new Promise(function (resolve, reject) {
+	                    _this8.getUserInfo().then(function () {
+	                        _ajax.ajax.get('/users/' + _this8.userInfo.id + '/publishers').then(function (response) {
+	                            if (opts.asClasses) {
+	                                resolve(response.map(function (item) {
+	                                    return new _Publisher2.default(item, _this8.config);
+	                                }));
+	                            } else {
+	                                resolve(response);
+	                            }
 	                            resolve(response);
 	                        }).catch(function (error) {
 	                            reject(error);
+	                        });
+	                    });
+	                });
+	            }
+	        }, {
+	            key: '_getPublisherApps',
+	            value: function _getPublisherApps(pubsArray) {
+	                return new Promise(function (resolve, reject) {
+	                    var appsArray = [];
+	                    pubsArray.forEach(function (element, i) {
+	                        _ajax.ajax.get('/publishers/' + element.id + '/apps/extended').then(function (response) {
+	                            var concatResult = appsArray.concat(response);
+	                            appsArray = concatResult;
+	                            if (i === pubsArray.length - 1) {
+	                                resolve(appsArray);
+	                            }
+	                        }).catch(function (err) {
+	                            return err;
 	                        });
 	                    });
 	                });
@@ -547,11 +681,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: 'getCachedDevices',
 	            value: function getCachedDevices() {
-	                var _this7 = this;
+	                var _this9 = this;
 
 	                return new Promise(function (resolve, reject) {
-	                    if (_this7.devicesCache) {
-	                        resolve(_this7.devicesCache);
+	                    if (_this9.devicesCache) {
+	                        resolve(_this9.devicesCache);
 	                    } else {
 	                        resolve([]);
 	                    }
@@ -632,17 +766,16 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    contentType: 'application/json'
 	                };
 
-	                if (!(url.charAt(0) === '/')) {
-	                    throw new Error('Please provide a url with a leading /');
-	                }
-
 	                if (!url) {
 	                    throw new Error('Please provide atleast a url');
 	                }
 	                if (typeof url !== 'string') {
 	                    throw new Error('Please provide a string url');
 	                }
-	                url += this._serializeQueryStr(opts.queryObj);
+
+	                var isFirstQuery = !(url.indexOf("?") > -1);
+
+	                url += this._serializeQueryStr(opts.queryObj, isFirstQuery);
 
 	                return new Promise(function (resolve, reject) {
 	                    var xhrObject = _this._xhrRequest({
@@ -667,7 +800,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    raw: true
 	                };
 
-	                if (!url.charAt(0) === '/') {
+	                if (!(url.charAt(0) === '/')) {
 	                    throw new Error('Please provide a url with a leading /');
 	                }
 	                if (!url) throw new Error('Please provide atleast a url');
@@ -698,7 +831,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    contentType: 'application/json'
 	                };
 
-	                if (!url.charAt(0) === '/') {
+	                if (!(url.charAt(0) === '/')) {
 	                    throw new Error('Please provide a url with a leading /');
 	                }
 	                if (!url) throw new Error('Please provide atleast a url');
@@ -727,7 +860,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    contentType: 'application/json'
 	                };
 
-	                if (!url.charAt(0) === '/') {
+	                if (!(url.charAt(0) === '/')) {
 	                    throw new Error('Please provide a url with a leading /');
 	                }
 	                if (!url) throw new Error('Please provide atleast a url');
@@ -748,6 +881,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	        }, {
 	            key: '_serializeQueryStr',
 	            value: function _serializeQueryStr(obj) {
+	                var firstQuery = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : true;
+
 	                if (!obj || Object.keys(obj).length === 0) {
 	                    return '';
 	                }
@@ -764,7 +899,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                if (queries.length === 0) {
 	                    return '';
 	                }
-	                return '?' + queries.join('&');
+
+	                var separator = "&";
+	                if (firstQuery) {
+	                    separator = "?";
+	                }
+
+	                return separator + queries.join('&');
 	            }
 	        }, {
 	            key: '_xhrRequest',
@@ -774,7 +915,15 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                xhrObject = new XMLHttpRequest();
 
-	                xhrObject.open(options.type, '' + this.options.protocol + this.options.uri + options.url, true);
+	                var url = "";
+
+	                if (options.url.charAt(0) !== '/') {
+	                    url = options.url;
+	                } else {
+	                    url = '' + this.options.protocol + this.options.uri + options.url;
+	                }
+
+	                xhrObject.open(options.type, url, true);
 
 	                xhrObject.setRequestHeader('Authorization', this.options.token);
 	                xhrObject.setRequestHeader('Content-Type', options.contentType);
@@ -862,6 +1011,8 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	    var _DeviceHistory2 = _interopRequireDefault(_DeviceHistory);
 
+	    var _mqtt2 = _interopRequireDefault(_mqtt);
+
 	    var _Model2 = _interopRequireDefault(_Model);
 
 	    function _interopRequireDefault(obj) {
@@ -895,17 +1046,19 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    var sharedChannel = null;
+	    var mqtt = null;
 
 	    var Device = function () {
 	        function Device() {
 	            var rawDevice = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-	            var config = arguments[1];
+	            var config = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
 
 	            _classCallCheck(this, Device);
 
 	            this.rawDevice = rawDevice;
 	            this.config = config;
 
+	            mqtt = mqtt || new _mqtt2.default(config.mqtt);
 	            this.id = rawDevice.id;
 	            this.name = rawDevice.name;
 	            this.modelId = rawDevice.modelId;
@@ -1052,11 +1205,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	                        userName: sharedChannel.credentials.user
 	                    };
 
-	                    _mqtt.mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
+	                    mqtt.subscribe(newChannelCredentials.credentials.topic, connection.event);
 	                    connection.unsubscribe = function () {
-	                        _mqtt.mqtt.unsubscribe(newChannelCredentials.credentials.topic, connection.event);
+	                        mqtt.unsubscribe(newChannelCredentials.credentials.topic, connection.event);
 	                    };
-	                    return _mqtt.mqtt.connect(options);
+	                    return mqtt.connect(options);
 	                };
 
 	                return new Promise(function (resolve, reject) {
@@ -1371,7 +1524,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	            this.id = rawDevice.id;
 	            this.ajax = new _ajax2.default({
-	                uri: config.ajax.dataUri,
+	                uri: config.ajax.uri,
 	                token: _ajax.ajax.options.token
 	            });
 	        }
@@ -1393,24 +1546,26 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    meaning = opts.meaning,
 	                    path = opts.path;
 
-	                var queryParams = {};
+	                var queryParams = {
+	                    aggregates: 'avg,min,max'
+	                };
 
 	                if (periode && periode.length > 0) {
 	                    var sampleObj = (0, _sampleCalculator2.default)(periode);
-	                    sample = sampleObj.sampleSize;
+	                    sample = sample || sampleObj.sampleSize;
 	                    start = sampleObj.start;
 	                    end = sampleObj.end;
 	                }
 
 	                if (sample !== undefined) {
-	                    queryParams.sample = sample;
+	                    queryParams.interval = sample;
 	                }
 
 	                if (end) {
-	                    queryParams.end = end.getTime();
+	                    queryParams.end = end.toISOString();
 	                }
 	                if (start) {
-	                    queryParams.start = start.getTime();
+	                    queryParams.start = start.toISOString();
 	                }
 	                if (meaning) {
 	                    queryParams.meaning = meaning;
@@ -1423,9 +1578,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	                queryParams.limit = limit;
 
 	                return new Promise(function (resolve, reject) {
-	                    _this.ajax.get('/history/devices/' + _this.id, { queryObj: queryParams }).then(function (response) {
+	                    _this.ajax.get('/devices/' + _this.id + '/aggregated-readings', { queryObj: queryParams }).then(function (response) {
 	                        resolve({
-	                            points: new _DeviceHistoryPoints2.default(response.results),
+	                            points: new _DeviceHistoryPoints2.default(response.data, meaning, path),
 	                            response: response
 	                        });
 	                    }, reject);
@@ -1445,11 +1600,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	                onDataReceived = onDataReceived || function () {};
 
-	                var hasMore = function hasMore(data) {
-	                    return data.count > data.limit && data.count - data.offset > data.limit;
-	                };
-
-	                var handleResponse = function handleResponse(data, resolve, reject) {
+	                var handleResponse = function handleResponse(data) {
 	                    if (data.points && !points) {
 	                        points = data.points;
 	                    } else if (data.response && data.response.results) {
@@ -1457,26 +1608,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	                    }
 
 	                    onDataReceived(points);
-
-	                    if (hasMore(data.response)) {
-	                        getData({
-	                            offset: data.response.offset + data.response.limit
-	                        }, resolve, reject);
-	                    } else {
-	                        resolve({
-	                            points: points
-	                        });
-	                    }
-	                };
-
-	                var getData = function getData(opts, resolve, reject) {
-	                    _this2.getHistoricalData(opts).then(function (data) {
-	                        handleResponse(data, resolve, reject);
-	                    }, reject);
 	                };
 
 	                return new Promise(function (resolve, reject) {
-	                    getData(opts, resolve, reject);
+	                    _this2.getHistoricalData(opts).then(function (data) {
+	                        handleResponse(data);
+	                        resolve(data.points);
+	                    }, reject);
 	                });
 	            }
 	        }]);
@@ -1608,7 +1746,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    var DeviceHistoryPoints = function () {
-	        function DeviceHistoryPoints(deviceHistory) {
+	        function DeviceHistoryPoints(deviceHistory, meaning, path) {
 	            _classCallCheck(this, DeviceHistoryPoints);
 
 	            if (!deviceHistory) {
@@ -1616,6 +1754,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 
 	            this.devicesPoints = {};
+	            this.meaning = meaning;
+	            this.path = path;
 	            this.addPoints(deviceHistory);
 	        }
 
@@ -1624,13 +1764,12 @@ return /******/ (function(modules) { // webpackBootstrap
 	            value: function addPoints(deviceHistory) {
 	                var _this = this;
 
-	                deviceHistory.forEach(function (res) {
-	                    var key = _this._getKey(res.meaning, res.path);
-	                    if (_this.devicesPoints[key]) {
-	                        _this.devicesPoints[key].points = _this.devicesPoints[key].points.concat(res.points);
+	                deviceHistory.forEach(function (obj) {
+	                    var key = _this._getKey(_this.meaning, _this.path);
+	                    if (!_this.devicesPoints[key]) {
+	                        _this.devicesPoints[key] = [obj];
 	                    } else {
-	                        _this.devicesPoints[key] = Object.assign({ id: res.deviceId }, res);
-	                        delete _this.devicesPoints[key].deviceId;
+	                        _this.devicesPoints[key].push(obj);
 	                    }
 	                });
 	            }
@@ -2549,7 +2688,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	            exports: {}
 	        };
 	        factory(mod, mod.exports, global.ajax);
-	        global.Transmitter = mod.exports;
+	        global.App = mod.exports;
 	    }
 	})(this, function (module, exports, _ajax) {
 	    'use strict';
@@ -2582,28 +2721,56 @@ return /******/ (function(modules) { // webpackBootstrap
 	        };
 	    }();
 
-	    var Transmitter = function () {
-	        function Transmitter(config) {
-	            _classCallCheck(this, Transmitter);
+	    var App = function () {
+	        function App() {
+	            var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-	            this.id = config.id;
-	            this.secret = config.secret;
+	            _classCallCheck(this, App);
+
+	            this.config = config;
 	            this.name = config.name;
-	            this.topic = config.topic;
-	            this.owner = config.owner;
-	            this.integrationType = config.integrationType;
+	            this.appId = config.appId;
+	            this.publisher = config.publisher;
+	            this.redirectUri = config.redirectUri;
+	            this.description = config.description;
 	        }
 
-	        _createClass(Transmitter, [{
-	            key: 'deleteTransmitter',
-	            value: function deleteTransmitter(opts) {
+	        _createClass(App, [{
+	            key: 'newApp',
+	            value: function newApp(postBody) {
 	                var _this = this;
 
-	                if (!this.id) {
-	                    throw new Error('Provide the id during instantiation');
+	                //POST /apps, (name, publisher, redirectUri, description)
+	                if (!postBody) {
+	                    throw new Error('Provide a body of parameters to post');
+	                } else if (!postBody.hasOwnProperty('name') && !postBody.hasOwnProperty('publisher') && !postBody.hasOwnProperty('redirectUri') && !postBody.hasOwnProperty('description')) {
+	                    throw new Error('Provide a body with parameters name, description, redirectUri, and publisher for the App');
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _ajax.ajax.post('/apps', postBody).then(function (response) {
+	                        _this.appId = response.id;
+	                        _this.name = response.name;
+	                        _this.publisher = response.publisher;
+	                        _this.redirectUri = response.redirectUri;
+	                        _this.description = response.description;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'deleteApp',
+	            value: function deleteApp() {
+	                var _this2 = this;
+
+	                //DELETE /apps/{appId}
+	                if (!this.appId) {
+	                    throw new Error('Provide the device id during instantiation');
 	                }
 	                return new Promise(function (resolve, reject) {
-	                    _ajax.ajax.delete('/transmitters/' + _this.id, opts).then(function (response) {
+	                    _ajax.ajax.delete('/apps/' + _this2.appId).then(function (response) {
 	                        //right now the object hangs around, but on the cloud it is gone
 	                        resolve(response);
 	                    }).catch(function (error) {
@@ -2612,27 +2779,30 @@ return /******/ (function(modules) { // webpackBootstrap
 	                });
 	            }
 	        }, {
-	            key: 'updateTransmitter',
-	            value: function updateTransmitter(patchBody, opts) {
-	                var _this2 = this;
+	            key: 'updateApp',
+	            value: function updateApp(patchBody) {
+	                var _this3 = this;
 
-	                if (!this.id) {
-	                    throw new Error('Provide the id during instantiation');
+	                //POST /apps/{appId}, optional:(name, publisher, redirectUri, description)
+	                if (!this.appId) {
+	                    throw new Error('Please provide an appId');
 	                } else if (!patchBody) {
 	                    throw new Error('Provide a patch of parameters to update');
 	                } else if (!Object.keys(patchBody).length) {
 	                    throw new Error('Provide a patch with some parameters to update');
 	                }
-
 	                for (var x in patchBody) {
 	                    if (!this.hasOwnProperty(x)) {
 	                        throw new Error('Provide a patch with relevant parameters to update');
 	                    }
 	                }
-
 	                return new Promise(function (resolve, reject) {
-	                    _ajax.ajax.patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
-	                        _this2.id = response.id, _this2.secret = response.secret, _this2.name = response.name, _this2.topic = response.topic, _this2.owner = response.owner, _this2.integrationType = response.integrationType, resolve(response);
+	                    _ajax.ajax.patch('/apps/' + _this3.appId, patchBody).then(function (response) {
+	                        _this3.name = response.name;
+	                        _this3.publisher = response.publisher;
+	                        _this3.redirectUri = response.redirectUri;
+	                        _this3.description = response.description;
+	                        resolve(response);
 	                    }).catch(function (error) {
 	                        reject(error);
 	                    });
@@ -2640,16 +2810,152 @@ return /******/ (function(modules) { // webpackBootstrap
 	            }
 	        }]);
 
-	        return Transmitter;
+	        return App;
 	    }();
 
-	    exports.default = Transmitter;
-	    ;
+	    exports.default = App;
 	    module.exports = exports['default'];
 	});
 
 /***/ },
 /* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(module, exports, require('../tools/ajax.js'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod, mod.exports, global.ajax);
+	        global.Publisher = mod.exports;
+	    }
+	})(this, function (module, exports, _ajax) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var Publisher = function () {
+	        function Publisher() {
+	            var config = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
+	            _classCallCheck(this, Publisher);
+
+	            this.config = config;
+	            this.name = config.name;
+	            this.publisherId = config.id;
+	            this.owner = config.owner;
+	        }
+
+	        _createClass(Publisher, [{
+	            key: 'newPublisher',
+	            value: function newPublisher(postBody) {
+	                var _this = this;
+
+	                //POST /publishers, (name, publisher, redirectUri, description)
+	                if (!postBody) {
+	                    throw new Error('Provide a body of parameters to post');
+	                } else if (!postBody.hasOwnProperty('name') && !postBody.hasOwnProperty('owner')) {
+	                    throw new Error('Provide a body with parameters name and owner for the Publisher');
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _ajax.ajax.post('/publishers', postBody).then(function (response) {
+	                        _this.publisherId = response.id;
+	                        _this.name = response.name;
+	                        _this.owner = response.owner;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'deletePublisher',
+	            value: function deletePublisher() {
+	                var _this2 = this;
+
+	                //DELETE /publishers/{publisherId}
+	                if (!this.publisherId) {
+	                    throw new Error('Provide the publisher id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _ajax.ajax.delete('/publishers/' + _this2.publisherId).then(function (response) {
+	                        //right now the object hangs around, but on the cloud it is gone
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'updatePublisher',
+	            value: function updatePublisher(patchBody) {
+	                var _this3 = this;
+
+	                //POST /publishers/{publisherId}, optional:(name, publisher, redirectUri, description)
+	                if (!this.publisherId) {
+	                    throw new Error('Please provide an publisherId');
+	                } else if (!patchBody) {
+	                    throw new Error('Provide a patch of parameters to update');
+	                } else if (!Object.keys(patchBody).length) {
+	                    throw new Error('Provide a patch with some parameters to update');
+	                }
+	                for (var x in patchBody) {
+	                    if (!this.hasOwnProperty(x)) {
+	                        throw new Error('Provide a patch with relevant parameters to update');
+	                    }
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _ajax.ajax.patch('/publishers/' + _this3.publisherId, patchBody).then(function (response) {
+	                        _this3.name = response.name;
+	                        _this3.owner = response.owner;
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }]);
+
+	        return Publisher;
+	    }();
+
+	    exports.default = Publisher;
+	    module.exports = exports['default'];
+	});
+
+/***/ },
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
@@ -2802,6 +3108,119 @@ return /******/ (function(modules) { // webpackBootstrap
 	    }();
 
 	    exports.default = Group;
+	    ;
+	    module.exports = exports['default'];
+	});
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	var __WEBPACK_AMD_DEFINE_FACTORY__, __WEBPACK_AMD_DEFINE_ARRAY__, __WEBPACK_AMD_DEFINE_RESULT__;(function (global, factory) {
+	    if (true) {
+	        !(__WEBPACK_AMD_DEFINE_ARRAY__ = [module, exports, __webpack_require__(4)], __WEBPACK_AMD_DEFINE_FACTORY__ = (factory), __WEBPACK_AMD_DEFINE_RESULT__ = (typeof __WEBPACK_AMD_DEFINE_FACTORY__ === 'function' ? (__WEBPACK_AMD_DEFINE_FACTORY__.apply(exports, __WEBPACK_AMD_DEFINE_ARRAY__)) : __WEBPACK_AMD_DEFINE_FACTORY__), __WEBPACK_AMD_DEFINE_RESULT__ !== undefined && (module.exports = __WEBPACK_AMD_DEFINE_RESULT__));
+	    } else if (typeof exports !== "undefined") {
+	        factory(module, exports, require('../tools/ajax.js'));
+	    } else {
+	        var mod = {
+	            exports: {}
+	        };
+	        factory(mod, mod.exports, global.ajax);
+	        global.Transmitter = mod.exports;
+	    }
+	})(this, function (module, exports, _ajax) {
+	    'use strict';
+
+	    Object.defineProperty(exports, "__esModule", {
+	        value: true
+	    });
+
+	    function _classCallCheck(instance, Constructor) {
+	        if (!(instance instanceof Constructor)) {
+	            throw new TypeError("Cannot call a class as a function");
+	        }
+	    }
+
+	    var _createClass = function () {
+	        function defineProperties(target, props) {
+	            for (var i = 0; i < props.length; i++) {
+	                var descriptor = props[i];
+	                descriptor.enumerable = descriptor.enumerable || false;
+	                descriptor.configurable = true;
+	                if ("value" in descriptor) descriptor.writable = true;
+	                Object.defineProperty(target, descriptor.key, descriptor);
+	            }
+	        }
+
+	        return function (Constructor, protoProps, staticProps) {
+	            if (protoProps) defineProperties(Constructor.prototype, protoProps);
+	            if (staticProps) defineProperties(Constructor, staticProps);
+	            return Constructor;
+	        };
+	    }();
+
+	    var Transmitter = function () {
+	        function Transmitter(config) {
+	            _classCallCheck(this, Transmitter);
+
+	            this.id = config.id;
+	            this.secret = config.secret;
+	            this.name = config.name;
+	            this.topic = config.topic;
+	            this.owner = config.owner;
+	            this.integrationType = config.integrationType;
+	        }
+
+	        _createClass(Transmitter, [{
+	            key: 'deleteTransmitter',
+	            value: function deleteTransmitter(opts) {
+	                var _this = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the id during instantiation');
+	                }
+	                return new Promise(function (resolve, reject) {
+	                    _ajax.ajax.delete('/transmitters/' + _this.id, opts).then(function (response) {
+	                        //right now the object hangs around, but on the cloud it is gone
+	                        resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }, {
+	            key: 'updateTransmitter',
+	            value: function updateTransmitter(patchBody, opts) {
+	                var _this2 = this;
+
+	                if (!this.id) {
+	                    throw new Error('Provide the id during instantiation');
+	                } else if (!patchBody) {
+	                    throw new Error('Provide a patch of parameters to update');
+	                } else if (!Object.keys(patchBody).length) {
+	                    throw new Error('Provide a patch with some parameters to update');
+	                }
+
+	                for (var x in patchBody) {
+	                    if (!this.hasOwnProperty(x)) {
+	                        throw new Error('Provide a patch with relevant parameters to update');
+	                    }
+	                }
+
+	                return new Promise(function (resolve, reject) {
+	                    _ajax.ajax.patch('/transmitters/' + _this2.id, patchBody, opts).then(function (response) {
+	                        _this2.id = response.id, _this2.secret = response.secret, _this2.name = response.name, _this2.topic = response.topic, _this2.owner = response.owner, _this2.integrationType = response.integrationType, resolve(response);
+	                    }).catch(function (error) {
+	                        reject(error);
+	                    });
+	                });
+	            }
+	        }]);
+
+	        return Transmitter;
+	    }();
+
+	    exports.default = Transmitter;
 	    ;
 	    module.exports = exports['default'];
 	});
