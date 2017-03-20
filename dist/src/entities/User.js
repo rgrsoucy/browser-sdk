@@ -191,10 +191,14 @@
                         }
                     }).then(function (response) {
                         var devices = response.data,
-                            links = response.links;
+                            links = response.links,
+                            count = response.count;
 
 
-                        var devicesData = {};
+                        var devicesData = {
+                            count: count
+                        };
+
                         if (links) {
                             devicesData.links = links;
                         }
