@@ -223,19 +223,26 @@ describe('User', function() {
             expect(fn).to.throw(Error);
         });
 
-        it('should resolve promise with found devices', function(done) {
-            userInstance.searchForDevicesEx({
+        it('should resolve promise with found devices', function() {
+            const promise = userInstance.searchForDevicesEx({
                 query: { name: 'testur' }
             }).then((result) => {
                 expect(result.devices).to.deep.equal([devicesStub]);
-                done();
+                expect(result.count).to.deep.equal(4);
+                expect(result.links).to.deep.equal({
+                    next: 'http://example.com?page=2'
+                });
             });
 
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
             }, JSON.stringify({
-                data: [devicesStub]
+                data: [devicesStub],
+                count: 4,
+                links: { next: 'http://example.com?page=2' }
             }));
+
+            return promise;
         });
 
         it('should be possible to get the devices as classes', function(done) {
