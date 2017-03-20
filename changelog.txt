@@ -19,3 +19,4 @@ NB!) The historical data has breaking changes, has a new object type from points
 2.0.38) Feature) Added publishers and App class. Also merged some parts of dev into master for the last time as Dev will be removed from branches.
 2.0.40) Feature) Added extended version of searchForDevices function searchForDevicesEx to support pagination. searchForDevices is now depricated.
 2.0.41) Feature) Added new search filter to searchForDevices shared, can by 'by-me', 'to-me', 'all' and owner which is the user uuid of the devices owner.
+2.0.42) Feature) Added new search property, result count
