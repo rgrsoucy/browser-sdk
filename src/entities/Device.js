@@ -156,7 +156,7 @@ default class Device {
         return new Promise((resolve, reject) => {
             getChannel.then(subscribeMqtt).then(function() {
                 resolve(connection);
-            });
+            }).catch(error => reject(error));
         });
     }
 

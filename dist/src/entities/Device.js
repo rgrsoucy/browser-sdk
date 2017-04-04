@@ -227,6 +227,8 @@
                 return new Promise(function (resolve, reject) {
                     getChannel.then(subscribeMqtt).then(function () {
                         resolve(connection);
+                    }).catch(function (error) {
+                        return reject(error);
                     });
                 });
             }
