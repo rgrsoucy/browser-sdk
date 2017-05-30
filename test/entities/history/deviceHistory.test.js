@@ -43,6 +43,97 @@ describe('DeviceHistory', function() {
         }, fakeConfig);
     });
 
+    describe('#getHistoricalRawData', function() {
+        it('should get data from the url', function() {
+            deviceHistoryInstance.getHistoricalRawData();
+
+            expect(this.requests[0].url).to.contain('https://test-api.example.com/devices/fakeDeviceId/raw-readings');
+        });
+
+        it('should request data from the specified device ID', function() {
+            deviceHistoryInstance.getHistoricalRawData();
+
+            expect(this.requests[0].url).to.contain('fakeDeviceId');
+        });
+
+        describe('parameters', function() {
+            it('should set end as end ISO', function() {
+                deviceHistoryInstance.getHistoricalRawData({
+                    end: new Date('1985-10-25T13:30:00.000Z')
+                });
+
+                expect(this.requests[0].url).to.contain('end=1985-10-25T13%3A30%3A00.000Z');
+            });
+
+            it('should set start as start ISO', function() {
+                deviceHistoryInstance.getHistoricalRawData({
+                    start: new Date('1955-11-04T13:30:00.000Z')
+                });
+
+                expect(this.requests[0].url).to.contain('start=1955-11-04T13%3A30%3A00.000Z');
+            });
+
+            it('should pass meaning query parameter', function() {
+                deviceHistoryInstance.getHistoricalRawData({
+                    meaning: 'something'
+                });
+
+                expect(this.requests[0].url).to.contain('meaning=something');
+            });
+
+            it('should pass path query parameter', function() {
+                deviceHistoryInstance.getHistoricalRawData({
+                    path: 'some-path'
+                });
+
+                expect(this.requests[0].url).to.contain('path=some-path');
+            });
+
+            describe('on success', function() {
+                describe('points object', function() {
+                    let historyResponse;
+                    beforeEach(function(done) {
+                        deviceHistoryInstance.getHistoricalRawData({
+                            meaning: 'fake-meaning',
+                            path: 'fake-path',
+                            start: new Date('1955-11-04T13:30:00.000Z'),
+                            end: new Date('1985-10-25T13:30:00.000Z')
+                        }).then((obj) => {
+                            historyResponse = obj;
+                            done();
+                        });
+
+                        this.requests[0].respond(204, {
+                            'Content-Type': 'application/json'
+                        }, JSON.stringify(DeviceHistoryFixture));
+                    });
+
+                    it('should keep the original response', function() {
+                        expect(historyResponse.response).to.be.deep.equal(DeviceHistoryFixture);
+                    });
+                });
+            });
+            describe('on failure', function() {
+                it('should reject the promise with error message', function(done) {
+                    deviceHistoryInstance.getHistoricalRawData({
+                        meaning: 'fake-meaning'
+                    }).then(() => {}, (m) => {
+                        var obj = JSON.parse(m.response);
+                        expect(obj.message).to.equal('oh noes');
+                        done();
+                    });
+
+                    this.requests[0].respond(404, {
+                        'Content-Type': 'application/json'
+                    }, JSON.stringify({
+                        message: 'oh noes'
+                    }));
+                });
+            });
+
+        });
+    });
+
     describe('#getHistoricalData', function() {
         it('should get data from the url', function() {
             deviceHistoryInstance.getHistoricalData();
@@ -212,7 +303,6 @@ describe('DeviceHistory', function() {
 
         });
     });
-
     describe('#getAllHistoricalData', function() {
         beforeEach(function() {
             let count = 0;

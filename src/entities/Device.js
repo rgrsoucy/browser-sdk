@@ -74,6 +74,10 @@ default class Device {
         return ajax.get(`/devices/${this.id}/readings`);
     }
 
+    getRawReadings(opts) {
+        return this.history.getHistoricalRawData(opts);
+    }
+
     deleteDevice(raw) {
         if (!(this.id)) {
             throw new Error('Provide the device id during instantiation');

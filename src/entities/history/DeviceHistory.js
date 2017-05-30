@@ -54,6 +54,31 @@ export default class DeviceHistory {
         });
     }
 
+    getHistoricalRawData(opts = {}) {
+        let { end, start, meaning, path } = opts;
+        const queryParams = {};
+        if (end) {
+            queryParams.end = end.toISOString();
+        }
+        if (start) {
+            queryParams.start = start.toISOString();
+        }
+        if (meaning) {
+            queryParams.meaning = meaning;
+        }
+        if (path) {
+            queryParams.path = path;
+        }
+
+        return new Promise((resolve, reject) => {
+            this.ajax.get(`/devices/${this.id}/raw-readings`, { queryObj: queryParams }).then(function(response) {
+                resolve({
+                    points: new DeviceHistoryPoints(response.data, meaning, path),
+                    response: response
+                });
+            }, reject);
+        });
+    }
     getAllHistoricalData(opts = {}) {
         let points;
 
