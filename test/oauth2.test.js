@@ -10,7 +10,7 @@ var expect = chai.expect;
 chai.use(sinonChai);
 let oauthInstance;
 
-describe.only('oauth2', function() {
+describe('oauth2', function() {
 
     beforeEach(function() {
         global.cleanup = jsdom();
