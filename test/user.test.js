@@ -1,10 +1,11 @@
-import User from '../src/entities/User.js';
-import { ajax } from '../src/tools/ajax.js';
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-var expect = chai.expect;
+import { afterEach, beforeEach, describe, it } from 'mocha';
+import User from '../src/entities/User.js';
+import { ajax } from '../src/tools/ajax.js';
+
+const expect = chai.expect;
 chai.use(sinonChai);
 
 let userInstance;
@@ -287,11 +288,11 @@ describe('User', function() {
 
     describe('#getCachedDevices', function() {
 
-        it('should return an empty array when there is no cache of devices', function (done) {
+        it('should return an empty array when there is no cache of devices', function(done) {
             userInstance.userInfo = userStub;
 
 
-            userInstance.getCachedDevices().then((devicesCache)=>{
+            userInstance.getCachedDevices().then((devicesCache) => {
                 expect(devicesCache).to.deep.equal([]);
                 done();
             });
@@ -314,36 +315,37 @@ describe('User', function() {
                 }, JSON.stringify(devicesStub));
             }, 0);
 
-        })
+        });
     });
 
     describe('#getMyApps', function() {
 
-        it('should return an array of app objects', function () {
-            var apiResponse =
+        it('should return an array of app objects', function() {
+            const apiResponse =
                 [{
-                    "id": "a1bf392f-0890-445a-b025-3d09316cd356",
-                    "name": "WB Data Board (WBDB)",
-                    "description": "The first APP to read the WB Sensors"
+                    'id': 'a1bf392f-0890-445a-b025-3d09316cd356',
+                    'name': 'WB Data Board (WBDB)',
+                    'description': 'The first APP to read the WB Sensors'
                 },
-                {
-                    "id": "aaaaaaaa",
-                    "name": "fakething",
-                    "description": "it's a thing"
-                }]
+                    {
+                        'id': 'aaaaaaaa',
+                        'name': 'fakething',
+                        'description': 'it\'s a thing'
+                    }];
 
-            var apiPublishers = [{
-                    "id":123
-                },
+            const apiPublishers = [{
+                'id': 123
+            },
                 {
-                    "id":456
-                }]
+                    'id': 456
+                }];
             userInstance.userInfo = userStub;
+
             // sinon.stub(ajax, 'get').resolves(apiResponse);
             sinon.stub(userInstance, 'getMyPublishers').resolves(apiPublishers);
             sinon.stub(userInstance, '_getPublisherApps').resolves(apiResponse);
 
-            return userInstance.getMyApps().then((res)=>{
+            return userInstance.getMyApps().then((res) => {
                 expect(res).to.deep.equal(apiResponse);
 
             });
@@ -352,58 +354,45 @@ describe('User', function() {
 
     describe('#getMyPublishers', function() {
 
-        it('should return an array of Publisher objects', function () {
-            var apiResponse =
-                [{
-                    "id": "a1bf392f-0890-445a-b025-3d09316cd356",
-                    "name": "WB Data Board (WBDB)"
-                },
-                {
-                    "id": "aaaaaaaa",
-                    "name": "fakething"
-                }]
-
-            var apiPublishers = [{
-                    "id":123
-                },
-                {
-                    "id":456
-                }]
+        it('should return an array of Publisher objects', function() {
+            const apiResponse = [{
+                'id': 'a1bf392f-0890-445a-b025-3d09316cd356',
+                'name': 'WB Data Board (WBDB)'
+            }, {
+                'id': 'aaaaaaaa',
+                'name': 'fakething'
+            }];
             userInstance.userInfo = userStub;
             sinon.stub(ajax, 'get').resolves(apiResponse);
 
-            return userInstance.getMyPublishers().then((res)=>{
+            return userInstance.getMyPublishers().then((res) => {
                 expect(res).to.deep.equal(apiResponse);
             });
-            ajax.get.restore();
         });
     });
     describe('#_getPublisherApps', function() {
 
-        it('should return an array of app objects', function () {
-            var apiResponse =
-                [{
-                    "id": "a1bf392f-0890-445a-b025-3d09316cd356",
-                    "name": "WB Data Board (WBDB)",
-                    "description": "The first APP to read the WB Sensors"
-                },
-                {
-                    "id": "aaaaaaaa",
-                    "name": "fakething",
-                    "description": "it's a thing"
-                }]
-            var doubleResponse = apiResponse.concat(apiResponse);
+        it('should return an array of app objects', function() {
+            const apiResponse = [{
+                'id': 'a1bf392f-0890-445a-b025-3d09316cd356',
+                'name': 'WB Data Board (WBDB)',
+                'description': 'The first APP to read the WB Sensors'
+            }, {
+                'id': 'aaaaaaaa',
+                'name': 'fakething',
+                'description': 'it\'s a thing'
+            }];
+            const doubleResponse = apiResponse.concat(apiResponse);
 
-            var apiPublishers = [{
-                    "id":123
-                },
-                {
-                    "id":456
-                }]
+            const apiPublishers = [{
+                'id': 123
+            }, {
+                'id': 456
+            }];
             userInstance.userInfo = userStub;
             ajax.get.resolves(apiResponse);
 
-            return userInstance._getPublisherApps(apiPublishers).then((res)=>{
+            return userInstance._getPublisherApps(apiPublishers).then((res) => {
                 expect(res).to.deep.equal(doubleResponse);
 
             });

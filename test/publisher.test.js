@@ -1,10 +1,10 @@
-import Publisher from '../src/entities/Publisher.js';
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { beforeEach, describe, it } from 'mocha';
+import Publisher from '../src/entities/Publisher.js';
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 
 let publisherInstance;
@@ -14,44 +14,44 @@ let myPublisherSpy = null;
 
 describe('Publisher', function() {
     beforeEach(function() {
-        myPublisherStub = sinon.stub();//generic stub
-        myPublisherSpy = sinon.spy();//generic stub
+        myPublisherStub = sinon.stub(); // generic stub
+        myPublisherSpy = sinon.spy(); // generic stub
         Publisher.__Rewire__('ajax', {
             url: 'fakeURL',
             token: '12345',
             tokenType: 'Bearer',
-            patch:myPublisherStub,
+            patch: myPublisherStub,
             delete: myPublisherSpy,
             post: myPublisherSpy
         });
 
         fakeConfig = {
-            name:'initial fake name',
-            id:'initial fake Id'
+            name: 'initial fake name',
+            id: 'initial fake Id'
         };
 
         publisherInstance = new Publisher(fakeConfig);
 
         myPublisherStub.returns({
             then: (resolve) => resolve({
-                id:'initial fake Id',
-                name:'fake',
-                owner:'fake'
-            }) //fakey promise, resolves with predefined response
+                id: 'initial fake Id',
+                name: 'fake',
+                owner: 'fake'
+            }) // fakey promise, resolves with predefined response
         });
     });
 
     describe('#updatePublisher', function() {
 
         it('should throw an error if no id given to look up', function() {
-            var fn = function() {
+            const fn = function() {
                 publisherInstance.updatePublisher(null, {});
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to update', function() {
-            var fn = function() {
+            const fn = function() {
                 publisherInstance.updatePublisher('fakeId', null);
             };
             expect(fn).to.throw(Error);
@@ -59,7 +59,7 @@ describe('Publisher', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 publisherInstance.updatePublisher(body);
             };
             expect(fn).to.throw(Error);
@@ -71,7 +71,7 @@ describe('Publisher', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 publisherInstance.updatePublisher(body);
             };
             expect(fn).to.throw(Error);
@@ -79,16 +79,16 @@ describe('Publisher', function() {
 
         it('should successfully update publisherInstance based on the response', function(done) {
             let body = {
-                name:'fake',
-                owner:'fake'
+                name: 'fake',
+                owner: 'fake'
             };
 
-            publisherInstance.updatePublisher(body).then((res) => {
+            publisherInstance.updatePublisher(body).then(() => {
                 expect(publisherInstance).to.deep.equal({
-                    config:fakeConfig,
-                    name:'fake',
-                    publisherId:'initial fake Id',
-                    owner:'fake'
+                    config: fakeConfig,
+                    name: 'fake',
+                    publisherId: 'initial fake Id',
+                    owner: 'fake'
                 });
                 done();
             });
@@ -108,7 +108,7 @@ describe('Publisher', function() {
 
         it('should throw an error if no id present', function() {
             publisherInstance.publisherId = null;
-            var fn = function() {
+            const fn = function() {
                 publisherInstance.deletePublisher();
             };
             expect(fn).to.throw(Error);
@@ -117,8 +117,8 @@ describe('Publisher', function() {
 
     describe('#newPublisher', function() {
         let body = {
-            name:'fakename',
-            owner:'something fake'
+            name: 'fakename',
+            owner: 'something fake'
         };
 
         it('should hit the post endpoint', function(done) {
@@ -132,7 +132,7 @@ describe('Publisher', function() {
 
         it('should throw an error if no id present', function() {
             publisherInstance.publisherId = null;
-            var fn = function() {
+            const fn = function() {
                 publisherInstance.newPublisher();
             };
             expect(fn).to.throw(Error);

@@ -1,7 +1,6 @@
-
 import chai from 'chai';
-import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { beforeEach, describe, it } from 'mocha';
 
 import DeviceHistoryPoints from '../../../src/entities/history/DeviceHistoryPoints.js';
 

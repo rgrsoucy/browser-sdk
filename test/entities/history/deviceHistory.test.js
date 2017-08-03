@@ -1,14 +1,11 @@
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-
-import Ajax from '../../../src/tools/ajax';
+import { afterEach, beforeEach, describe, it } from 'mocha';
 import DeviceHistory from '../../../src/entities/history/DeviceHistory.js';
-
 import DeviceHistoryFixture from '../../fixtures/history';
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
@@ -118,7 +115,7 @@ describe('DeviceHistory', function() {
                     deviceHistoryInstance.getHistoricalRawData({
                         meaning: 'fake-meaning'
                     }).then(() => {}, (m) => {
-                        var obj = JSON.parse(m.response);
+                        const obj = JSON.parse(m.response);
                         expect(obj.message).to.equal('oh noes');
                         done();
                     });
@@ -221,7 +218,7 @@ describe('DeviceHistory', function() {
 
             describe('periode', function() {
                 beforeEach(function() {
-                    var startTime = new Date('1955-10-05T13:30:00.000Z');
+                    const startTime = new Date('1955-10-05T13:30:00.000Z');
                     this.clock = sinon.useFakeTimers(startTime.getTime());
                 });
 
@@ -288,7 +285,7 @@ describe('DeviceHistory', function() {
                     deviceHistoryInstance.getHistoricalData({
                         periode: '1m'
                     }).then(() => {}, (m) => {
-                        var obj = JSON.parse(m.response);
+                        const obj = JSON.parse(m.response);
                         expect(obj.message).to.equal('oh noes');
                         done();
                     });
@@ -305,9 +302,8 @@ describe('DeviceHistory', function() {
     });
     describe('#getAllHistoricalData', function() {
         beforeEach(function() {
-            let count = 0;
             requestCb = (request) => {
-                //Needs to be done async
+                // Needs to be done async
                 setTimeout(function() {
                     request.respond(204, {
                         'Content-Type': 'application/json'
@@ -340,7 +336,7 @@ describe('DeviceHistory', function() {
         });
 
         it('should notify listener on when data is coming in for each page', function() {
-            var pageListener = sinon.spy();
+            const pageListener = sinon.spy();
             return deviceHistoryInstance.getAllHistoricalData({
                 periode: '1m',
                 onDataReceived: pageListener

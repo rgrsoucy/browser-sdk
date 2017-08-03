@@ -1,7 +1,12 @@
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import chaiPromise from 'chai-as-promised';
+import { afterEach, beforeEach, describe, it } from 'mocha';
 import main, {
     User, Device, Model, Group, App, Transmitter, Publisher
 }
-from '../src/main';
+    from '../src/main';
 import DeviceClass from '../src/entities/Device';
 import ModelClass from '../src/entities/Model';
 import GroupClass from '../src/entities/Group';
@@ -10,19 +15,15 @@ import PublisherClass from '../src/entities/Publisher';
 import UserClass from '../src/entities/User';
 import TransmitterClass from '../src/entities/Transmitter';
 import { ajax } from '../src/tools/ajax';
-import chai from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
-import chaiPromise from 'chai-as-promised';
-var expect = chai.expect;
 
+const expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
 let oauthMock = {
     token: 'notoken',
-    login: function(){},
-    logout: function(){}
+    login: function() {},
+    logout: function() {}
 };
 
 main.__Rewire__('Oauth2', function() {
@@ -46,41 +47,41 @@ let testUser = {
 let testUserClassInstance = new UserClass(testUser.config);
 
 describe('Main', function() {
-    beforeEach(function(){
-        sinon.stub(User.prototype, "getUserInfo").resolves(testUser);
+    beforeEach(function() {
+        sinon.stub(User.prototype, 'getUserInfo').resolves(testUser);
         sinon.spy(oauthMock, 'login');
         sinon.spy(oauthMock, 'logout');
     });
 
-    afterEach(function(){
+    afterEach(function() {
         oauthMock.login.restore();
         oauthMock.logout.restore();
         User.prototype.getUserInfo.restore();
     });
 
 
-    it('should export Device class under device', function() {        
-        expect(Device).to.be.equal(DeviceClass);    
+    it('should export Device class under device', function() {
+        expect(Device).to.be.equal(DeviceClass);
     });
 
-    it('should export Group class under group', function() {        
-        expect(Group).to.be.equal(GroupClass);    
+    it('should export Group class under group', function() {
+        expect(Group).to.be.equal(GroupClass);
     });
 
-    it('should export Model class under model', function() {        
-        expect(Model).to.be.equal(ModelClass);    
+    it('should export Model class under model', function() {
+        expect(Model).to.be.equal(ModelClass);
     });
 
-    it('should export App class under App', function() {        
-        expect(App).to.be.equal(AppClass);    
+    it('should export App class under App', function() {
+        expect(App).to.be.equal(AppClass);
     });
 
-    it('should export Publisher class under Publisher', function() {        
-        expect(Publisher).to.be.equal(PublisherClass);    
+    it('should export Publisher class under Publisher', function() {
+        expect(Publisher).to.be.equal(PublisherClass);
     });
 
-    it('should export Transmitter class under transmitter', function() {        
-        expect(Transmitter).to.be.equal(TransmitterClass);    
+    it('should export Transmitter class under transmitter', function() {
+        expect(Transmitter).to.be.equal(TransmitterClass);
     });
 
 
@@ -97,7 +98,7 @@ describe('Main', function() {
                 expect(oauthMock.login).to.have.been.called;
             });
 
-            it('should ask to verify the token', function(){
+            it('should ask to verify the token', function() {
                 sinon.spy(main, '_verifyToken');
                 main.authorize();
                 expect(main._verifyToken).to.have.been.called;
@@ -134,13 +135,12 @@ describe('Main', function() {
 
         describe('#_verifyToken', function(done) {
             it('should logout if attempt to get userInfo fails', function() {
-                let verifyUser = new User();
                 let badRequest = {
-                    "status": 401
-                }
+                    'status': 401
+                };
                 User.prototype.getUserInfo.restore();
-                sinon.stub(User.prototype, "getUserInfo").onCall(0).rejects(badRequest);
-                main.authorize().then(()=>{
+                sinon.stub(User.prototype, 'getUserInfo').onCall(0).rejects(badRequest);
+                main.authorize().then(() => {
                     expect(oauthMock.logout).to.have.been.called;
                     done();
                 });
@@ -152,7 +152,7 @@ describe('Main', function() {
     describe('#logout', function() {
         it('should throw an error if the user is already logged out', function() {
             main.logout();
-            var fn = function() {
+            const fn = function() {
                 main.logout();
             };
             expect(fn).to.throw(Error);
@@ -180,13 +180,6 @@ describe('Main', function() {
         });
 
         it('should return the current config', function() {
-            let testConfig = {
-                persistToken: true,
-                mqtt: {
-                    endpoint: 'mqtt.relayr.io'
-                }
-            };
-
             expect(main.getConfig().persistToken).to.equal(true);
             expect(main.getConfig().mqtt).deep.to.equal({ endpoint: 'mqtt.relayr.io' });
         });
@@ -201,8 +194,8 @@ describe('Main', function() {
             testUserClassInstance.token = 'fake-token';
         });
 
-        it('should return the current user', function(done){
-            main.authorize('fake-token').then(()=>{
+        it('should return the current user', function(done) {
+            main.authorize('fake-token').then(() => {
                 expect(main.getCurrentUser()).to.deep.equal(testUserClassInstance);
                 done();
             });
@@ -218,28 +211,30 @@ describe('Main', function() {
             main.authorize('fake-token');
         });
 
-        it('should return the custom ajax if one is provided', function(){
+        it('should return the custom ajax if one is provided', function() {
 
-            let differentAjax = {'_options':{
+            let differentAjax = {
+                '_options': {
                     uri: 'kittens.com',
                     protocol: 'https://',
                     tokenType: 'Bearer',
                     token: 'fake-token',
                     dataUri: 'data.relayr.io',
-            }};
+                }
+            };
 
             let ajaxConfig = {
-                                uri: 'kittens.com',
-                                dataUri: 'data.relayr.io',
-                                protocol: 'https://',
-                                token: 'fake-token'
-                            }
+                uri: 'kittens.com',
+                dataUri: 'data.relayr.io',
+                protocol: 'https://',
+                token: 'fake-token'
+            };
 
             expect(main.customAjax(ajaxConfig)).to.deep.equal(differentAjax);
         });
 
-        it('should return the standard ajax if none is provided', function(){
-            var fn = function() {
+        it('should return the standard ajax if none is provided', function() {
+            const fn = function() {
                 main.customAjax();
             };
             expect(fn).to.throw(Error);

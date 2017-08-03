@@ -1,11 +1,12 @@
-import Model, { cache, prototypeCache } from '../src/entities/Model';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, describe, it } from 'mocha';
 import { relayrMockModels, relayrMockPrototypes } from './fixtures/models/models.fixture.js';
+import Model, { cache, prototypeCache } from '../src/entities/Model';
 
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 
 let modelInstance;
@@ -34,8 +35,8 @@ describe('Model', function() {
     });
 
     afterEach(function() {
-      cache.clear();
-      prototypeCache.clear();
+        cache.clear();
+        prototypeCache.clear();
     });
 
     describe('#getAllModels', function() {
@@ -59,9 +60,9 @@ describe('Model', function() {
 
             let sampleModel = relayrMockModels;
 
-            let firstTime = modelInstance.getAllModels().then((result) => {
+            modelInstance.getAllModels().then(() => {
 
-                let secondTime = modelInstance.getAllModels().then((result) => {
+                modelInstance.getAllModels().then(() => {
                     expect(cache.public.toArray[0]).to.deep.equal(sampleModel.models[0]);
                     done();
                 });
@@ -77,7 +78,7 @@ describe('Model', function() {
 
             let sampleModel = relayrMockModels;
 
-            modelInstance.getAllModels().then((result) => {
+            modelInstance.getAllModels().then(() => {
 
                 expect(cache.public.toDictionary[sampleModel.models[0].id]).to.deep.equal(sampleModel.models[0]);
                 done();
@@ -122,7 +123,7 @@ describe('Model', function() {
         it('should create a dictionary of models in cache.public.toDictionary', function() {
             let samplePrototype = relayrMockPrototypes;
 
-            let promise = modelInstance.getAllPrototypes().then((result) => {
+            let promise = modelInstance.getAllPrototypes().then(() => {
                 expect(cache.public.toDictionary[samplePrototype.prototypes[0].id]).to.deep.equal(samplePrototype.prototypes[0]);
             });
 
@@ -152,14 +153,11 @@ describe('Model', function() {
         });
 
         it('should return 404 when model is not found', function(done) {
-
-            let sampleModel = relayrMockModels;
             let modelId = 'oh.noes.im.a.model.now.:(';
-            modelInstance.getModel(modelId).then((model) => {
-
-            }).catch((error)=> {
-              expect(error.status).to.equal(404);
-              done();
+            modelInstance.getModel(modelId).then(() => {})
+                .catch((error) => {
+                expect(error.status).to.equal(404);
+                done();
             });
 
             this.requests[0].respond(404, {

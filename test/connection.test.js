@@ -1,14 +1,13 @@
 import chai from 'chai';
-import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised';
+import { describe, it } from 'mocha';
 import Connection from '../src/tools/connection';
 
-var expect = chai.expect;
+const expect = chai.expect;
 
 chai.use(sinonChai);
 chai.use(chaiPromise);
-
 
 
 describe('Connection', function() {
@@ -22,7 +21,7 @@ describe('Connection', function() {
         };
         connection.on('data', function(dataStream) {
             expect(dataStream).to.deep.equal(mockData);
-            if (dataCount == 5) {
+            if (dataCount === 5) {
                 done();
 
             }
@@ -31,7 +30,7 @@ describe('Connection', function() {
 
 
         function fakeSocket() {
-            for (var i = 5; i >= 0; i--) {
+            for (let i = 5; i >= 0; i--) {
                 connection.event(mockData);
             }
         }
@@ -40,7 +39,6 @@ describe('Connection', function() {
     });
 
     it('Should keep a buffer of historical data and flush to subscriber when ready', function(done) {
-        let dataCount = 0;
         this.timeout(5000);
         let connection = new Connection;
         let mockData = {
@@ -53,8 +51,6 @@ describe('Connection', function() {
         }
 
         fakeSocket();
-
-
 
         function fakeProcessingWait() {
             setTimeout(() => {

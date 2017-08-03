@@ -1,6 +1,9 @@
+import chai from 'chai';
+import sinon from 'sinon';
+import sinonChai from 'sinon-chai';
+import { afterEach, beforeEach, describe, it } from 'mocha';
 import Device from '../src/entities/Device.js';
 import DeviceHistory from '../src/entities/history/DeviceHistory.js';
-
 import readingFixture from './fixtures/devices/readings.fixture';
 
 let MQTTMock = {
@@ -13,11 +16,8 @@ Device.__Rewire__('sharedChannel', {
     credentials: {}
 });
 
-import chai from 'chai';
-import sinon from 'sinon';
-import sinonChai from 'sinon-chai';
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 let deviceInstance;
 let fakeConfig;
@@ -57,14 +57,14 @@ describe('Device', function() {
 
         it('should throw an error if no device id given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.updateDevice();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to update', function() {
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.updateDevice();
             };
             expect(fn).to.throw(Error);
@@ -72,7 +72,7 @@ describe('Device', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.updateDevice(body);
             };
             expect(fn).to.throw(Error);
@@ -84,7 +84,7 @@ describe('Device', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.updateDevice(body);
             };
             expect(fn).to.throw(Error);
@@ -95,7 +95,6 @@ describe('Device', function() {
                 owner: 'bob',
                 name: 'Im a thing'
             };
-            let response;
 
             deviceInstance.updateDevice(patch, true).then((response) => {
                 expect(patch).to.deep.equal(response);
@@ -112,7 +111,7 @@ describe('Device', function() {
     describe('#deleteDevice', function() {
         it('should throw an error if no device Id given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.deleteDevice();
             };
             expect(fn).to.throw(Error);
@@ -127,7 +126,7 @@ describe('Device', function() {
                 done();
             });
 
-            //this is the api
+            // this is the api
             this.requests[0].respond(204, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(data));
@@ -139,14 +138,14 @@ describe('Device', function() {
 
         it('should throw an error if no device Id given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.sendCommand();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to send a command', function() {
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.sendCommand();
             };
             expect(fn).to.throw(Error);
@@ -154,7 +153,7 @@ describe('Device', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.sendCommand(body);
             };
             expect(fn).to.throw(Error);
@@ -166,7 +165,7 @@ describe('Device', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.sendCommand(body);
             };
             expect(fn).to.throw(Error);
@@ -224,7 +223,7 @@ describe('Device', function() {
             });
 
             afterEach(function() {
-                [stubConnect, stubSubscribe, stubUnsubscribe].map(stub => stub.restore());
+                [stubConnect, stubSubscribe, stubUnsubscribe].forEach(stub => stub.restore());
             });
 
             it('should setup a connection with channel credentials over mqtt', function(done) {
@@ -307,7 +306,7 @@ describe('Device', function() {
     describe('#getReadings', function() {
         it('should throw an error if no device Id given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.getReadings();
             };
             expect(fn).to.throw(Error);
@@ -382,15 +381,13 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.getDeviceState();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should return the correct object describing state', function(done) {
-            let response;
-
             deviceInstance.getDeviceState().then((response) => {
                 expect(response).to.deep.equal(sampleState);
                 done();
@@ -410,15 +407,13 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.getDeviceConfigurations();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should return the correct object describing the configurations', function(done) {
-            let response;
-
             deviceInstance.getDeviceConfigurations().then((response) => {
                 expect(response).to.deep.equal(sampleConfiguration);
                 done();
@@ -439,14 +434,14 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceConfigurations(schema);
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to update', function() {
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceConfigurations();
             };
             expect(fn).to.throw(Error);
@@ -454,7 +449,7 @@ describe('Device', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceConfigurations(body);
             };
             expect(fn).to.throw(Error);
@@ -466,7 +461,7 @@ describe('Device', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceConfigurations(body);
             };
             expect(fn).to.throw(Error);
@@ -478,10 +473,8 @@ describe('Device', function() {
                 name: 'someName1',
                 value: 'someValue1'
             };
-            let response;
-
             let sampleConfig = [schema];
-            deviceInstance.setDeviceConfigurations(schema).then((response) => {
+            deviceInstance.setDeviceConfigurations(schema).then(() => {
                 expect(deviceInstance.configurations.length).to.equal(2);
                 done();
             });
@@ -492,8 +485,6 @@ describe('Device', function() {
         });
 
         it('should have the last item in the config array be the one you just added', function(done) {
-            let response;
-
             let sampleConfig = [schema];
             deviceInstance.setDeviceConfigurations(schema).then((response) => {
                 expect(response).to.deep.equal(sampleConfig);
@@ -516,15 +507,13 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.getDeviceCommands();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should return the correct object describing state', function(done) {
-            let response;
-
             deviceInstance.getDeviceCommands().then((response) => {
                 expect(response).to.deep.equal(sampleCommands);
                 done();
@@ -545,14 +534,14 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceCommands(cmd);
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to set', function() {
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceCommands();
             };
             expect(fn).to.throw(Error);
@@ -560,7 +549,7 @@ describe('Device', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceCommands(body);
             };
             expect(fn).to.throw(Error);
@@ -572,7 +561,7 @@ describe('Device', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceCommands(body);
             };
             expect(fn).to.throw(Error);
@@ -585,10 +574,8 @@ describe('Device', function() {
                 value: 'someValue1'
             };
 
-            let response;
-
             let sampleConfig = [cmd];
-            deviceInstance.setDeviceCommands(cmd).then((response) => {
+            deviceInstance.setDeviceCommands(cmd).then(() => {
                 expect(deviceInstance.commands.length).to.equal(2);
                 done();
             });
@@ -599,8 +586,6 @@ describe('Device', function() {
         });
 
         it('should have the last item in the command array be the one you just added', function(done) {
-            let response;
-
             let sampleConfig = [cmd];
             deviceInstance.setDeviceCommands(cmd).then((response) => {
                 expect(response).to.deep.equal(sampleConfig);
@@ -625,15 +610,13 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.getDeviceMetadata();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should return the correct object describing Metadata', function(done) {
-            let response;
-
             deviceInstance.getDeviceMetadata().then((response) => {
                 expect(response).to.deep.equal(sampleMetadata);
                 done();
@@ -652,14 +635,14 @@ describe('Device', function() {
 
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceMetadata(meta);
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of metadata at all to update', function() {
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceMetadata();
             };
             expect(fn).to.throw(Error);
@@ -667,7 +650,7 @@ describe('Device', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.setDeviceMetadata(body);
             };
             expect(fn).to.throw(Error);
@@ -678,7 +661,7 @@ describe('Device', function() {
                 data: 'this that or the other thing'
             };
 
-            deviceInstance.setDeviceMetadata(meta).then((response) => {
+            deviceInstance.setDeviceMetadata(meta).then(() => {
                 expect(deviceInstance.metadata).to.deep.equal(meta);
                 done();
             });
@@ -708,7 +691,7 @@ describe('Device', function() {
     describe('#deleteDeviceMetadata', function() {
         it('should throw an error if no deviceId given to look up', function() {
             deviceInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 deviceInstance.deleteDeviceMetadata();
             };
             expect(fn).to.throw(Error);
