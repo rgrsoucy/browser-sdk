@@ -201,19 +201,20 @@ describe('Device', function() {
         });
 
         describe('on sucessful connection', function() {
-            let sandbox;
             let connectionCb;
+            let stubConnect;
+            let stubSubscribe;
+            let stubUnsubscribe;
             beforeEach(function() {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(MQTTMock, 'connect').returns(new Promise((resolve) => {
+                stubConnect = sinon.stub(MQTTMock, 'connect').returns(new Promise((resolve) => {
                     resolve();
                 }));
 
-                sandbox.stub(MQTTMock, 'subscribe', function(topic, cb) {
+                stubSubscribe = sinon.stub(MQTTMock, 'subscribe').callsFake(function(topic, cb) {
                     connectionCb = cb;
                 });
 
-                sandbox.stub(MQTTMock, 'unsubscribe', function() {});
+                stubUnsubscribe = sinon.stub(MQTTMock, 'unsubscribe').callsFake(function() {});
 
                 deviceInstance._channelCredentials = {
                     credentials: {
@@ -223,7 +224,7 @@ describe('Device', function() {
             });
 
             afterEach(function() {
-                sandbox.restore();
+                [stubConnect, stubSubscribe, stubUnsubscribe].map(stub => stub.restore());
             });
 
             it('should setup a connection with channel credentials over mqtt', function(done) {
