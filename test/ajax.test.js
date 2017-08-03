@@ -253,8 +253,8 @@ describe('Ajax', function() {
             {
               raw: true
             }).then((responseText) => {
-
-              expect(responseText).to.be.deep.equal('').notify(done());
+              expect(responseText).to.be.deep.equal('');
+              done();
             });
 
             this.requests[0].respond(202, {

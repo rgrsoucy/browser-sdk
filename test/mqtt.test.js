@@ -5,7 +5,6 @@ import chaiPromise from 'chai-as-promised';
 import Mqtt from '../src/tools/mqtt.js';
 var expect = chai.expect;
 
-var jsdom = require('mocha-jsdom');
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
@@ -14,7 +13,6 @@ let fakeOptions = {
     password: 'lovesCake123'
 }
 describe('Mqtt', function() {
-    jsdom();
 
     let mqtt;
     beforeEach(function() {
@@ -54,12 +52,12 @@ describe('Mqtt', function() {
             expect(mqtt.client.connect).to.have.been.calledOnce;
         });
 
-        it('should not create a connection if it is already connected', sinon.test(function() {
-            this.stub(mqtt.client, 'isConnected').returns(true);
+        it('should not create a connection if it is already connected', function() {
+            sinon.stub(mqtt.client, 'isConnected').returns(true);
             mqtt.connect(fakeOptions);
 
             expect(mqtt.client.connect).not.to.have.been.calledOnce;
-        }));
+        });
     });
 
 
@@ -109,7 +107,7 @@ describe('Mqtt', function() {
             mqtt.subscribe(myTopic, function() {
             });
 
-            expect(mqtt._topics[myTopic]).to.be.defined;
+            expect(mqtt._topics[myTopic]).to.be.ok;
         });
 
         it('should trigger stored callback when event is fired', function(done) {

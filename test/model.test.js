@@ -44,7 +44,7 @@ describe('Model', function() {
             let sampleModel = relayrMockModels;
 
             modelInstance.getAllModels().then((result) => {
-                expect(result).to.include(sampleModel.models[0]);
+                expect(result).to.deep.include(sampleModel.models[0]);
                 done();
             });
 
@@ -94,7 +94,7 @@ describe('Model', function() {
             let prototypes = relayrMockPrototypes;
 
             const promise = modelInstance.getAllPrototypes().then((result) => {
-                expect(result).to.include(prototypes.prototypes[0]);
+                expect(result).to.deep.include(prototypes.prototypes[0]);
                 expect(this.requests[0].url).to.contain('device-models/prototypes');
             });
 

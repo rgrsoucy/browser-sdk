@@ -9,19 +9,22 @@ chai.use(sinonChai);
 
 let appInstance;
 let fakeConfig;
-const myAppStub = sinon.stub();//generic stub
-const myAppSpy = sinon.spy();//generic stub
-App.__Rewire__('ajax', {
-                url: 'fakeURL',
-                token: '12345',
-                tokenType: 'Bearer',
-                patch:myAppStub,
-                delete: myAppSpy,
-                post: myAppSpy
-            });
+let myAppStub = null;
+let myAppSpy = null;
 
 describe('App', function() {
     beforeEach(function() {
+        myAppStub = sinon.stub();//generic stub
+        myAppSpy = sinon.spy();//generic stub
+        App.__Rewire__('ajax', {
+            url: 'fakeURL',
+            token: '12345',
+            tokenType: 'Bearer',
+            patch:myAppStub,
+            delete: myAppSpy,
+            post: myAppSpy
+        });
+
         fakeConfig = {
             name:'initial fake name',
             appId:'initial fake Id'
@@ -91,14 +94,17 @@ describe('App', function() {
                 });
                 done();
             });
-            
+
         });
     });
 
     describe('#deleteApp', function() {
-        it('should hit the delete endpoint', function() {
-            appInstance.deleteApp();
-            expect(myAppSpy).to.be.called.once;
+        it('should hit the delete endpoint', function(done) {
+            appInstance.deleteApp().catch(e => {
+                expect(e).to.be.ok;
+                expect(myAppSpy).to.have.been.calledOnce;
+                done();
+            });
         });
 
         it('should throw an error if no id present', function() {
@@ -118,9 +124,13 @@ describe('App', function() {
             publisher:'fakePub'
         };
 
-        it('should hit the post endpoint', function() {
-            appInstance.newApp(body);
-            expect(myAppSpy).to.be.called.once;
+        it('should hit the post endpoint', function(done) {
+            appInstance.newApp(body)
+                .catch(e => {
+                    expect(e).to.be.ok;
+                    expect(myAppSpy).to.have.been.calledOnce;
+                    done();
+                });
         });
 
         it('should throw an error if no id present', function() {

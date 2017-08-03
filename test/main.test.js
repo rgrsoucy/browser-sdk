@@ -14,7 +14,6 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised';
-import 'sinon-as-promised';
 var expect = chai.expect;
 
 chai.use(sinonChai);

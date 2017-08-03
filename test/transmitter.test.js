@@ -28,6 +28,7 @@ describe('Transmitter', function() {
         };
 
         transmitterInstance = new Transmitter(fakeConfig);
+        global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
         this.xhr = sinon.useFakeXMLHttpRequest();
         this.requests = [];
@@ -107,7 +108,7 @@ describe('Transmitter', function() {
             let data = {};
 
             transmitterInstance.deleteTransmitter(data).then((response) => {
-                expect(response).to.be.defined;
+                expect(response).to.be.ok;
                 done();
             });
 

@@ -3,7 +3,7 @@ import Oauth2 from '../src/authorization/oauth2.js';
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
-import jsdom from 'mocha-jsdom';
+import jsdom from 'jsdom-global';
 var expect = chai.expect;
 chai.use(sinonChai);
 
@@ -15,14 +15,18 @@ let oauthInstance;
 
 describe('oauth2', function() {
 
-    jsdom();
-
     beforeEach(function() {
+        global.cleanup = jsdom();
+
         let options = {
             appId: 'fakeAppId',
             redirectURI: 'fakeURI'
         };
         oauthInstance = new Oauth2(options);
+    });
+
+    afterEach(() => {
+        global.cleanup();
     });
 
     describe('#login', function() {

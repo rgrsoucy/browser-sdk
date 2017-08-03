@@ -6,7 +6,6 @@ import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 var expect = chai.expect;
 chai.use(sinonChai);
-global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
 let userInstance;
 let fakeConfig;
@@ -40,6 +39,8 @@ describe('User', function() {
                 tokenType: 'Bears'
             }
         };
+
+        global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
         userInstance = new User(fakeConfig);
 
