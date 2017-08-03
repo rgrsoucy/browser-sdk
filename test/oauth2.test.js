@@ -4,25 +4,28 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import jsdom from 'jsdom-global';
+import mockStorage from 'mock-localstorage';
+
 var expect = chai.expect;
 chai.use(sinonChai);
-
-import mockStorage from 'mock-localstorage';
-let localStorage = new mockStorage();
-global.localStorage = localStorage;
-
 let oauthInstance;
 
-describe('oauth2', function() {
+describe.only('oauth2', function() {
 
     beforeEach(function() {
         global.cleanup = jsdom();
+
+
+        let localStorage = new mockStorage();
+        global.localStorage = localStorage;
 
         let options = {
             appId: 'fakeAppId',
             redirectURI: 'fakeURI'
         };
         oauthInstance = new Oauth2(options);
+
+        sinon.spy(oauthInstance, '_loginRedirect');
     });
 
     afterEach(() => {
@@ -30,9 +33,6 @@ describe('oauth2', function() {
     });
 
     describe('#login', function() {
-        beforeEach(function() {
-            sinon.spy(oauthInstance, '_loginRedirect');
-        });
         it('should bulid a URL with provided app id and redirect uri', function() {
             oauthInstance.login();
 
