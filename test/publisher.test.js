@@ -9,19 +9,22 @@ chai.use(sinonChai);
 
 let publisherInstance;
 let fakeConfig;
-const myPublisherStub = sinon.stub();//generic stub
-const myPublisherSpy = sinon.spy();//generic stub
-Publisher.__Rewire__('ajax', {
-                url: 'fakeURL',
-                token: '12345',
-                tokenType: 'Bearer',
-                patch:myPublisherStub,
-                delete: myPublisherSpy,
-                post: myPublisherSpy
-            });
+let myPublisherStub = null;
+let myPublisherSpy = null;
 
 describe('Publisher', function() {
     beforeEach(function() {
+        myPublisherStub = sinon.stub();//generic stub
+        myPublisherSpy = sinon.spy();//generic stub
+        Publisher.__Rewire__('ajax', {
+            url: 'fakeURL',
+            token: '12345',
+            tokenType: 'Bearer',
+            patch:myPublisherStub,
+            delete: myPublisherSpy,
+            post: myPublisherSpy
+        });
+
         fakeConfig = {
             name:'initial fake name',
             id:'initial fake Id'
@@ -89,14 +92,18 @@ describe('Publisher', function() {
                 });
                 done();
             });
-            
+
         });
     });
 
     describe('#deletePublisher', function() {
-        it('should hit the delete endpoint', function() {
-            publisherInstance.deletePublisher();
-            expect(myPublisherSpy).to.be.called.once;
+        it('should hit the delete endpoint', function(done) {
+            publisherInstance.deletePublisher()
+                .catch(e => {
+                    expect(e).to.be.ok;
+                    expect(myPublisherSpy).to.be.calledOnce;
+                    done();
+                });
         });
 
         it('should throw an error if no id present', function() {
@@ -114,9 +121,13 @@ describe('Publisher', function() {
             owner:'something fake'
         };
 
-        it('should hit the post endpoint', function() {
-            publisherInstance.newPublisher(body);
-            expect(myPublisherSpy).to.be.called.once;
+        it('should hit the post endpoint', function(done) {
+            publisherInstance.newPublisher(body)
+                .catch(e => {
+                    expect(e).to.be.ok;
+                    expect(myPublisherSpy).to.be.calledOnce;
+                    done();
+                });
         });
 
         it('should throw an error if no id present', function() {

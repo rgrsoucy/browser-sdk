@@ -123,7 +123,7 @@ describe('Device', function() {
 
             // deviceInstance.ajax.customXHR = this.xhr;
             deviceInstance.deleteDevice(data).then((response) => {
-                expect(response).to.be.defined;
+                expect(response).to.be.ok;
                 done();
             });
 
@@ -201,19 +201,20 @@ describe('Device', function() {
         });
 
         describe('on sucessful connection', function() {
-            let sandbox;
             let connectionCb;
+            let stubConnect;
+            let stubSubscribe;
+            let stubUnsubscribe;
             beforeEach(function() {
-                sandbox = sinon.sandbox.create();
-                sandbox.stub(MQTTMock, 'connect').returns(new Promise((resolve) => {
+                stubConnect = sinon.stub(MQTTMock, 'connect').returns(new Promise((resolve) => {
                     resolve();
                 }));
 
-                sandbox.stub(MQTTMock, 'subscribe', function(topic, cb) {
+                stubSubscribe = sinon.stub(MQTTMock, 'subscribe').callsFake(function(topic, cb) {
                     connectionCb = cb;
                 });
 
-                sandbox.stub(MQTTMock, 'unsubscribe', function() {});
+                stubUnsubscribe = sinon.stub(MQTTMock, 'unsubscribe').callsFake(function() {});
 
                 deviceInstance._channelCredentials = {
                     credentials: {
@@ -223,7 +224,7 @@ describe('Device', function() {
             });
 
             afterEach(function() {
-                sandbox.restore();
+                [stubConnect, stubSubscribe, stubUnsubscribe].map(stub => stub.restore());
             });
 
             it('should setup a connection with channel credentials over mqtt', function(done) {
@@ -332,7 +333,7 @@ describe('Device', function() {
         });
 
         describe('on failure', function() {
-            it('should fail promise error message', function() {
+            it('should fail promise error message', function(done) {
                 deviceInstance.getReadings().then(() => {}, function(d) {
                     expect(JSON.parse(d.response).message).to.be.deep.equal('oh noes');
                     done();
@@ -471,7 +472,7 @@ describe('Device', function() {
             expect(fn).to.throw(Error);
         });
 
-        it('should add an item to the configurations array', function() {
+        it('should add an item to the configurations array', function(done) {
             deviceInstance.configurations[0] = {
                 path: 'somePath1',
                 name: 'someName1',
@@ -577,7 +578,7 @@ describe('Device', function() {
             expect(fn).to.throw(Error);
         });
 
-        it('should add an item to the commands array', function() {
+        it('should add an item to the commands array', function(done) {
             deviceInstance.commands[0] = {
                 path: 'somePath1',
                 name: 'someName1',
@@ -716,7 +717,7 @@ describe('Device', function() {
         it('should delete the metadata ', function(done) {
             let data = {};
             deviceInstance.deleteDeviceMetadata(data).then((response) => {
-                expect(response).to.be.defined;
+                expect(response).to.be.ok;
                 done();
             });
 

@@ -189,7 +189,7 @@ describe('Group', function() {
             let data = {};
 
             groupInstance.deleteGroup(data).then((response) => {
-                expect(response).to.be.defined;
+                expect(response).to.be.ok;
                 done();
             });
 
