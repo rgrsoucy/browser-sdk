@@ -1,10 +1,10 @@
-import Transmitter from '../src/entities/Transmitter.js';
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { beforeEach, describe, it } from 'mocha';
+import Transmitter from '../src/entities/Transmitter.js';
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 
 let transmitterInstance;
@@ -42,14 +42,14 @@ describe('Transmitter', function() {
 
         it('should throw an error if no id given to look up', function() {
             transmitterInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 transmitterInstance.updateTransmitter();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to update', function() {
-            var fn = function() {
+            const fn = function() {
                 transmitterInstance.updateTransmitter();
             };
             expect(fn).to.throw(Error);
@@ -57,7 +57,7 @@ describe('Transmitter', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 transmitterInstance.updateTransmitter(body);
             };
             expect(fn).to.throw(Error);
@@ -69,7 +69,7 @@ describe('Transmitter', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 transmitterInstance.updateTransmitter(body);
             };
             expect(fn).to.throw(Error);
@@ -80,14 +80,13 @@ describe('Transmitter', function() {
                 owner: 'bob',
                 name: 'Im a thing'
             };
-            let response;
 
             transmitterInstance.updateTransmitter(patch, {}).then((response) => {
                 expect(patch).to.deep.equal(response);
                 done();
             });
 
-            //this is the api
+            // this is the api
             this.requests[0].respond(200, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(patch));
@@ -98,7 +97,7 @@ describe('Transmitter', function() {
     describe('#deleteTransmitter', function() {
         it('should throw an error if no id given to look up', function() {
             transmitterInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 transmitterInstance.deleteTransmitter();
             };
             expect(fn).to.throw(Error);
@@ -112,7 +111,7 @@ describe('Transmitter', function() {
                 done();
             });
 
-            //this is the api
+            // this is the api
             this.requests[0].respond(204, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(data));

@@ -1,23 +1,19 @@
-import Oauth2 from '../src/authorization/oauth2.js';
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import jsdom from 'jsdom-global';
-import mockStorage from 'mock-localstorage';
+import MockStorage from 'mock-localstorage';
+import { afterEach, beforeEach, describe, it } from 'mocha';
+import Oauth2 from '../src/authorization/oauth2.js';
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 let oauthInstance;
 
 describe('oauth2', function() {
-
     beforeEach(function() {
         global.cleanup = jsdom();
-
-
-        let localStorage = new mockStorage();
-        global.localStorage = localStorage;
+        global.localStorage = new MockStorage();
 
         let options = {
             appId: 'fakeAppId',
@@ -48,7 +44,7 @@ describe('oauth2', function() {
 
         it('should throw an error if no redirect uri was provided', function() {
             oauthInstance.redirectURI = null;
-            var fn = function() {
+            const fn = function() {
                 oauthInstance.login();
             };
             expect(fn).to.throw(Error);
@@ -56,7 +52,7 @@ describe('oauth2', function() {
 
         it('should throw an error if no app id was provided', function() {
             oauthInstance.appId = null;
-            var fn = function() {
+            const fn = function() {
                 oauthInstance.login();
             };
             expect(fn).to.throw(Error);
@@ -64,7 +60,7 @@ describe('oauth2', function() {
 
         it('should have a response type token', function() {
             oauthInstance.appId = null;
-            var fn = function() {
+            const fn = function() {
                 oauthInstance.login();
             };
             expect(fn).to.throw(Error);
@@ -135,21 +131,21 @@ describe('oauth2', function() {
         });
 
         it('should throw an error when the URL is emptys', function() {
-            var fn = function() {
+            const fn = function() {
                 oauthInstance._parseToken('');
             };
             expect(fn).to.throw(Error);
         });
 
         it('should throw an error when no query parameter is provided', function() {
-            var fn = function() {
+            const fn = function() {
                 oauthInstance._parseToken('example.com/oauth#');
             };
             expect(fn).to.throw(Error);
         });
 
         it('should throw an error when no access token is provided', function() {
-            var fn = function() {
+            const fn = function() {
                 oauthInstance._parseToken('example.com/oauth#BLABLA');
             };
             expect(fn).to.throw(Error);
@@ -164,8 +160,6 @@ describe('oauth2', function() {
 
     describe('#setToken', function() {
         beforeEach(function() {
-            let token = 'A_FAKE_TOKEN';
-
             let options = {
                 appId: 'fakeAppId',
                 redirectURI: 'fakeURI',

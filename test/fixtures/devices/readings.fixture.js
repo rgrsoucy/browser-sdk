@@ -1,5 +1,5 @@
 let readingFixture = {
-   readings:[
+   readings: [
       {
          path: 'wifi',
          meaning: 'rssi',

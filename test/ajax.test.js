@@ -2,10 +2,12 @@ import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
 import chaiPromise from 'chai-as-promised';
+import { afterEach, beforeEach, describe, it } from 'mocha';
+import Ajax, { ajax } from '../src/tools/ajax.js';
+
 global.XMLHttpRequest = sinon.useFakeXMLHttpRequest();
 
-import Ajax, { ajax } from '../src/tools/ajax.js';
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 chai.use(chaiPromise);
 
@@ -15,12 +17,12 @@ let ajaxInstance;
 describe('Ajax', function() {
     beforeEach(function() {
         ajaxInstance = ajax;
-        ajaxInstance.options= {
+        ajaxInstance.options = {
             tokenType: 'Bearer',
             token: 'FAKE_TOKEN'
         };
 
-        //instance.xhr doesn't exist anymore as a property
+        // instance.xhr doesn't exist anymore as a property
         this.xhr = sinon.useFakeXMLHttpRequest();
 
         this.requests = [];
@@ -48,8 +50,8 @@ describe('Ajax', function() {
 
         it('should be possible to specify another protocol', function() {
             let ajaxInstance2 = new Ajax({
-                    protocol: 'http://'
-                });
+                protocol: 'http://'
+            });
             expect(ajaxInstance2.options.protocol).to.equal('http://');
         });
 
@@ -61,14 +63,13 @@ describe('Ajax', function() {
     describe('get', function() {
 
         it('Should return a promise when calling ajaxInstance._xhrRequest()', function(done) {
-
-            var data = {
+            const data = {
                 id: 'a3aad38e-55db-4c59-bb82-d98b38fc2b83',
                 name: 'John Smith',
                 email: 'test_user@relayr.io'
             };
 
-            var dataJson = JSON.stringify(data);
+            const dataJson = JSON.stringify(data);
 
             ajaxInstance._xhrRequest({
                 url: '/oauth-userinfo',
@@ -92,7 +93,7 @@ describe('Ajax', function() {
 
             sinon.spy(ajaxInstance, '_xhrRequest');
 
-            var options = {
+            const options = {
                 url: '/oauth-userinfo',
                 type: 'GET',
                 isObject: true,
@@ -106,7 +107,7 @@ describe('Ajax', function() {
         });
 
         it('Should have url in ajaxInstance.get', function() {
-            var fn = function() {
+            const fn = function() {
                 ajaxInstance.get(null);
             };
 
@@ -114,7 +115,7 @@ describe('Ajax', function() {
         });
 
         it('Should have a string in a url', function() {
-            var fn = function() {
+            const fn = function() {
                 ajaxInstance.get(8);
             };
 
@@ -195,15 +196,7 @@ describe('Ajax', function() {
         });
 
         it('Should throw an error upon server response 4xx', function(done) {
-
-            var data = {
-                id: 'a3aad38e-55db-4c59-bb82-d98b38fc2b83',
-                name: 'John Smith',
-                email: 'test_user@relayr.io'
-            };
-
-            var dataJson = JSON.stringify(data);
-            var config = {
+            const config = {
                 url: '/oauth-userinfo',
                 type: 'GET',
                 isObject: true,
@@ -214,15 +207,7 @@ describe('Ajax', function() {
         });
 
         it('Should throw an error upon server response 5xx', function(done) {
-
-            var data = {
-                id: 'a3aad38e-55db-4c59-bb82-d98b38fc2b83',
-                name: 'John Smith',
-                email: 'test_user@relayr.io'
-            };
-
-            var dataJson = JSON.stringify(data);
-            var config = {
+            const config = {
                 url: '/oauth-userinfo',
                 type: 'GET',
                 isObject: true,
@@ -248,13 +233,13 @@ describe('Ajax', function() {
     describe('_xhrRequest', function() {
         it('should return pure responseText when its an isObject but emtpy string coming back', function(done) {
             ajaxInstance.post('/test', {
-                fakeKey: 'fakeValue'
-            },
-            {
-              raw: true
-            }).then((responseText) => {
-              expect(responseText).to.be.deep.equal('');
-              done();
+                    fakeKey: 'fakeValue'
+                },
+                {
+                    raw: true
+                }).then((responseText) => {
+                expect(responseText).to.be.deep.equal('');
+                done();
             });
 
             this.requests[0].respond(202, {

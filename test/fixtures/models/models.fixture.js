@@ -1373,7 +1373,7 @@ let relayrMockModelOld = [{
             "defaultValues": {}
         }
     }]
-}]
+}];
 
 export
 let relayrMockModels = {
@@ -1916,7 +1916,7 @@ let relayrMockModels = {
     }],
     "limit": 10,
     "offset": 0
-}
+};
 
 export const relayrMockPrototypes = {
     "_links": {

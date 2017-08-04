@@ -1,10 +1,10 @@
-import Group from '../src/entities/Group.js';
-
 import chai from 'chai';
 import sinon from 'sinon';
 import sinonChai from 'sinon-chai';
+import { beforeEach, describe, it } from 'mocha';
+import Group from '../src/entities/Group.js';
 
-var expect = chai.expect;
+const expect = chai.expect;
 chai.use(sinonChai);
 
 let groupInstance;
@@ -56,15 +56,13 @@ describe('Group', function() {
 
         it('should throw an error if no id given to look up', function() {
             groupInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 groupInstance.getGroup();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should return the correct object describing the group', function(done) {
-            let response;
-
             groupInstance.getGroup().then((response) => {
                 expect(response).to.deep.equal(sampleGroup);
                 done();
@@ -99,15 +97,13 @@ describe('Group', function() {
 
         it('should throw an error if no id given to look up', function() {
             groupInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 groupInstance.getGroupDevices();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should return the correct array describing the groups devices', function(done) {
-            let response;
-
             groupInstance.getGroupDevices().then((response) => {
                 expect(response).to.deep.equal(sampleGroupDevices);
                 done();
@@ -123,14 +119,14 @@ describe('Group', function() {
 
         it('should throw an error if no id given to look up', function() {
             groupInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 groupInstance.updateGroup();
             };
             expect(fn).to.throw(Error);
         });
 
         it('should give a body of parameters at all to update', function() {
-            var fn = function() {
+            const fn = function() {
                 groupInstance.updateGroup();
             };
             expect(fn).to.throw(Error);
@@ -138,7 +134,7 @@ describe('Group', function() {
 
         it('should have something in the body', function() {
             let body = {};
-            var fn = function() {
+            const fn = function() {
                 groupInstance.updateGroup(body);
             };
             expect(fn).to.throw(Error);
@@ -150,7 +146,7 @@ describe('Group', function() {
                 abilities: 'flying'
             };
 
-            var fn = function() {
+            const fn = function() {
                 groupInstance.updateGroup(body);
             };
             expect(fn).to.throw(Error);
@@ -161,7 +157,6 @@ describe('Group', function() {
                 owner: 'bob',
                 name: 'Im a thing'
             };
-            let response;
 
             groupInstance.updateGroup(patch, true).then((response) => {
                 expect(patch).to.deep.equal(response);
@@ -179,7 +174,7 @@ describe('Group', function() {
     describe('#deleteGroup', function() {
         it('should throw an error if no id given to look up', function() {
             groupInstance.id = null;
-            var fn = function() {
+            const fn = function() {
                 groupInstance.deleteGroup();
             };
             expect(fn).to.throw(Error);
@@ -193,7 +188,7 @@ describe('Group', function() {
                 done();
             });
 
-            //this is the api
+            // this is the api
             this.requests[0].respond(204, {
                 'Content-Type': 'text/json'
             }, JSON.stringify(data));
