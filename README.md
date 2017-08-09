@@ -52,7 +52,19 @@ Because this version of the SDK is based on ES6 Promises, we recommend that you 
 
 ### Available Methods
 
+#### Device
 
+- `getAnomalies(filters)`: _In development,
+deprecated until the API is available_.
+Gets events recorded in the Anomaly Detection Data Fetching Service
+for the device.
+_`filters`_ is an optional object containing optional filters:
+    * phaseId _(string)_: ID of a phase
+    * featureId _(integer)_: ID of a feature
+    * startDateTime _(ISO 8601 DateTime)_: Start date and time of the query.
+      If not specified data will be fetched since its date of creation.
+    * endDateTime _(ISO 8601 DateTime)_: End date and time of the query.
+      If not specified it defaults to current time.
 
 
 ### Build

@@ -7,6 +7,8 @@ import Model from './Model';
 let sharedChannel = null;
 let mqtt = null;
 
+const neokamiApi = new Ajax({ url: 'NeokamiAnomalyApiUrl' }); // TODO: Use real URL of Neokami API
+
 export
 default class Device {
     constructor(rawDevice = {}, config = {}) {
@@ -308,6 +310,35 @@ default class Device {
                     //right now the object hangs around, but on the cloud it is gone
                     resolve(response);
                 }).catch((error) => {
+                    reject(error);
+                });
+        });
+    }
+
+    /**
+     * Gets the Anomalies for the device.
+     * WARNING: unavailable until Analytics Result Fetching API is deployed
+     *
+     * @deprecated Unavailable until Analytics Result Fetching API is deployed
+     * @param {Object} filters - object containing the filters
+     * @param {string} filters.phaseId - filter: ID of the phase
+     * @param {int} filters.featureId - filter: ID of the feature
+     * @param {string} filters.startDateTime - filter: start datetime of the query
+     * @param {string} filters.endDateTime - filter: end datetime of the query
+     * @returns {Promise.<Array>} Promise resolving an array of anomalies
+     */
+    getAnomalies(filters) {
+        // NeokamiApi/anomaly-data/{deviceId}
+        // GET
+        if (!(this.id)) {
+            throw new Error('Provide the userId during instantiation');
+        }
+        return new Promise((resolve, reject) => {
+            neokamiApi.get(`/anomaly-data/${this.id}`, filters)
+                .then((response) => {
+                    resolve(response.data);
+                })
+                .catch((error) => {
                     reject(error);
                 });
         });
